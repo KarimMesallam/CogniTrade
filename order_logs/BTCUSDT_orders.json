@@ -1,0 +1,286 @@
+[
+  {
+    "timestamp": "2025-03-23T15:51:34.731250",
+    "symbol": "BTCUSDT",
+    "order_id": 8904916,
+    "client_order_id": "KyqRu44jbT9zLC17zRf72X",
+    "action": "SELL",
+    "type": "MARKET",
+    "side": "SELL",
+    "quantity": "1.00000000",
+    "price": "0.00000000",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "84971.69000000",
+        "qty": "0.11269000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981810
+      },
+      {
+        "price": "84971.68000000",
+        "qty": "0.10386000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981811
+      },
+      {
+        "price": "84971.67000000",
+        "qty": "0.09510000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981812
+      },
+      {
+        "price": "84971.66000000",
+        "qty": "0.09845000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981813
+      },
+      {
+        "price": "84971.65000000",
+        "qty": "0.08903000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981814
+      },
+      {
+        "price": "84971.64000000",
+        "qty": "0.09280000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981815
+      },
+      {
+        "price": "84971.63000000",
+        "qty": "0.11516000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981816
+      },
+      {
+        "price": "84971.62000000",
+        "qty": "0.10251000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981817
+      },
+      {
+        "price": "84971.61000000",
+        "qty": "0.08645000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981818
+      },
+      {
+        "price": "84971.60000000",
+        "qty": "0.09633000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981819
+      },
+      {
+        "price": "84971.43000000",
+        "qty": "0.00762000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981820
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 8904916,
+      "orderListId": -1,
+      "clientOrderId": "KyqRu44jbT9zLC17zRf72X",
+      "transactTime": 1742737892758,
+      "price": "0.00000000",
+      "origQty": "1.00000000",
+      "executedQty": "1.00000000",
+      "origQuoteOrderQty": "0.00000000",
+      "cummulativeQuoteQty": "84971.64425250",
+      "status": "FILLED",
+      "timeInForce": "GTC",
+      "type": "MARKET",
+      "side": "SELL",
+      "workingTime": 1742737892758,
+      "fills": [
+        {
+          "price": "84971.69000000",
+          "qty": "0.11269000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981810
+        },
+        {
+          "price": "84971.68000000",
+          "qty": "0.10386000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981811
+        },
+        {
+          "price": "84971.67000000",
+          "qty": "0.09510000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981812
+        },
+        {
+          "price": "84971.66000000",
+          "qty": "0.09845000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981813
+        },
+        {
+          "price": "84971.65000000",
+          "qty": "0.08903000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981814
+        },
+        {
+          "price": "84971.64000000",
+          "qty": "0.09280000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981815
+        },
+        {
+          "price": "84971.63000000",
+          "qty": "0.11516000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981816
+        },
+        {
+          "price": "84971.62000000",
+          "qty": "0.10251000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981817
+        },
+        {
+          "price": "84971.61000000",
+          "qty": "0.08645000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981818
+        },
+        {
+          "price": "84971.60000000",
+          "qty": "0.09633000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981819
+        },
+        {
+          "price": "84971.43000000",
+          "qty": "0.00762000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981820
+        }
+      ],
+      "selfTradePreventionMode": "EXPIRE_MAKER"
+    }
+  },
+  {
+    "timestamp": "2025-03-23T15:52:34.627515",
+    "symbol": "BTCUSDT",
+    "order_id": 8905048,
+    "client_order_id": "mQSmdOv0nExzCGATUHTLCB",
+    "action": "BUY",
+    "type": "MARKET",
+    "side": "BUY",
+    "quantity": "0.00011000",
+    "price": "0.00000000",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "84971.70000000",
+        "qty": "0.00011000",
+        "commission": "0.00000000",
+        "commissionAsset": "BTC",
+        "tradeId": 1981839
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 8905048,
+      "orderListId": -1,
+      "clientOrderId": "mQSmdOv0nExzCGATUHTLCB",
+      "transactTime": 1742737952628,
+      "price": "0.00000000",
+      "origQty": "0.00011000",
+      "executedQty": "0.00011000",
+      "origQuoteOrderQty": "0.00000000",
+      "cummulativeQuoteQty": "9.34688700",
+      "status": "FILLED",
+      "timeInForce": "GTC",
+      "type": "MARKET",
+      "side": "BUY",
+      "workingTime": 1742737952628,
+      "fills": [
+        {
+          "price": "84971.70000000",
+          "qty": "0.00011000",
+          "commission": "0.00000000",
+          "commissionAsset": "BTC",
+          "tradeId": 1981839
+        }
+      ],
+      "selfTradePreventionMode": "EXPIRE_MAKER"
+    }
+  },
+  {
+    "timestamp": "2025-03-23T15:53:32.288352",
+    "symbol": "BTCUSDT",
+    "order_id": 8905156,
+    "client_order_id": "qDpGKhm2wZTeLG7o3G38wV",
+    "action": "SELL",
+    "type": "MARKET",
+    "side": "SELL",
+    "quantity": "0.00011000",
+    "price": "0.00000000",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "84969.25000000",
+        "qty": "0.00011000",
+        "commission": "0.00000000",
+        "commissionAsset": "USDT",
+        "tradeId": 1981868
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 8905156,
+      "orderListId": -1,
+      "clientOrderId": "qDpGKhm2wZTeLG7o3G38wV",
+      "transactTime": 1742738010436,
+      "price": "0.00000000",
+      "origQty": "0.00011000",
+      "executedQty": "0.00011000",
+      "origQuoteOrderQty": "0.00000000",
+      "cummulativeQuoteQty": "9.34661750",
+      "status": "FILLED",
+      "timeInForce": "GTC",
+      "type": "MARKET",
+      "side": "SELL",
+      "workingTime": 1742738010436,
+      "fills": [
+        {
+          "price": "84969.25000000",
+          "qty": "0.00011000",
+          "commission": "0.00000000",
+          "commissionAsset": "USDT",
+          "tradeId": 1981868
+        }
+      ],
+      "selfTradePreventionMode": "EXPIRE_MAKER"
+    }
+  }
+]

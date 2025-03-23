@@ -56,7 +56,7 @@ def get_market_data(symbol, interval='1m'):
     """Fetch current market data for analysis."""
     try:
         # Get recent candles
-        candles = client.get_klines(symbol=symbol, interval=interval, limit=20, recvWindow=60000)
+        candles = client.get_klines(symbol=symbol, interval=interval, limit=20)
         
         # Get order book
         order_book = client.get_order_book(symbol=symbol, limit=5)

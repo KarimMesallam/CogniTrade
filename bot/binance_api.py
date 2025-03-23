@@ -27,13 +27,16 @@ def synchronize_time():
         
         logger.info(f"Time offset with Binance server: {time_offset}ms")
         
+        # Update client timestamps
+        client.timestamp_offset = time_offset
+        
         return time_offset
     except Exception as e:
         logger.error(f"Error synchronizing time: {e}")
         return 0
 
 # Synchronize time on module load
-synchronize_time()
+time_offset = synchronize_time()
 
 def get_recent_closes(symbol, interval, limit=2):
     """
@@ -48,8 +51,8 @@ def get_recent_closes(symbol, interval, limit=2):
         List of closing prices
     """
     try:
-        # Add recvWindow parameter for this API call
-        candles = client.get_klines(symbol=symbol, interval=interval, limit=limit, recvWindow=60000)
+        # Don't use recvWindow for get_klines as it's not supported in this context
+        candles = client.get_klines(symbol=symbol, interval=interval, limit=limit)
         # The 5th element in each candle is the close price
         return [float(candle[4]) for candle in candles]
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -70,8 +73,12 @@ def get_account_balance(asset=None):
         Dictionary of asset balances or single balance if asset is specified
     """
     try:
-        # Add recvWindow parameter for this API call
-        account_info = client.get_account(recvWindow=60000)
+        # Use correct timestamp by adding the time offset
+        timestamp = int(time.time() * 1000) + time_offset
+        
+        # Pass timestamp explicitly for accurate time
+        account_info = client.get_account(timestamp=timestamp)
+        
         if asset:
             # Find the specific asset
             for balance in account_info['balances']:
@@ -187,7 +194,8 @@ def place_market_buy(symbol, quantity):
     """
     try:
         logger.info(f"Placing market buy order: {symbol}, quantity: {quantity}")
-        order = client.order_market_buy(symbol=symbol, quantity=quantity, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        order = client.order_market_buy(symbol=symbol, quantity=quantity, timestamp=timestamp)
         logger.info(f"Market buy order placed successfully: {order}")
         return order
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -210,7 +218,8 @@ def place_market_sell(symbol, quantity):
     """
     try:
         logger.info(f"Placing market sell order: {symbol}, quantity: {quantity}")
-        order = client.order_market_sell(symbol=symbol, quantity=quantity, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        order = client.order_market_sell(symbol=symbol, quantity=quantity, timestamp=timestamp)
         logger.info(f"Market sell order placed successfully: {order}")
         return order
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -234,7 +243,8 @@ def place_limit_buy(symbol, quantity, price):
     """
     try:
         logger.info(f"Placing limit buy order: {symbol}, quantity: {quantity}, price: {price}")
-        order = client.order_limit_buy(symbol=symbol, quantity=quantity, price=price, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        order = client.order_limit_buy(symbol=symbol, quantity=quantity, price=price, timestamp=timestamp)
         logger.info(f"Limit buy order placed successfully: {order}")
         return order
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -258,7 +268,8 @@ def place_limit_sell(symbol, quantity, price):
     """
     try:
         logger.info(f"Placing limit sell order: {symbol}, quantity: {quantity}, price: {price}")
-        order = client.order_limit_sell(symbol=symbol, quantity=quantity, price=price, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        order = client.order_limit_sell(symbol=symbol, quantity=quantity, price=price, timestamp=timestamp)
         logger.info(f"Limit sell order placed successfully: {order}")
         return order
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -279,10 +290,11 @@ def get_open_orders(symbol=None):
         List of open orders
     """
     try:
+        timestamp = int(time.time() * 1000) + time_offset
         if symbol:
-            orders = client.get_open_orders(symbol=symbol, recvWindow=60000)
+            orders = client.get_open_orders(symbol=symbol, timestamp=timestamp)
         else:
-            orders = client.get_open_orders(recvWindow=60000)
+            orders = client.get_open_orders(timestamp=timestamp)
         return orders
     except (BinanceAPIException, BinanceRequestException) as e:
         logger.error(f"Error getting open orders: {e}")
@@ -304,7 +316,8 @@ def cancel_order(symbol, order_id):
     """
     try:
         logger.info(f"Cancelling order: {order_id} for {symbol}")
-        result = client.cancel_order(symbol=symbol, orderId=order_id, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        result = client.cancel_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
         logger.info(f"Order cancelled successfully: {result}")
         return result
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -326,7 +339,8 @@ def get_order_status(symbol, order_id):
         Order status or None on error
     """
     try:
-        order = client.get_order(symbol=symbol, orderId=order_id, recvWindow=60000)
+        timestamp = int(time.time() * 1000) + time_offset
+        order = client.get_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
         return order
     except (BinanceAPIException, BinanceRequestException) as e:
         logger.error(f"Error getting order status: {e}")
