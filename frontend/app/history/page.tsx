@@ -167,7 +167,7 @@ export default function HistoryPage() {
                       disabled={isLoading}
                     >
                       {symbols.map((symbol) => (
-                        <SelectItem key={symbol.value} value={symbol.value}>
+                        <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
                           {symbol.name}
                         </SelectItem>
                       ))}
@@ -179,10 +179,10 @@ export default function HistoryPage() {
                       className="w-32"
                       disabled={isLoading}
                     >
-                      <SelectItem value="20">20 items</SelectItem>
-                      <SelectItem value="50">50 items</SelectItem>
-                      <SelectItem value="100">100 items</SelectItem>
-                      <SelectItem value="200">200 items</SelectItem>
+                      <SelectItem value="20" className="bg-slate-700 text-slate-200 hover:bg-blue-600">20 items</SelectItem>
+                      <SelectItem value="50" className="bg-slate-700 text-slate-200 hover:bg-blue-600">50 items</SelectItem>
+                      <SelectItem value="100" className="bg-slate-700 text-slate-200 hover:bg-blue-600">100 items</SelectItem>
+                      <SelectItem value="200" className="bg-slate-700 text-slate-200 hover:bg-blue-600">200 items</SelectItem>
                     </Select>
                   </div>
                   
@@ -266,7 +266,7 @@ export default function HistoryPage() {
                       disabled={isLoading}
                     >
                       {symbols.map((symbol) => (
-                        <SelectItem key={symbol.value} value={symbol.value}>
+                        <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
                           {symbol.name}
                         </SelectItem>
                       ))}
@@ -278,10 +278,10 @@ export default function HistoryPage() {
                       className="w-32"
                       disabled={isLoading}
                     >
-                      <SelectItem value="20">20 items</SelectItem>
-                      <SelectItem value="50">50 items</SelectItem>
-                      <SelectItem value="100">100 items</SelectItem>
-                      <SelectItem value="200">200 items</SelectItem>
+                      <SelectItem value="20" className="bg-slate-700 text-slate-200 hover:bg-blue-600">20 items</SelectItem>
+                      <SelectItem value="50" className="bg-slate-700 text-slate-200 hover:bg-blue-600">50 items</SelectItem>
+                      <SelectItem value="100" className="bg-slate-700 text-slate-200 hover:bg-blue-600">100 items</SelectItem>
+                      <SelectItem value="200" className="bg-slate-700 text-slate-200 hover:bg-blue-600">200 items</SelectItem>
                     </Select>
                   </div>
                   

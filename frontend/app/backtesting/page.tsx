@@ -255,158 +255,219 @@ export default function BacktestingPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1">
-            <Card className="bg-slate-800 border-slate-700 mb-6">
-              <Title className="text-white mb-4">Backtest Settings</Title>
+            <Card className="bg-slate-800 border-slate-700 mb-6 overflow-hidden">
+              <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
+                <Title className="text-white text-lg">Backtest Settings</Title>
+              </div>
               
-              <div className="space-y-4">
+              <div className="p-4 space-y-5">
                 <div>
-                  <Text className="mb-2">Symbol</Text>
-                  <Select
-                    value={selectedSymbol}
-                    onValueChange={setSelectedSymbol}
-                    disabled={isLoading}
-                  >
-                    {symbols.map((symbol) => (
-                      <SelectItem key={symbol.value} value={symbol.value}>
-                        {symbol.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
-                
-                <div>
-                  <Text className="mb-2">Timeframes</Text>
-                  <div className="flex flex-wrap gap-2">
-                    {timeframes.map((timeframe) => (
-                      <button
-                        key={timeframe.value}
-                        onClick={() => handleTimeframeChange(timeframe.value)}
-                        className={`px-3 py-1 text-sm rounded ${
-                          selectedTimeframes.includes(timeframe.value)
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                        }`}
+                  <Text className="text-white font-medium mb-2">Market Settings</Text>
+                  <div className="space-y-3">
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Symbol</Text>
+                      <Select
+                        value={selectedSymbol}
+                        onValueChange={setSelectedSymbol}
                         disabled={isLoading}
+                        className="text-white border-slate-600 rounded-md px-3"
                       >
-                        {timeframe.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <Text className="mb-2">Strategy</Text>
-                  <Select
-                    value={selectedStrategy}
-                    onValueChange={setSelectedStrategy}
-                    disabled={isLoading}
-                  >
-                    {strategies.map((strategy) => (
-                      <SelectItem key={strategy.id} value={strategy.id}>
-                        {strategy.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
-                
-                {/* Show strategy parameters if a strategy is selected */}
-                {selectedStrategy && Object.keys(strategyParams).length > 0 && (
-                  <div>
-                    <Text className="mb-2">Strategy Parameters</Text>
-                    <div className="space-y-3">
-                      {Object.entries(strategyParams).map(([param, value]) => (
-                        <div key={param}>
-                          <Text className="text-sm mb-1 text-gray-400">{param}</Text>
-                          <NumberInput
-                            value={value}
-                            onValueChange={(val) => handleParamChange(param, val)}
-                            min={0}
-                            step={param.includes('period') ? 1 : 0.1}
-                          />
-                        </div>
-                      ))}
+                        {symbols.map((symbol) => (
+                          <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                            {symbol.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Timeframes</Text>
+                      <div className="flex flex-wrap gap-2">
+                        {timeframes.map((timeframe) => (
+                          <button
+                            key={timeframe.value}
+                            onClick={() => handleTimeframeChange(timeframe.value)}
+                            className={`px-3 py-1 text-sm rounded-md ${
+                              selectedTimeframes.includes(timeframe.value)
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                            } transition-colors duration-200`}
+                            disabled={isLoading}
+                          >
+                            {timeframe.name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                )}
-                
-                <div>
-                  <Text className="mb-2">Date Range</Text>
-                  <DateRangePicker
-                    value={dateRange}
-                    onValueChange={setDateRange}
-                    className="w-full"
-                    disabled={isLoading}
-                  />
                 </div>
                 
-                <div>
-                  <Text className="mb-2">Initial Capital (USDT)</Text>
-                  <NumberInput
-                    value={initialCapital}
-                    onValueChange={setInitialCapital}
-                    min={100}
-                    max={1000000}
-                    step={100}
-                    disabled={isLoading}
-                  />
+                <div className="border-t border-slate-700 pt-4">
+                  <Text className="text-white font-medium mb-2">Strategy Settings</Text>
+                  <div className="space-y-3">
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Strategy</Text>
+                      <Select
+                        value={selectedStrategy}
+                        onValueChange={setSelectedStrategy}
+                        disabled={isLoading}
+                        className="text-white border-slate-600 rounded-md px-3"
+                      >
+                        {strategies.map((strategy) => (
+                          <SelectItem key={strategy.id} value={strategy.id} className="bg-slate-700 text-slate-200 hover:bg-blue-600 w-full">
+                            {strategy.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                    
+                    {/* Show strategy parameters if a strategy is selected */}
+                    {selectedStrategy && Object.keys(strategyParams).length > 0 && (
+                      <div className="bg-slate-700 p-3 rounded-md">
+                        <Text className="text-sm font-medium text-white mb-2">Strategy Parameters</Text>
+                        <div className="space-y-3">
+                          {Object.entries(strategyParams).map(([param, value]) => (
+                            <div key={param}>
+                              <Text className="text-xs mb-1 text-gray-300">{param}</Text>
+                              <NumberInput
+                                value={value}
+                                onValueChange={(val) => handleParamChange(param, val)}
+                                min={0}
+                                step={param.includes('period') ? 1 : 0.1}
+                                className="px-3"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
-                <div>
-                  <Text className="mb-2">Commission (%)</Text>
-                  <NumberInput
-                    value={commission}
-                    onValueChange={setCommission}
-                    min={0}
-                    max={5}
-                    step={0.01}
-                    disabled={isLoading}
-                  />
+                <div className="border-t border-slate-700 pt-4">
+                  <Text className="text-white font-medium mb-2">Backtest Period</Text>
+                  <div className="space-y-3">
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Date Range</Text>
+                      <div className="relative">
+                        <DateRangePicker
+                          value={dateRange}
+                          onValueChange={setDateRange}
+                          className="w-full z-10 bg-slate-700 border-slate-600 text-white"
+                          disabled={isLoading}
+                          color="blue"
+                        />
+                        <style jsx global>{`
+                          .tremor-DateRangePicker-root .tremor-DateRangePicker-calendarButton {
+                            font-size: 16px;
+                          }
+                          .tremor-DateRangePicker-root .tremor-DateRangePicker-calendarButtonIcon {
+                            width: 16px;
+                            height: 16px;
+                          }
+                          .tremor-DateRangePicker-calendarModal {
+                            z-index: 50;
+                          }
+                          .tremor-DateRangePicker-root .tremor-DateRangePicker-button {
+                            padding-left: 12px;
+                            padding-right: 12px;
+                          }
+                        `}</style>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-700 pt-4">
+                  <Text className="text-white font-medium mb-2">Account Settings</Text>
+                  <div className="space-y-3">
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Initial Capital (USDT)</Text>
+                      <NumberInput
+                        value={initialCapital}
+                        onValueChange={setInitialCapital}
+                        min={100}
+                        max={1000000}
+                        step={100}
+                        disabled={isLoading}
+                        className="px-3"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Text className="mb-1 text-sm text-gray-300">Commission (%)</Text>
+                      <NumberInput
+                        value={commission}
+                        onValueChange={setCommission}
+                        min={0}
+                        max={5}
+                        step={0.01}
+                        disabled={isLoading}
+                        className="px-3"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-700 pt-4">
+                  <Button
+                    size="lg"
+                    color="blue"
+                    onClick={runBacktest}
+                    icon={FaPlay}
+                    disabled={isRunning || isLoading}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-md transition-colors duration-200"
+                  >
+                    {isRunning ? "Running..." : "Run Backtest"}
+                  </Button>
                 </div>
               </div>
             </Card>
 
             {hasResults && backtestResult && (
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">Backtest Results</Title>
+              <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+                <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
+                  <Title className="text-white text-lg">Backtest Results</Title>
+                </div>
                 
-                <div className="space-y-3">
-                  <div className="flex justify-between">
+                <div className="p-4 space-y-3">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Net Profit</Text>
                     <Text className={`font-medium ${backtestResult.metrics.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       ${backtestResult.metrics.total_profit.toFixed(2)}
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Return</Text>
                     <Text className={`font-medium ${backtestResult.metrics.profit_percent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {backtestResult.metrics.profit_percent.toFixed(2)}%
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Max Drawdown</Text>
                     <Text className="text-red-400 font-medium">
                       {backtestResult.metrics.max_drawdown_percent.toFixed(2)}%
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Win Rate</Text>
                     <Text className="text-white font-medium">
                       {(backtestResult.metrics.win_rate * 100).toFixed(2)}%
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Total Trades</Text>
                     <Text className="text-white font-medium">
                       {backtestResult.metrics.total_trades}
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5 border-b border-slate-700">
                     <Text className="text-gray-400">Winning Trades</Text>
                     <Text className="text-white font-medium">
                       {backtestResult.metrics.winning_trades}
                     </Text>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between py-1.5">
                     <Text className="text-gray-400">Sharpe Ratio</Text>
                     <Text className="text-white font-medium">
                       {backtestResult.metrics.sharpe_ratio.toFixed(2)}

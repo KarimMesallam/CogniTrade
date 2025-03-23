@@ -202,52 +202,57 @@ export default function TradingPage() {
   return (
     <ClientWrapper>
       <DashboardLayout>
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <Title>Live Trading</Title>
-          <div className="flex flex-wrap gap-2">
-            <Select 
-              value={symbol} 
-              onValueChange={setSymbol}
-              className="w-44"
-              disabled={isLoading}
-            >
-              {symbols.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.name}
-                </SelectItem>
-              ))}
-            </Select>
-            <Select 
-              value={timeframe} 
-              onValueChange={setTimeframe}
-              className="w-36"
-            >
-              {timeframes.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </Select>
-            <Select 
-              value={strategy} 
-              onValueChange={setStrategy}
-              className="w-52"
-              disabled={isLoading}
-            >
-              {strategies.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.name}
-                </SelectItem>
-              ))}
-            </Select>
-            <Button
-              className={isBotRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
-              onClick={toggleBot}
-              icon={isBotRunning ? FaPowerOff : FaPlay}
-              disabled={isLoading}
-            >
-              {isBotRunning ? 'Stop Bot' : 'Start Bot'}
-            </Button>
+        <div className="mb-6 bg-slate-800 rounded-lg p-4 shadow-md border border-slate-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <Title className="text-white mb-2">Live Trading</Title>
+              <Text className="text-gray-400">Configure and manage your trading bot</Text>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <Select 
+                value={symbol} 
+                onValueChange={setSymbol}
+                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
+                disabled={isLoading}
+              >
+                {symbols.map((s) => (
+                  <SelectItem key={s.value} value={s.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Select 
+                value={timeframe} 
+                onValueChange={setTimeframe}
+                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
+              >
+                {timeframes.map((t) => (
+                  <SelectItem key={t.value} value={t.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Select 
+                value={strategy} 
+                onValueChange={setStrategy}
+                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
+                disabled={isLoading}
+              >
+                {strategies.map((s) => (
+                  <SelectItem key={s.value} value={s.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Button
+                className={`${isBotRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} md:col-span-1 text-white font-medium px-4 py-2 rounded shadow-md transition-colors duration-200`}
+                onClick={toggleBot}
+                icon={isBotRunning ? FaPowerOff : FaPlay}
+                disabled={isLoading}
+              >
+                {isBotRunning ? 'Stop Bot' : 'Start Bot'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -272,28 +277,31 @@ export default function TradingPage() {
             )}
           </Card>
 
-          <Card className="bg-slate-800 border-slate-700">
-            <Title className="text-white mb-2">Recent Signals</Title>
-            <div className="overflow-x-auto">
+          <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+            <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
+              <Title className="text-white text-lg">Recent Signals</Title>
+            </div>
+            
+            <div className="p-4 overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-700">
-                <thead>
+                <thead className="bg-slate-700">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbol</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Strategy</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Signal</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Strength</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action Taken</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Symbol</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Strategy</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Signal</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Strength</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Action Taken</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700">
+                <tbody className="divide-y divide-slate-700 bg-slate-800">
                   {signals.length > 0 ? (
                     signals.map((signal, index) => (
-                      <tr key={index}>
+                      <tr key={index} className="hover:bg-slate-700 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.time}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.symbol}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.strategy}</td>
-                        <td className={`px-4 py-3 whitespace-nowrap text-sm ${signal.signal === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
+                        <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium ${signal.signal === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
                           {signal.signal}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">

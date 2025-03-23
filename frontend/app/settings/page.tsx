@@ -41,6 +41,7 @@ export default function SettingsPage() {
           color="blue"
           onClick={saveSettings}
           icon={FaSave}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 shadow-md"
         >
           Save Settings
         </Button>
@@ -48,12 +49,12 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-1 gap-6">
         <TabGroup>
-          <TabList className="mb-4">
-            <Tab icon={FaKey}>API Credentials</Tab>
-            <Tab icon={FaRobot}>LLM Settings</Tab>
-            <Tab icon={FaCog}>General</Tab>
-            <Tab icon={FaBell}>Notifications</Tab>
-            <Tab icon={FaDatabase}>Database</Tab>
+          <TabList className="mb-4 bg-slate-800 border border-slate-700 rounded-lg p-1 flex overflow-x-auto">
+            <Tab icon={FaKey} className="flex items-center gap-2 p-2 text-sm font-medium">API Credentials</Tab>
+            <Tab icon={FaRobot} className="flex items-center gap-2 p-2 text-sm font-medium">LLM Settings</Tab>
+            <Tab icon={FaCog} className="flex items-center gap-2 p-2 text-sm font-medium">General</Tab>
+            <Tab icon={FaBell} className="flex items-center gap-2 p-2 text-sm font-medium">Notifications</Tab>
+            <Tab icon={FaDatabase} className="flex items-center gap-2 p-2 text-sm font-medium">Database</Tab>
           </TabList>
           
           <TabPanels>
@@ -70,7 +71,7 @@ export default function SettingsPage() {
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         placeholder="Enter your Binance API key"
-                        className="flex-1"
+                        className="flex-1 px-4"
                       />
                     </div>
                   </div>
@@ -83,29 +84,33 @@ export default function SettingsPage() {
                         value={apiSecret}
                         onChange={(e) => setApiSecret(e.target.value)}
                         placeholder="Enter your Binance API secret"
-                        className="flex-1"
+                        className="flex-1 px-4"
                       />
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between py-2 border-t border-slate-700">
+                    <Text>Show secrets</Text>
                     <Switch
                       id="show-secrets"
                       name="show-secrets"
                       checked={showSecrets}
                       onChange={() => setShowSecrets(!showSecrets)}
+                      color="blue"
+                      className="w-10 h-5"
                     />
-                    <Text>Show secrets</Text>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between py-2 border-t border-slate-700">
+                    <Text>Use Testnet (Paper Trading)</Text>
                     <Switch
                       id="testnet"
                       name="testnet"
                       checked={isTestnet}
                       onChange={() => setIsTestnet(!isTestnet)}
+                      color="blue"
+                      className="w-10 h-5"
                     />
-                    <Text>Use Testnet (Paper Trading)</Text>
                   </div>
                   
                   <div>
@@ -114,6 +119,7 @@ export default function SettingsPage() {
                       value={defaultSymbol}
                       onChange={(e) => setDefaultSymbol(e.target.value)}
                       placeholder="BTCUSDT"
+                      className="px-4"
                     />
                   </div>
                 </div>
@@ -132,6 +138,7 @@ export default function SettingsPage() {
                       value={llmApiKey}
                       onChange={(e) => setLlmApiKey(e.target.value)}
                       placeholder="Enter your LLM provider API key"
+                      className="px-4"
                     />
                   </div>
                   
@@ -141,6 +148,7 @@ export default function SettingsPage() {
                       value={llmApiEndpoint}
                       onChange={(e) => setLlmApiEndpoint(e.target.value)}
                       placeholder="https://api.yourllmprovider.com/v1"
+                      className="px-4"
                     />
                   </div>
                   
@@ -150,6 +158,7 @@ export default function SettingsPage() {
                       value={llmModel}
                       onChange={(e) => setLlmModel(e.target.value)}
                       placeholder="gpt-4o, claude-3-sonnet, etc."
+                      className="px-4"
                     />
                   </div>
                   
@@ -178,6 +187,7 @@ export default function SettingsPage() {
                       min={1}
                       max={60}
                       step={1}
+                      className="px-4"
                     />
                   </div>
                   
@@ -222,6 +232,8 @@ export default function SettingsPage() {
                         name="email-notifications"
                         checked={emailNotifications}
                         onChange={() => setEmailNotifications(!emailNotifications)}
+                        color="blue"
+                        className="w-10 h-5"
                       />
                     </div>
                     
@@ -232,6 +244,7 @@ export default function SettingsPage() {
                           value={emailAddress}
                           onChange={(e) => setEmailAddress(e.target.value)}
                           placeholder="you@example.com"
+                          className="px-4"
                         />
                       </div>
                     )}
@@ -245,6 +258,8 @@ export default function SettingsPage() {
                         name="telegram-notifications"
                         checked={telegramNotifications}
                         onChange={() => setTelegramNotifications(!telegramNotifications)}
+                        color="blue"
+                        className="w-10 h-5"
                       />
                     </div>
                     
@@ -257,6 +272,7 @@ export default function SettingsPage() {
                             value={telegramBotToken}
                             onChange={(e) => setTelegramBotToken(e.target.value)}
                             placeholder="Telegram Bot Token"
+                            className="px-4"
                           />
                         </div>
                         <div>
@@ -265,6 +281,7 @@ export default function SettingsPage() {
                             value={telegramChatId}
                             onChange={(e) => setTelegramChatId(e.target.value)}
                             placeholder="Telegram Chat ID"
+                            className="px-4"
                           />
                         </div>
                       </div>
@@ -287,6 +304,7 @@ export default function SettingsPage() {
                       min={100}
                       max={10000}
                       step={100}
+                      className="px-4"
                     />
                     <Text className="text-gray-400 text-xs mt-1">
                       Orders older than this limit will be pruned to save space
@@ -301,6 +319,7 @@ export default function SettingsPage() {
                       min={100}
                       max={10000}
                       step={100}
+                      className="px-4"
                     />
                     <Text className="text-gray-400 text-xs mt-1">
                       Signals older than this limit will be pruned to save space
