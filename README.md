@@ -76,18 +76,53 @@ trading_bot/
 
 ### Running the Bot
 
-Start the bot (for paper trading) by running:
+Start the bot (for paper trading) by running either:
+
 ```bash
+# Method 1: Using the run_bot.py script
+./run_bot.py
+
+# Method 2: Using the module directly
 python -m bot.main
 ```
-This script initializes the Binance connection, applies a basic strategy (placeholder logic), and enters a continuous trading loop.
+
+The bot will:
+1. Initialize the Binance connection using your API keys
+2. Check account balances and verify that the configured symbol can be traded
+3. Enter a continuous trading loop that:
+   - Retrieves current market data
+   - Generates signals from both simple and technical analysis strategies
+   - Uses LLM (or rule-based fallback) for decision support
+   - Executes trades when signals and LLM decisions align
+   - Implements exponential backoff for error handling
+
+All activity is logged to both the console and a file named `trading_bot.log`.
 
 ### Running Tests
 
-To run the unit tests:
+The project uses pytest for unit testing. To run the tests:
+
 ```bash
-pytest
+# Run all tests
+python -m pytest
+
+# Run tests with verbose output
+python -m pytest -v
+
+# Run tests in a specific file
+python -m pytest tests/test_strategy.py
+
+# Run a specific test
+python -m pytest tests/test_llm_manager.py::test_make_rule_based_decision
+
+# Generate test coverage report
+python -m pytest --cov=bot tests/
 ```
+
+Test categories:
+- API tests: Tests for Binance API interactions
+- Strategy tests: Tests for trading strategy logic
+- LLM tests: Tests for LLM integration and decision making
 
 ## Future Improvements
 

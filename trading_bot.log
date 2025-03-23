@@ -1,0 +1,7 @@
+2025-03-23 15:32:31,547 - trading_bot - INFO - === Starting trading bot ===
+2025-03-23 15:32:31,547 - trading_bot - INFO - Trading symbol: BTCUSDT
+2025-03-23 15:32:31,547 - trading_bot - INFO - Mode: TESTNET
+2025-03-23 15:32:31,853 - trading_bot - INFO - Connected to Binance Testnet successfully
+2025-03-23 15:32:31,854 - trading_bot - INFO - Server time: 2025-03-23 15:32:29.779000
+2025-03-23 15:32:32,160 - trading_bot - ERROR - Failed to initialize bot: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time.
+2025-03-23 15:32:32,161 - trading_bot - CRITICAL - Failed to initialize bot. Exiting.
