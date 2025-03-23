@@ -125,3 +125,428 @@ Given these signals and the latest market data, should we BUY, SELL, or HOLD?
 2025-03-23 15:53:32,288 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8905156, 'orderListId': -1, 'clientOrderId': 'qDpGKhm2wZTeLG7o3G38wV', 'transactTime': 1742738010436, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34661750', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738010436, 'fills': [{'price': '84969.25000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1981868}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
 2025-03-23 15:53:32,288 - trading_bot - INFO - Market sell executed: 8905156
 2025-03-23 15:53:32,288 - trading_bot - INFO - Sell order executed successfully: 8905156
+2025-03-23 15:54:28,866 - trading_bot - INFO - RSI indicates overbought condition: 89.28
+2025-03-23 15:54:28,866 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:54:28,867 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 15:54:28,867 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:54:28,867 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:54:28,867 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 15:54:28,867 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 15:54:28,867 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 15:54:28,867 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:54:28.867523", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84942.00000000", "order_book_summary": {"top_bid": ["84950.63000000", "0.08924000"], "top_ask": ["84950.89000000", "0.11178000"]}}}
+2025-03-23 15:54:28,867 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 15:54:30,448 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 15:54:30,448 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:54:30,756 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8905501, 'orderListId': -1, 'clientOrderId': 'kDEMDfWQtpXxBqItFuapER', 'transactTime': 1742738068987, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34459790', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738068987, 'fills': [{'price': '84950.89000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1981988}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:54:30,757 - trading_bot - INFO - Market buy executed: 8905501
+2025-03-23 15:54:30,757 - trading_bot - INFO - Buy order executed successfully: 8905501
+2025-03-23 15:55:28,282 - trading_bot - INFO - RSI indicates overbought condition: 89.31
+2025-03-23 15:55:28,283 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:55:28,283 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 15:55:28,283 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:55:28,283 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:55:28,283 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 15:55:28,283 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 15:55:28,283 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 15:55:28,283 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:55:28.283708", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84946.60000000", "order_book_summary": {"top_bid": ["84946.60000000", "0.07935000"], "top_ask": ["84946.61000000", "0.10031000"]}}}
+2025-03-23 15:55:28,283 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 15:55:28,593 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 15:55:28,593 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:55:28,899 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8906034, 'orderListId': -1, 'clientOrderId': 'n0odVsuO9y4P4Qta4crzOw', 'transactTime': 1742738127231, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34412490', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738127231, 'fills': [{'price': '84946.59000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1982038}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:55:28,900 - trading_bot - INFO - Market sell executed: 8906034
+2025-03-23 15:55:28,900 - trading_bot - INFO - Sell order executed successfully: 8906034
+2025-03-23 15:56:25,950 - trading_bot - INFO - RSI indicates overbought condition: 89.36
+2025-03-23 15:56:25,950 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:56:25,950 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 15:56:25,950 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:56:25,950 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:56:25,950 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 15:56:25,951 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 15:56:25,951 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 15:56:25,951 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:56:25.951203", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84954.00000000", "order_book_summary": {"top_bid": ["84955.93000000", "0.07875000"], "top_ask": ["84955.94000000", "0.06034000"]}}}
+2025-03-23 15:56:25,951 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 15:56:27,070 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 15:56:27,070 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:56:27,379 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8906684, 'orderListId': -1, 'clientOrderId': '9seZL21J6GgH2VWAA6acij', 'transactTime': 1742738185791, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34516440', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738185791, 'fills': [{'price': '84956.04000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982148}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:56:27,380 - trading_bot - INFO - Market buy executed: 8906684
+2025-03-23 15:56:27,380 - trading_bot - INFO - Buy order executed successfully: 8906684
+2025-03-23 15:57:24,906 - trading_bot - INFO - RSI indicates overbought condition: 89.91
+2025-03-23 15:57:24,906 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:57:24,906 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 15:57:24,906 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:57:24,906 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:57:24,907 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 15:57:24,907 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 15:57:24,907 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 15:57:24,907 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:57:24.907264", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85031.25000000", "order_book_summary": {"top_bid": ["85012.15000000", "0.10228000"], "top_ask": ["85012.16000000", "0.08258000"]}}}
+2025-03-23 15:57:24,907 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 15:57:26,527 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 15:57:26,528 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:57:26,838 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8906943, 'orderListId': -1, 'clientOrderId': '0dC5u9juoPGQqy3X8zuPZl', 'transactTime': 1742738245261, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35133760', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738245261, 'fills': [{'price': '85012.16000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982260}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:57:26,839 - trading_bot - INFO - Market buy executed: 8906943
+2025-03-23 15:57:26,839 - trading_bot - INFO - Buy order executed successfully: 8906943
+2025-03-23 15:58:23,872 - trading_bot - INFO - RSI indicates overbought condition: 89.90
+2025-03-23 15:58:23,872 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:58:23,872 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 15:58:23,872 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:58:23,872 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:58:23,873 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 15:58:23,873 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 15:58:23,873 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 15:58:23,873 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:58:23.873304", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85029.31000000", "order_book_summary": {"top_bid": ["85029.31000000", "0.09975000"], "top_ask": ["85029.33000000", "0.08762000"]}}}
+2025-03-23 15:58:23,873 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 15:58:24,986 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 15:58:24,986 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:58:25,772 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8907207, 'orderListId': -1, 'clientOrderId': 'LSYTy3kLtxaLn4D2IlIqDw', 'transactTime': 1742738304240, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35322520', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738304240, 'fills': [{'price': '85029.32000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982343}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:58:25,772 - trading_bot - INFO - Market buy executed: 8907207
+2025-03-23 15:58:25,772 - trading_bot - INFO - Buy order executed successfully: 8907207
+2025-03-23 15:59:23,289 - trading_bot - INFO - RSI indicates overbought condition: 90.23
+2025-03-23 15:59:23,289 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 15:59:23,289 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 15:59:23,290 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 15:59:23,290 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 15:59:23,290 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 15:59:23,290 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 15:59:23,290 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 15:59:23,290 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T15:59:23.290460", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85076.01000000", "order_book_summary": {"top_bid": ["85076.00000000", "0.09063000"], "top_ask": ["85079.35000000", "0.09150000"]}}}
+2025-03-23 15:59:23,290 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 15:59:24,408 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 15:59:24,408 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 15:59:25,197 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8907469, 'orderListId': -1, 'clientOrderId': 'HgnQTVg1wRMDlB3tknbbkE', 'transactTime': 1742738363674, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35872960', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738363674, 'fills': [{'price': '85079.36000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982541}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 15:59:25,198 - trading_bot - INFO - Market buy executed: 8907469
+2025-03-23 15:59:25,198 - trading_bot - INFO - Buy order executed successfully: 8907469
+2025-03-23 16:00:22,253 - trading_bot - INFO - RSI indicates overbought condition: 89.08
+2025-03-23 16:00:22,253 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:00:22,253 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:00:22,253 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:00:22,253 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:00:22,253 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:00:22,253 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:00:22,253 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:00:22,254 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:00:22.254022", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85083.60000000", "order_book_summary": {"top_bid": ["84886.73000000", "1.36379000"], "top_ask": ["85083.60000000", "0.45028000"]}}}
+2025-03-23 16:00:22,254 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:00:22,567 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00044
+2025-03-23 16:00:22,567 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00044
+2025-03-23 16:00:22,872 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8907665, 'orderListId': -1, 'clientOrderId': 'f0ty5yNbcdiFeZ9AP6HZhj', 'transactTime': 1742738421491, 'price': '0.00000000', 'origQty': '0.00044000', 'executedQty': '0.00044000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '37.35016120', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738421491, 'fills': [{'price': '84886.73000000', 'qty': '0.00044000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1982605}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:00:22,872 - trading_bot - INFO - Market sell executed: 8907665
+2025-03-23 16:00:22,873 - trading_bot - INFO - Sell order executed successfully: 8907665
+2025-03-23 16:01:20,404 - trading_bot - INFO - RSI indicates overbought condition: 89.35
+2025-03-23 16:01:20,404 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:01:20,404 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:01:20,405 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:01:20,405 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:01:20,405 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:01:20,405 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:01:20,405 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:01:20,405 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:01:20.405482", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85118.00000000", "order_book_summary": {"top_bid": ["84944.11000000", "1.36084000"], "top_ask": ["85118.00000000", "0.49580000"]}}}
+2025-03-23 16:01:20,405 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:01:21,509 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:01:21,509 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:01:21,821 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8907780, 'orderListId': -1, 'clientOrderId': 'U8wStyqwlXibAelkUvx3tH', 'transactTime': 1742738480482, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.36307680', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738480482, 'fills': [{'price': '85118.88000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982674}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:01:21,821 - trading_bot - INFO - Market buy executed: 8907780
+2025-03-23 16:01:21,822 - trading_bot - INFO - Buy order executed successfully: 8907780
+2025-03-23 16:02:18,404 - trading_bot - INFO - RSI indicates overbought condition: 89.78
+2025-03-23 16:02:18,404 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:02:18,404 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:02:18,404 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:02:18,404 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:02:18,405 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:02:18,405 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:02:18,405 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:02:18,405 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:02:18.405275", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85178.42000000", "order_book_summary": {"top_bid": ["85178.86000000", "0.09626000"], "top_ask": ["85193.59000000", "0.00017000"]}}}
+2025-03-23 16:02:18,405 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:02:19,090 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:02:19,090 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:02:19,401 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8908077, 'orderListId': -1, 'clientOrderId': 'CJ3pZPsP5WGr7UuodseUZu', 'transactTime': 1742738538213, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.37129490', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738538213, 'fills': [{'price': '85193.59000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1982877}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:02:19,401 - trading_bot - INFO - Market buy executed: 8908077
+2025-03-23 16:02:19,402 - trading_bot - INFO - Buy order executed successfully: 8908077
+2025-03-23 16:03:15,979 - trading_bot - INFO - RSI indicates overbought condition: 88.70
+2025-03-23 16:03:15,979 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:03:15,980 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:03:15,980 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:03:15,980 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:03:15,980 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:03:15,980 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:03:15,980 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:03:15,980 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:03:15.980623", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85077.73000000", "order_book_summary": {"top_bid": ["85077.44000000", "0.93423000"], "top_ask": ["85102.68000000", "0.06388000"]}}}
+2025-03-23 16:03:15,980 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:03:16,287 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00022
+2025-03-23 16:03:16,287 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00022
+2025-03-23 16:03:16,592 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8908309, 'orderListId': -1, 'clientOrderId': 'eM2pQby5hD5syLWa721X0l', 'transactTime': 1742738595589, 'price': '0.00000000', 'origQty': '0.00022000', 'executedQty': '0.00022000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '18.71703680', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738595589, 'fills': [{'price': '85077.44000000', 'qty': '0.00022000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1982975}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:03:16,593 - trading_bot - INFO - Market sell executed: 8908309
+2025-03-23 16:03:16,593 - trading_bot - INFO - Sell order executed successfully: 8908309
+2025-03-23 16:04:14,952 - trading_bot - INFO - RSI indicates overbought condition: 89.94
+2025-03-23 16:04:14,952 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:04:14,952 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:04:14,952 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:04:14,952 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:04:14,952 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:04:14,952 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:04:14,953 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:04:14,953 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:04:14.953105", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85201.21000000", "order_book_summary": {"top_bid": ["85021.73000000", "0.07181000"], "top_ask": ["85021.75000000", "0.03479000"]}}}
+2025-03-23 16:04:14,953 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:04:16,055 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:04:16,056 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:04:16,366 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8908515, 'orderListId': -1, 'clientOrderId': 'EQLpUtxZBAg4wS02BnBJXr', 'transactTime': 1742738654135, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.37156880', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738654135, 'fills': [{'price': '85196.08000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983107}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:04:16,367 - trading_bot - INFO - Market buy executed: 8908515
+2025-03-23 16:04:16,367 - trading_bot - INFO - Buy order executed successfully: 8908515
+2025-03-23 16:05:12,956 - trading_bot - INFO - RSI indicates overbought condition: 86.51
+2025-03-23 16:05:12,956 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:05:12,957 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:05:12,957 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:05:12,957 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:05:12,957 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:05:12,957 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:05:12,957 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:05:12,957 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:05:12.957509", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85042.62000000", "order_book_summary": {"top_bid": ["85051.54000000", "0.08379000"], "top_ask": ["85051.66000000", "0.10065000"]}}}
+2025-03-23 16:05:12,957 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:05:13,742 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:05:13,742 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:05:14,050 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8908737, 'orderListId': -1, 'clientOrderId': 'cCK20wWyOrlKBzU33dD0Pc', 'transactTime': 1742738711965, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35566940', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738711965, 'fills': [{'price': '85051.54000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983210}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:05:14,051 - trading_bot - INFO - Market sell executed: 8908737
+2025-03-23 16:05:14,051 - trading_bot - INFO - Sell order executed successfully: 8908737
+2025-03-23 16:06:11,590 - trading_bot - INFO - RSI indicates overbought condition: 83.76
+2025-03-23 16:06:11,591 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:06:11,591 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:06:11,591 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:06:11,591 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:06:11,591 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:06:11,591 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:06:11,591 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:06:11,591 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:06:11.591674", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84996.08000000", "order_book_summary": {"top_bid": ["84996.23000000", "0.08707000"], "top_ask": ["84997.21000000", "0.10060000"]}}}
+2025-03-23 16:06:11,591 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:06:11,898 - trading_bot - WARNING - No balance available to sell for BTC
+2025-03-23 16:07:09,418 - trading_bot - INFO - RSI indicates overbought condition: 83.36
+2025-03-23 16:07:09,419 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:07:09,419 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:07:09,419 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:07:09,419 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:07:09,419 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:07:09,419 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:07:09,419 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:07:09,419 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:07:09.419910", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84989.13000000", "order_book_summary": {"top_bid": ["84989.13000000", "0.10592000"], "top_ask": ["84989.14000000", "0.06071000"]}}}
+2025-03-23 16:07:09,420 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:07:10,197 - trading_bot - WARNING - No balance available to sell for BTC
+2025-03-23 16:08:07,720 - trading_bot - INFO - RSI indicates overbought condition: 83.58
+2025-03-23 16:08:07,720 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:08:07,721 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:08:07,721 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:08:07,721 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:08:07,721 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:08:07,721 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:08:07,721 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:08:07,721 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:08:07.721554", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84993.02000000", "order_book_summary": {"top_bid": ["84978.77000000", "0.08773000"], "top_ask": ["84979.32000000", "0.09219000"]}}}
+2025-03-23 16:08:07,721 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:08:09,308 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:08:09,308 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:08:09,613 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8909378, 'orderListId': -1, 'clientOrderId': '9BLetGndhOcWZmTdDZ3dqx', 'transactTime': 1742738887767, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34772520', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742738887767, 'fills': [{'price': '84979.32000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983412}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:08:09,614 - trading_bot - INFO - Market buy executed: 8909378
+2025-03-23 16:08:09,614 - trading_bot - INFO - Buy order executed successfully: 8909378
+2025-03-23 16:09:06,656 - trading_bot - INFO - RSI indicates overbought condition: 82.45
+2025-03-23 16:09:06,656 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:09:06,656 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:09:06,656 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:09:06,657 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:09:06,657 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:09:06,657 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:09:06,657 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:09:06,657 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:09:06.657333", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84972.90000000", "order_book_summary": {"top_bid": ["84970.15000000", "0.09573000"], "top_ask": ["84970.29000000", "0.01496000"]}}}
+2025-03-23 16:09:06,657 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:09:06,962 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:09:06,962 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:09:07,272 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8909472, 'orderListId': -1, 'clientOrderId': '35cpzyWQ1Jx5GogGZDdYIq', 'transactTime': 1742738945563, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34671650', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742738945563, 'fills': [{'price': '84970.15000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983467}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:09:07,273 - trading_bot - INFO - Market sell executed: 8909472
+2025-03-23 16:09:07,273 - trading_bot - INFO - Sell order executed successfully: 8909472
+2025-03-23 16:10:04,347 - trading_bot - INFO - RSI indicates overbought condition: 83.45
+2025-03-23 16:10:04,347 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:10:04,347 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:10:04,347 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:10:04,347 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:10:04,348 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:10:04,348 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:10:04,348 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:10:04,348 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:10:04.348250", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84990.60000000", "order_book_summary": {"top_bid": ["84999.99000000", "0.10642000"], "top_ask": ["85000.00000000", "0.08318000"]}}}
+2025-03-23 16:10:04,348 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:10:05,953 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:10:05,953 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:10:06,261 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8909710, 'orderListId': -1, 'clientOrderId': 'JFR6LkPDIe0ciNUtbaPkeD', 'transactTime': 1742739004594, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34987130', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742739004594, 'fills': [{'price': '84998.83000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983536}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:10:06,262 - trading_bot - INFO - Market buy executed: 8909710
+2025-03-23 16:10:06,262 - trading_bot - INFO - Buy order executed successfully: 8909710
+2025-03-23 16:11:02,857 - trading_bot - INFO - RSI indicates overbought condition: 83.14
+2025-03-23 16:11:02,857 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:11:02,857 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:11:02,857 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:11:02,857 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:11:02,857 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:11:02,857 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:11:02,857 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:11:02,858 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:11:02.858031", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "84985.14000000", "order_book_summary": {"top_bid": ["84985.14000000", "0.09055000"], "top_ask": ["84985.15000000", "0.09973000"]}}}
+2025-03-23 16:11:02,858 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:11:03,162 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:11:03,162 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:11:03,474 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8910021, 'orderListId': -1, 'clientOrderId': 'BpVtxEBBHs1dQ1fNNVg6fN', 'transactTime': 1742739061986, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34836540', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742739061986, 'fills': [{'price': '84985.14000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983559}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:11:03,475 - trading_bot - INFO - Market sell executed: 8910021
+2025-03-23 16:11:03,475 - trading_bot - INFO - Sell order executed successfully: 8910021
+2025-03-23 16:12:00,539 - trading_bot - INFO - RSI indicates overbought condition: 85.08
+2025-03-23 16:12:00,539 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:12:00,539 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:12:00,539 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:12:00,539 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:12:00,539 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:12:00,539 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:12:00,539 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:12:00,540 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:12:00.540035", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85018.86000000", "order_book_summary": {"top_bid": ["85015.54000000", "0.06863000"], "top_ask": ["85015.55000000", "0.08881000"]}}}
+2025-03-23 16:12:00,540 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:12:01,694 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:12:01,694 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:12:02,000 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8910381, 'orderListId': -1, 'clientOrderId': 'Z1s9qoOZMMoBsidBcrMw4j', 'transactTime': 1742739120593, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35171050', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742739120593, 'fills': [{'price': '85015.55000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983624}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:12:02,002 - trading_bot - INFO - Market buy executed: 8910381
+2025-03-23 16:12:02,002 - trading_bot - INFO - Buy order executed successfully: 8910381
+2025-03-23 16:12:59,033 - trading_bot - INFO - RSI indicates overbought condition: 84.24
+2025-03-23 16:12:59,033 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:12:59,033 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:12:59,033 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:12:59,034 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:12:59,034 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:12:59,034 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:12:59,034 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:12:59,034 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:12:59.034421", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85004.50000000", "order_book_summary": {"top_bid": ["84912.51000000", "1.52261000"], "top_ask": ["85004.51000000", "0.09895000"]}}}
+2025-03-23 16:12:59,034 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:12:59,345 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:12:59,346 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:12:59,652 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8910712, 'orderListId': -1, 'clientOrderId': 'QvY44fhiBiLikqaRXARBYQ', 'transactTime': 1742739178391, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.34037610', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742739178391, 'fills': [{'price': '84912.51000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983709}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:12:59,653 - trading_bot - INFO - Market sell executed: 8910712
+2025-03-23 16:12:59,654 - trading_bot - INFO - Sell order executed successfully: 8910712
+2025-03-23 16:13:57,642 - trading_bot - INFO - RSI indicates overbought condition: 85.29
+2025-03-23 16:13:57,643 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:13:57,643 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:13:57,643 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:13:57,643 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:13:57,643 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:13:57,643 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:13:57,643 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:13:57,643 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:13:57.643932", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85022.35000000", "order_book_summary": {"top_bid": ["85029.05000000", "0.01721000"], "top_ask": ["85035.87000000", "0.11660000"]}}}
+2025-03-23 16:13:57,644 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:13:58,755 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:13:58,755 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:13:59,058 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8911170, 'orderListId': -1, 'clientOrderId': '25TD7KeoSedhbkWy4xG3h4', 'transactTime': 1742739237803, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35394570', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742739237803, 'fills': [{'price': '85035.87000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983815}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:13:59,059 - trading_bot - INFO - Market buy executed: 8911170
+2025-03-23 16:13:59,059 - trading_bot - INFO - Buy order executed successfully: 8911170
+2025-03-23 16:14:56,559 - trading_bot - INFO - RSI indicates overbought condition: 85.89
+2025-03-23 16:14:56,559 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:14:56,559 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:14:56,559 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:14:56,559 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:14:56,559 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:14:56,560 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:14:56,560 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:14:56,560 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:14:56.560163", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85043.44000000", "order_book_summary": {"top_bid": ["85032.51000000", "0.11308000"], "top_ask": ["85032.52000000", "0.07885000"]}}}
+2025-03-23 16:14:56,560 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:14:56,874 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:14:56,874 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:14:57,641 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8911652, 'orderListId': -1, 'clientOrderId': 'uwVh4ECGlPpMNfbRSXuGzp', 'transactTime': 1742739296462, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35219670', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742739296462, 'fills': [{'price': '85019.97000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983860}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:14:57,643 - trading_bot - INFO - Market sell executed: 8911652
+2025-03-23 16:14:57,643 - trading_bot - INFO - Sell order executed successfully: 8911652
+2025-03-23 16:15:54,693 - trading_bot - INFO - RSI indicates overbought condition: 86.31
+2025-03-23 16:15:54,693 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:15:54,693 - trading_bot - INFO - Signals: {'simple': 'BUY', 'technical': 'HOLD'}
+2025-03-23 16:15:54,693 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'BUY', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): BUY
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:15:54,693 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:15:54,693 - trading_bot - INFO - Rule-based parsed signals - Simple: BUY, Technical: HOLD
+2025-03-23 16:15:54,693 - trading_bot - INFO - LLM decision: BUY
+2025-03-23 16:15:54,693 - trading_bot - INFO - Signal consensus: BUY
+2025-03-23 16:15:54,693 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:15:54.693874", "decision": "BUY", "signals": {"simple": "BUY", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85039.40000000", "order_book_summary": {"top_bid": ["84871.41000000", "1.72546000"], "top_ask": ["85054.40000000", "0.09812000"]}}}
+2025-03-23 16:15:54,693 - trading_bot - INFO - Executing BUY for BTCUSDT
+2025-03-23 16:15:55,809 - trading_bot - INFO - Executing market buy: BTCUSDT, quantity: 0.00011
+2025-03-23 16:15:55,809 - trading_bot - INFO - Placing market buy order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:15:56,121 - trading_bot - INFO - Market buy order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8911915, 'orderListId': -1, 'clientOrderId': 'q10fncOWKirIJGwnVwi8a5', 'transactTime': 1742739355018, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35598400', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'workingTime': 1742739355018, 'fills': [{'price': '85054.40000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'BTC', 'tradeId': 1983924}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:15:56,122 - trading_bot - INFO - Market buy executed: 8911915
+2025-03-23 16:15:56,122 - trading_bot - INFO - Buy order executed successfully: 8911915
+2025-03-23 16:16:53,187 - trading_bot - INFO - RSI indicates overbought condition: 86.39
+2025-03-23 16:16:53,187 - trading_bot - ERROR - Error in technical analysis: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2025-03-23 16:16:53,187 - trading_bot - INFO - Signals: {'simple': 'SELL', 'technical': 'HOLD'}
+2025-03-23 16:16:53,187 - trading_bot - INFO - LLM received prompt: Current signals for BTCUSDT: {'simple': 'SELL', 'technical': 'HOLD'}.
+Simple signal (1m timeframe): SELL
+Technical analysis signal (1h timeframe): HOLD
+Given these signals and the latest market data, should we BUY, SELL, or HOLD?
+2025-03-23 16:16:53,187 - trading_bot - INFO - No LLM API configured, using rule-based decision logic
+2025-03-23 16:16:53,187 - trading_bot - INFO - Rule-based parsed signals - Simple: SELL, Technical: HOLD
+2025-03-23 16:16:53,187 - trading_bot - INFO - LLM decision: SELL
+2025-03-23 16:16:53,187 - trading_bot - INFO - Signal consensus: SELL
+2025-03-23 16:16:53,187 - trading_bot - INFO - Decision log: {"timestamp": "2025-03-23T16:16:53.187950", "decision": "SELL", "signals": {"simple": "SELL", "technical": "HOLD"}, "market_data_summary": {"symbol": "BTCUSDT", "latest_close": "85040.68000000", "order_book_summary": {"top_bid": ["85004.60000000", "1.62101000"], "top_ask": ["85004.80000000", "0.09118000"]}}}
+2025-03-23 16:16:53,188 - trading_bot - INFO - Executing SELL for BTCUSDT
+2025-03-23 16:16:53,497 - trading_bot - INFO - Executing market sell: BTCUSDT, quantity: 0.00011
+2025-03-23 16:16:53,498 - trading_bot - INFO - Placing market sell order: BTCUSDT, quantity: 0.00011
+2025-03-23 16:16:53,807 - trading_bot - INFO - Market sell order placed successfully: {'symbol': 'BTCUSDT', 'orderId': 8912195, 'orderListId': -1, 'clientOrderId': 'QbQtU51W8pDT8zHDTMS2Mg', 'transactTime': 1742739412849, 'price': '0.00000000', 'origQty': '0.00011000', 'executedQty': '0.00011000', 'origQuoteOrderQty': '0.00000000', 'cummulativeQuoteQty': '9.35050600', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'SELL', 'workingTime': 1742739412849, 'fills': [{'price': '85004.60000000', 'qty': '0.00011000', 'commission': '0.00000000', 'commissionAsset': 'USDT', 'tradeId': 1983988}], 'selfTradePreventionMode': 'EXPIRE_MAKER'}
+2025-03-23 16:16:53,809 - trading_bot - INFO - Market sell executed: 8912195
+2025-03-23 16:16:53,809 - trading_bot - INFO - Sell order executed successfully: 8912195
+2025-03-23 16:16:57,718 - trading_bot_runner - INFO - Bot stopped by user

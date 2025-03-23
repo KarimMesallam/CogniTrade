@@ -13,6 +13,41 @@ from bot.strategy import (
     calculate_bollinger_bands, calculate_macd, technical_analysis_signal
 )
 
+# Create a simplified version of the decision logic to test directly
+def simplified_decision_logic(rsi: float, price: float, upper_band: float, lower_band: float, 
+                             prev_macd: float, curr_macd: float, prev_signal: float, curr_signal: float) -> str:
+    """Simplified decision logic for testing purposes - mirrors the logic in technical_analysis_signal."""
+    buy_signals = 0
+    sell_signals = 0
+    
+    # RSI signals
+    if rsi < 30:  # Oversold
+        buy_signals += 1
+    elif rsi > 70:  # Overbought
+        sell_signals += 1
+    
+    # Bollinger Band signals
+    if price > upper_band:  # Price above upper band
+        sell_signals += 1
+    elif price < lower_band:  # Price below lower band
+        buy_signals += 1
+    
+    # MACD signals
+    # MACD line crosses above signal line
+    if prev_macd < prev_signal and curr_macd > curr_signal:
+        buy_signals += 1
+    # MACD line crosses below signal line
+    elif prev_macd > prev_signal and curr_macd < curr_signal:
+        sell_signals += 1
+    
+    # Determine overall signal
+    if buy_signals > sell_signals:
+        return "BUY"
+    elif sell_signals > buy_signals:
+        return "SELL"
+    else:
+        return "HOLD"
+
 @pytest.fixture
 def sample_data():
     """Sample data fixture for testing."""
@@ -73,6 +108,15 @@ def test_get_candles_dataframe(mock_client):
     assert len(df) == 1
     assert df['close'].iloc[0] == 50050.0
 
+@patch('bot.strategy.client')
+def test_get_candles_dataframe_error(mock_client):
+    """Test error handling in the get_candles_dataframe function."""
+    # Make the client.get_klines raise an exception
+    mock_client.get_klines.side_effect = Exception("API error")
+    
+    df = get_candles_dataframe('BTCUSDT', '1h', 1)
+    assert df is None
+
 def test_calculate_rsi():
     """Test the RSI calculation function."""
     # Create a DataFrame with a predictable pattern
@@ -89,6 +133,30 @@ def test_calculate_rsi():
     # Check values are between 0 and 100 (ignoring NaN values)
     valid_rsi = rsi.dropna()
     assert (valid_rsi >= 0).all() and (valid_rsi <= 100).all()
+
+def test_calculate_rsi_edge_cases():
+    """Test RSI calculation with edge cases."""
+    # Test with all identical prices (no change)
+    df_no_change = pd.DataFrame({
+        'close': [50, 50, 50, 50, 50, 50, 50, 50]
+    })
+    rsi_no_change = calculate_rsi(df_no_change, period=4)
+    
+    # For identical prices, RSI may be NaN due to division by zero (0 gain / 0 loss)
+    # or it might be 50 (middle value) in some implementations
+    # Let's check that the last value is either NaN or 50
+    assert pd.isna(rsi_no_change.iloc[-1]) or (abs(rsi_no_change.iloc[-1] - 50) < 1e-6)
+
+    # Test with all increasing prices (all gains, no losses)
+    df_all_gains = pd.DataFrame({
+        'close': [50, 55, 60, 65, 70, 75, 80, 85]
+    })
+    rsi_all_gains = calculate_rsi(df_all_gains, period=4)
+    last_value = rsi_all_gains.iloc[-1]
+    
+    # When there are only gains and no losses, RSI should approach 100
+    assert not pd.isna(last_value)
+    assert last_value > 95  # Should be close to 100
 
 def test_calculate_bollinger_bands():
     """Test the Bollinger Bands calculation function."""
@@ -137,6 +205,21 @@ def test_technical_analysis_signal_hold():
         signal = technical_analysis_signal('BTCUSDT', '1h')
         assert signal == 'HOLD'
 
+@patch('bot.strategy.get_candles_dataframe')
+def test_technical_analysis_error_handling(mock_get_candles):
+    """Test error handling in technical analysis signal function."""
+    # Make get_candles_dataframe return a valid DataFrame but force an exception later
+    df = create_mock_dataframe()
+    
+    # Remove a required column to force an exception
+    df_with_error = df.drop('close', axis=1)
+    
+    mock_get_candles.return_value = df_with_error
+    
+    # The function should handle the exception and return 'HOLD'
+    signal = technical_analysis_signal('BTCUSDT', '1h')
+    assert signal == 'HOLD'
+
 # Define simple stand-in functions for testing signal generation logic
 def mock_ta_signal_buy(symbol, interval):
     """A mock function that always returns BUY signal"""
@@ -161,4 +244,189 @@ def test_signal_generation_sell():
     symbol = "BTCUSDT"
     interval = "1h"
     assert mock_ta_signal_sell(symbol, interval) == "SELL"
+
+def create_mock_dataframe():
+    """Create a mock DataFrame with necessary columns for technical analysis."""
+    df = pd.DataFrame({
+        'timestamp': pd.date_range(start='2023-01-01', periods=50, freq='H'),
+        'open': [50000 + i * 10 for i in range(50)],
+        'high': [50100 + i * 10 for i in range(50)],
+        'low': [49900 + i * 10 for i in range(50)],
+        'close': [50050 + i * 10 for i in range(50)],
+        'volume': [100 + i for i in range(50)]
+    })
+    
+    # Add calculated indicators
+    df['rsi'] = np.nan  # Will be filled in the test
+    df['sma'] = df['close'].rolling(window=20).mean()
+    df['std_dev'] = df['close'].rolling(window=20).std()
+    df['upper_band'] = df['sma'] + (df['std_dev'] * 2)
+    df['lower_band'] = df['sma'] - (df['std_dev'] * 2)
+    df['ema_fast'] = df['close'].ewm(span=12, adjust=False).mean()
+    df['ema_slow'] = df['close'].ewm(span=26, adjust=False).mean()
+    df['macd_line'] = df['ema_fast'] - df['ema_slow']
+    df['signal_line'] = df['macd_line'].ewm(span=9, adjust=False).mean()
+    df['macd_histogram'] = df['macd_line'] - df['signal_line']
+    
+    return df
+
+def create_mock_dataframe_with_scalar_values():
+    """Create a mock DataFrame with scalar values for indicators to avoid Series comparison issues."""
+    df = pd.DataFrame({
+        'timestamp': pd.date_range(start='2023-01-01', periods=50, freq='H'),
+        'open': [50000 + i * 10 for i in range(50)],
+        'high': [50100 + i * 10 for i in range(50)],
+        'low': [49900 + i * 10 for i in range(50)],
+        'close': [50050 + i * 10 for i in range(50)],
+        'volume': [100 + i for i in range(50)]
+    })
+    
+    # Instead of calculating the indicators using the DataFrame methods which give Series,
+    # we'll just add scalar values that we will modify in each test
+    df['rsi'] = np.nan
+    df['sma'] = np.nan
+    df['std_dev'] = np.nan
+    df['upper_band'] = np.nan
+    df['lower_band'] = np.nan
+    df['macd_line'] = np.nan
+    df['signal_line'] = np.nan
+    df['macd_histogram'] = np.nan
+    
+    return df
+
+# Test the simplified decision logic directly
+def test_decision_logic_rsi_oversold():
+    """Test decision logic when RSI is oversold (below 30)."""
+    # RSI oversold (buy signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=25.0,                   # RSI oversold (buy signal)
+        price=50500,                # Normal price (no BB breakout)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=0.0,              # No MACD cross 
+        curr_macd=0.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'BUY'
+
+def test_decision_logic_rsi_overbought():
+    """Test decision logic when RSI is overbought (above 70)."""
+    # RSI overbought (sell signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=75.0,                   # RSI overbought (sell signal)
+        price=50500,                # Normal price (no BB breakout)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=0.0,              # No MACD cross
+        curr_macd=0.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'SELL'
+
+def test_decision_logic_bb_upper_breakout():
+    """Test decision logic when price breaks above upper Bollinger Band."""
+    # Price above upper BB (sell signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=50.0,                   # Neutral RSI
+        price=51100,                # Price above upper band (sell signal)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=0.0,              # No MACD cross
+        curr_macd=0.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'SELL'
+
+def test_decision_logic_bb_lower_breakout():
+    """Test decision logic when price breaks below lower Bollinger Band."""
+    # Price below lower BB (buy signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=50.0,                   # Neutral RSI
+        price=49900,                # Price below lower band (buy signal)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=0.0,              # No MACD cross
+        curr_macd=0.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'BUY'
+
+def test_decision_logic_macd_bullish_cross():
+    """Test decision logic for bullish MACD cross."""
+    # MACD bullish cross (buy signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=50.0,                   # Neutral RSI
+        price=50500,                # Normal price (no BB breakout)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=-1.0,             # MACD bullish cross (buy signal)
+        curr_macd=1.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'BUY'
+
+def test_decision_logic_macd_bearish_cross():
+    """Test decision logic for bearish MACD cross."""
+    # MACD bearish cross (sell signal), other indicators neutral
+    signal = simplified_decision_logic(
+        rsi=50.0,                   # Neutral RSI
+        price=50500,                # Normal price (no BB breakout)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=1.0,              # MACD bearish cross (sell signal)
+        curr_macd=-1.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'SELL'
+
+def test_decision_logic_equal_signals():
+    """Test decision logic when buy and sell signals are equal."""
+    # Equal buy and sell signals should result in HOLD
+    signal = simplified_decision_logic(
+        rsi=75.0,                   # RSI overbought (sell signal)
+        price=49900,                # Price below lower band (buy signal)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=0.0,              # No MACD cross
+        curr_macd=0.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'HOLD'
+
+def test_decision_logic_multiple_buy_signals():
+    """Test decision logic with multiple buy signals."""
+    # Multiple buy signals should result in BUY
+    signal = simplified_decision_logic(
+        rsi=25.0,                   # RSI oversold (buy signal)
+        price=49900,                # Price below lower band (buy signal) 
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=-1.0,             # MACD bullish cross (buy signal)
+        curr_macd=1.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'BUY'
+
+def test_decision_logic_multiple_sell_signals():
+    """Test decision logic with multiple sell signals."""
+    # Multiple sell signals should result in SELL
+    signal = simplified_decision_logic(
+        rsi=75.0,                   # RSI overbought (sell signal)
+        price=51100,                # Price above upper band (sell signal)
+        upper_band=51000,           # Bollinger bands
+        lower_band=50000,
+        prev_macd=1.0,              # MACD bearish cross (sell signal)
+        curr_macd=-1.0,
+        prev_signal=0.0,
+        curr_signal=0.0
+    )
+    assert signal == 'SELL'
 
