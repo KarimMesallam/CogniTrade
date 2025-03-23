@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2025-03-23T16:55:58.576518",
+    "timestamp": "2025-03-23T17:17:32.787236",
     "symbol": "BTCUSDT",
     "order_id": 123,
     "client_order_id": "test_client_order_id",
@@ -37,6 +37,7 @@
           "commissionAsset": "BTC"
         }
       ]
-    }
+    },
+    "trade_id": "BTCUSDT_BUY_123_1742743052"
   }
 ]

@@ -21,6 +21,9 @@ class Database:
         """Initialize the database connection"""
         self.db_path = db_path
         
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        
         # Create tables if they don't exist
         self._initialize_database()
     
@@ -563,4 +566,14 @@ class Database:
                     return False
         except Exception as e:
             logger.error(f"Error acknowledging alert: {e}")
-            return False 
+            return False
+            
+    def _get_connection(self):
+        """
+        Get a connection to the database.
+        For advanced operations requiring direct database access.
+        
+        Returns:
+            sqlite3.Connection object
+        """
+        return sqlite3.connect(self.db_path) 

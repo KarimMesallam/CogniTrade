@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+import uuid
 from datetime import datetime
 from bot.binance_api import (
     get_order_status, get_open_orders, cancel_order, 
@@ -8,6 +9,7 @@ from bot.binance_api import (
     place_limit_buy, place_limit_sell,
     calculate_order_quantity
 )
+from bot.db_integration import DatabaseIntegration
 
 logger = logging.getLogger("trading_bot")
 
@@ -19,18 +21,29 @@ class OrderManager:
     """
     Handles order execution, tracking, and management.
     """
-    def __init__(self, symbol, risk_percentage=1.0):
+    def __init__(self, symbol, risk_percentage=1.0, use_database=True):
         """
         Initialize the order manager.
         
         Args:
             symbol: Trading pair symbol (e.g., 'BTCUSDT')
             risk_percentage: Percentage of available funds to risk per trade (1.0 = 1%)
+            use_database: Whether to use database for storage (in addition to JSON files)
         """
         self.symbol = symbol
         self.risk_percentage = risk_percentage
         self.active_orders = {}
         self.order_history = []
+        self.use_database = use_database
+        
+        # Initialize database integration if enabled
+        if self.use_database:
+            try:
+                self.db = DatabaseIntegration()
+                logger.info("Database integration enabled for order management")
+            except Exception as e:
+                logger.error(f"Failed to initialize database integration: {e}")
+                self.use_database = False
         
         # Load previous orders if log exists
         self._load_order_history()
@@ -84,6 +97,11 @@ class OrderManager:
             "raw_response": order
         }
         
+        # Generate a unique trade ID if not present
+        trade_id = f"{self.symbol}_{action}_{order.get('orderId')}_{int(datetime.now().timestamp())}"
+        order_log["trade_id"] = trade_id
+        
+        # Add to local history
         self.order_history.append(order_log)
         self._save_order_history()
         
@@ -94,6 +112,38 @@ class OrderManager:
         elif status in ["FILLED", "CANCELED", "REJECTED", "EXPIRED"]:
             if order["orderId"] in self.active_orders:
                 del self.active_orders[order["orderId"]]
+        
+        # Save to database if enabled
+        if self.use_database:
+            try:
+                # Create database trade record
+                db_trade_data = {
+                    "trade_id": trade_id,
+                    "symbol": self.symbol,
+                    "side": order.get("side"),
+                    "quantity": float(order.get("origQty", 0)),
+                    "price": float(order.get("price", 0)) if order.get("price") and order.get("price") != "0.00000000" else None,
+                    "timestamp": timestamp,
+                    "order_id": str(order.get("orderId")),
+                    "status": status,
+                    "strategy": "manual" if not action else action.lower(),
+                    "raw_data": order
+                }
+                
+                # Calculate profit/loss if possible
+                if order.get("fills"):
+                    total_cost = sum(float(fill["price"]) * float(fill["qty"]) for fill in order["fills"])
+                    total_qty = sum(float(fill["qty"]) for fill in order["fills"])
+                    if total_qty > 0:
+                        # Add execution time and fees
+                        db_trade_data["execution_time"] = order.get("transactTime", 0)
+                        db_trade_data["fees"] = sum(float(fill.get("commission", 0)) for fill in order["fills"])
+                
+                # Save or update in database
+                self.db.save_trade(db_trade_data)
+                
+            except Exception as e:
+                logger.error(f"Error saving order to database: {e}")
     
     def execute_market_buy(self, quantity=None, quote_amount=None):
         """
@@ -256,6 +306,18 @@ class OrderManager:
                     logger.info(f"Order {order_id} status changed: {previous_status} -> {current_status}")
                     self._log_order(order_status, self.active_orders[order_id]["action"], current_status)
                     updated_orders[order_id] = order_status
+                    
+                    # Update in database if enabled
+                    if self.use_database and "trade_id" in self.active_orders[order_id]:
+                        try:
+                            trade_id = self.active_orders[order_id]["trade_id"]
+                            update_data = {
+                                "status": current_status,
+                                "raw_data": order_status
+                            }
+                            self.db.update_trade(trade_id, update_data)
+                        except Exception as e:
+                            logger.error(f"Error updating order in database: {e}")
             else:
                 logger.warning(f"Failed to get status for order: {order_id}")
         

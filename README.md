@@ -10,6 +10,7 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **AI Orchestration:** A dedicated module to incorporate LLMs (e.g., DeepSeek R1, GPT-4o, o3-mini, Claude 3.7 Sonnet) for enhanced decision making.
 - **Extensible:** Easily add new exchanges, trading strategies, and real-time data streams.
 - **Advanced Backtesting:** Comprehensive backtesting module with multi-timeframe analysis, strategy optimization, and performance visualization.
+- **Comprehensive Testing:** High-coverage test suite for all components with mocks for external dependencies.
 
 ## Features
 
@@ -17,8 +18,9 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Paper Trading Mode:** Safely test strategies on Binance Testnet before going live.
 - **Strategy Module:** Contains logic for trading signals (e.g., based on technical indicators) with an abstract layer for future enhancements.
 - **LLM Manager:** A placeholder module to later integrate multiple language models for trade signal orchestration.
+- **Order Management:** Robust order execution system with proper error handling and logging.
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
-- **Testing Suite:** Unit tests using pytest to validate functionality as the project scales.
+- **Testing Suite:** Comprehensive unit and integration tests with high coverage metrics for all system components.
 - **Backtesting System:** Sophisticated backtesting capabilities with:
   - Multi-timeframe analysis for more robust trading decisions
   - Strategy optimization through parameter grid search
@@ -42,15 +44,19 @@ trading_bot/
 │   ├── database.py         # Database management for storing trading data and analytics
 │   ├── backtesting.py      # Advanced backtesting engine for strategy development
 │   └── main.py             # Main entry point for running the bot
-├── tests/                  # Unit tests (pytest)
-│   ├── test_binance_api.py
-│   ├── test_strategy.py
-│   ├── test_llm_manager.py
-│   └── test_backtesting.py
+├── tests/                  # Comprehensive tests (pytest)
+│   ├── test_binance_api.py # Tests for Binance API wrapper with >80% coverage
+│   ├── test_main.py        # Tests for the main trading loop with proper mocks
+│   ├── test_order_manager.py # Tests for order execution and management
+│   ├── test_strategy.py    # Tests for trading strategies
+│   ├── test_llm_manager.py # Tests for LLM integration
+│   ├── test_backtesting.py # Tests for backtesting capabilities
+│   └── test_database.py    # Tests for database operations
 ├── examples/               # Example scripts
 │   └── backtesting_example.py  # Demonstration of backtesting capabilities
 ├── data/                   # Directory for storing market data
 ├── logs/                   # Trading and backtesting logs
+├── order_logs/             # Logs of executed orders
 ├── requirements.txt        # List of dependencies
 ├── .env                    # Environment variables (API keys, etc.)
 └── README.md               # Project documentation (this file)
@@ -92,7 +98,7 @@ trading_bot/
 
 ### Running the Bot
 
-Start the bot (for paper trading) by running either:
+Start the bot (for paper trading) by running:
 
 ```bash
 # Method 1: Using the run_bot.py script
@@ -213,7 +219,7 @@ See the `examples/backtesting_example.py` file for comprehensive examples of the
 
 ### Running Tests
 
-The project uses pytest for unit testing. To run the tests:
+The project uses pytest for unit testing with a focus on high code coverage. To run the tests:
 
 ```bash
 # Run all tests
@@ -230,13 +236,19 @@ python -m pytest tests/test_llm_manager.py::test_make_rule_based_decision
 
 # Generate test coverage report
 python -m pytest --cov=bot tests/
+
+# Generate coverage for a specific module
+python -m pytest tests/test_binance_api.py --cov=bot.binance_api
 ```
 
 Test categories:
-- API tests: Tests for Binance API interactions
-- Strategy tests: Tests for trading strategy logic
-- LLM tests: Tests for LLM integration and decision making
-- Backtesting tests: Tests for the backtesting engine functionality
+- **API tests:** Comprehensive tests for Binance API interactions, including error handling, time synchronization, and edge cases
+- **Order Manager tests:** Tests for order execution, tracking, and management functionality
+- **Main Module tests:** Tests for the main trading loop with proper mocking of dependencies
+- **Strategy tests:** Tests for trading strategy logic
+- **LLM tests:** Tests for LLM integration and decision making
+- **Backtesting tests:** Tests for the backtesting engine functionality
+- **Database tests:** Tests for database operations and data persistence
 
 ## Future Improvements
 

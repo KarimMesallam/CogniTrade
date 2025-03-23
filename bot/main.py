@@ -7,6 +7,7 @@ from bot.strategy import simple_signal, technical_analysis_signal
 from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
 from bot.llm_manager import get_decision_from_llm, log_decision_with_context
 from bot.order_manager import OrderManager
+from bot.db_integration import DatabaseIntegration
 
 # Configure logging
 logging.basicConfig(
@@ -42,6 +43,19 @@ def initialize_bot():
         if not symbol_info:
             logger.error(f"Symbol {SYMBOL} not found or not available for trading")
             return False
+        
+        # Initialize database
+        try:
+            db = DatabaseIntegration()
+            db.add_system_alert(
+                message=f"Bot initialized for trading {SYMBOL} on Binance {'Testnet' if TESTNET else 'Live'}",
+                alert_type="info",
+                severity="low"
+            )
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Error initializing database: {e}")
+            logger.warning("Continuing without database support")
         
         logger.info(f"Bot initialized successfully for trading {SYMBOL}")
         return True
@@ -80,7 +94,7 @@ def get_market_data(symbol, interval='1m'):
         logger.error(f"Unexpected error fetching market data: {e}")
         return None
 
-def execute_trade(signals, llm_decision, symbol, market_data, order_manager):
+def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_integration=None):
     """Execute a trade based on signals and decisions."""
     try:
         # Get consensus from signals
@@ -90,6 +104,19 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager):
         # Log the decision with full context for later analysis
         log_decision_with_context(llm_decision, signals, market_data)
         
+        # Save signals to database if available
+        signal_ids = {}
+        if db_integration:
+            for strategy_name, signal_value in signals.items():
+                timeframe = '1m' if strategy_name == 'simple' else '1h'
+                signal_ids[strategy_name] = db_integration.save_signal(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    strategy=strategy_name,
+                    signal=signal_value,
+                    llm_decision=llm_decision
+                )
+        
         # Only execute if both signals agree
         if signal_consensus == "BUY" and llm_decision == "BUY":
             logger.info(f"Executing BUY for {symbol}")
@@ -97,6 +124,13 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager):
             order = order_manager.execute_market_buy(quote_amount=10.0)  # 10 USDT for example
             if order:
                 logger.info(f"Buy order executed successfully: {order['orderId']}")
+                
+                # Link signal to trade in database if available
+                if db_integration and 'trade_id' in order and signal_ids:
+                    for signal_id in signal_ids.values():
+                        if signal_id > 0:
+                            db_integration.link_signal_to_trade(signal_id, order['trade_id'])
+                
                 return order
             else:
                 logger.warning("Buy order execution failed")
@@ -111,6 +145,13 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager):
                 order = order_manager.execute_market_sell(quantity)
                 if order:
                     logger.info(f"Sell order executed successfully: {order['orderId']}")
+                    
+                    # Link signal to trade in database if available
+                    if db_integration and 'trade_id' in order and signal_ids:
+                        for signal_id in signal_ids.values():
+                            if signal_id > 0:
+                                db_integration.link_signal_to_trade(signal_id, order['trade_id'])
+                    
                     return order
                 else:
                     logger.warning("Sell order execution failed")
@@ -153,8 +194,25 @@ def trading_loop():
     """Main trading loop."""
     logger.info("Starting trading loop...")
     
+    # Initialize database integration
+    db_integration = None
+    try:
+        db_integration = DatabaseIntegration()
+        logger.info("Database integration initialized for trading loop")
+        
+        # Log start of trading session
+        db_integration.add_system_alert(
+            message="Trading session started",
+            alert_type="info",
+            severity="low",
+            data={"symbol": SYMBOL, "testnet": TESTNET}
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize database integration: {e}")
+        logger.warning("Continuing without database support")
+    
     # Initialize order manager
-    order_manager = OrderManager(SYMBOL, risk_percentage=1.0)
+    order_manager = OrderManager(SYMBOL, risk_percentage=1.0, use_database=db_integration is not None)
     logger.info(f"Order manager initialized for {SYMBOL}")
     
     # Track consecutive errors to implement exponential backoff
@@ -171,6 +229,10 @@ def trading_loop():
             market_data = get_market_data(SYMBOL)
             if not market_data:
                 raise Exception("Failed to get market data")
+            
+            # Save market data to database if available
+            if db_integration:
+                db_integration.save_market_data(market_data, SYMBOL, '1m')
             
             # Generate trading signals from different strategies
             signals = {
@@ -193,7 +255,7 @@ def trading_loop():
             logger.info(f"LLM decision: {llm_decision}")
             
             # Execute trade if appropriate
-            order = execute_trade(signals, llm_decision, SYMBOL, market_data, order_manager)
+            order = execute_trade(signals, llm_decision, SYMBOL, market_data, order_manager, db_integration)
             
             # Reset error counter on success
             consecutive_errors = 0
@@ -207,6 +269,16 @@ def trading_loop():
             backoff_time = min(60 * 2 ** consecutive_errors, 3600)  # Exponential backoff, max 1 hour
             logger.error(f"Binance API error: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
+            
+            # Log error to database if available
+            if db_integration:
+                db_integration.add_system_alert(
+                    message=f"Binance API error: {str(e)}",
+                    alert_type="error",
+                    severity="medium",
+                    data={"error_type": "api_error", "retry_in": backoff_time}
+                )
+            
             time.sleep(backoff_time)
             
         except Exception as e:
@@ -214,6 +286,16 @@ def trading_loop():
             backoff_time = min(60 * 2 ** consecutive_errors, 3600)
             logger.error(f"Unexpected error in trading loop: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
+            
+            # Log error to database if available
+            if db_integration:
+                db_integration.add_system_alert(
+                    message=f"Unexpected error in trading loop: {str(e)}",
+                    alert_type="error",
+                    severity="high",
+                    data={"error_type": "system_error", "retry_in": backoff_time}
+                )
+            
             time.sleep(backoff_time)
 
 if __name__ == '__main__':
@@ -226,7 +308,30 @@ if __name__ == '__main__':
             trading_loop()
         except KeyboardInterrupt:
             logger.info("Bot stopped by user")
+            
+            # Log shutdown to database
+            try:
+                db = DatabaseIntegration()
+                db.add_system_alert(
+                    message="Bot shutdown initiated by user",
+                    alert_type="info",
+                    severity="low"
+                )
+            except:
+                pass
         except Exception as e:
             logger.critical(f"Critical error: {e}")
+            
+            # Log critical error to database
+            try:
+                db = DatabaseIntegration()
+                db.add_system_alert(
+                    message=f"Critical error: {str(e)}",
+                    alert_type="error",
+                    severity="critical",
+                    data={"error_type": "critical_system_error"}
+                )
+            except:
+                pass
     else:
         logger.critical("Failed to initialize bot. Exiting.")

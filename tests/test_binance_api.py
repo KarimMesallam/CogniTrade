@@ -1,7 +1,9 @@
 import os
 import sys
 import pytest
-from unittest.mock import patch, MagicMock
+import time
+from unittest.mock import patch, MagicMock, call
+from binance.exceptions import BinanceAPIException, BinanceRequestException
 from dotenv import load_dotenv
 
 # Add the parent directory to the path to allow imports
@@ -14,7 +16,7 @@ from bot.binance_api import (
     synchronize_time, get_recent_closes, get_account_balance,
     get_symbol_info, calculate_order_quantity, place_market_buy,
     place_market_sell, place_limit_buy, place_limit_sell,
-    get_open_orders, cancel_order, get_order_status
+    get_open_orders, cancel_order, get_order_status, time_offset
 )
 from bot.config import SYMBOL
 
@@ -315,3 +317,103 @@ def test_get_order_status(mock_client):
     mock_client.get_order.side_effect = Exception("Test error")
     order = get_order_status(SYMBOL, 123456)
     assert order is None
+
+# New tests for specific Binance exceptions and edge cases
+
+@patch('bot.binance_api.client')
+def test_binance_api_exception_handling(mock_client):
+    """Test handling of specific Binance API exceptions."""
+    # Test BinanceAPIException in get_account_balance
+    mock_client.get_account.side_effect = BinanceAPIException(
+        status_code=400,
+        text='{"code": -1022, "msg": "Signature for this request is not valid."}',
+        response=None
+    )
+    result = get_account_balance()
+    assert result is None
+    
+    # Test BinanceRequestException in get_symbol_info
+    mock_client.get_symbol_info.side_effect = BinanceRequestException(message="Connection error")
+    result = get_symbol_info(SYMBOL)
+    assert result is None
+    
+    # Test with real Binance exceptions in order operations
+    api_exception = BinanceAPIException(
+        status_code=400,
+        text='{"code": -2010, "msg": "Account has insufficient balance for requested action."}',
+        response=None
+    )
+    
+    # Test place_market_buy with API exception
+    mock_client.order_market_buy.side_effect = api_exception
+    result = place_market_buy(SYMBOL, 0.001)
+    assert result is None
+    
+    # Test place_market_sell with API exception
+    mock_client.order_market_sell.side_effect = api_exception
+    result = place_market_sell(SYMBOL, 0.001)
+    assert result is None
+    
+    # Test cancel_order with API exception
+    mock_client.cancel_order.side_effect = api_exception
+    result = cancel_order(SYMBOL, 123456)
+    assert result is None
+
+@patch('bot.binance_api.client')
+@patch('bot.binance_api.time')
+def test_synchronize_time_detailed(mock_time, mock_client):
+    """Test time synchronization in detail."""
+    # Test successful time synchronization
+    mock_time.time.return_value = 1617000000.0  # Mock local time
+    mock_client.get_server_time.return_value = {"serverTime": 1617000100000}  # Server time with 100s difference
+    
+    offset = synchronize_time()
+    assert offset == 100000  # 100s difference in milliseconds
+    assert mock_client.timestamp_offset == 100000
+    
+    # Test exception handling in synchronize_time
+    mock_client.get_server_time.side_effect = BinanceAPIException(
+        status_code=500,
+        text='{"code": -1000, "msg": "An unknown error occurred while processing the request."}',
+        response=None
+    )
+    offset = synchronize_time()
+    assert offset == 0  # Should return 0 on error
+    
+    # Test with a connection error
+    mock_client.get_server_time.side_effect = BinanceRequestException(message="Connection refused")
+    offset = synchronize_time()
+    assert offset == 0  # Should return 0 on connection error
+
+@patch('bot.binance_api.client')
+def test_edge_cases(mock_client):
+    """Test edge cases and additional error scenarios."""
+    # Test get_recent_closes with API exception
+    mock_client.get_klines.side_effect = BinanceAPIException(
+        status_code=400,
+        text='{"code": -1121, "msg": "Invalid symbol."}',
+        response=None
+    )
+    result = get_recent_closes("INVALID", "1h")
+    assert result == []
+    
+    # Test get_account_balance with malformed response
+    mock_client.get_account.return_value = {}  # Missing 'balances' key
+    result = get_account_balance()
+    assert result is None
+    
+    mock_client.get_account.return_value = {'balances': []}  # Empty balances
+    result = get_account_balance('BTC')
+    assert result is None
+    
+    # Test calculate_order_quantity with invalid inputs
+    # Test when price ticker is missing
+    mock_client.get_symbol_ticker.return_value = {}
+    result = calculate_order_quantity(SYMBOL, 100.0)
+    assert result is None
+    
+    # Test with malformed symbol info
+    mock_client.get_symbol_ticker.return_value = {"symbol": SYMBOL, "price": "50000.00"}
+    mock_client.get_symbol_info.return_value = None
+    result = calculate_order_quantity(SYMBOL, 100.0)
+    assert result is None
