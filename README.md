@@ -19,6 +19,7 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Strategy Module:** Contains logic for trading signals (e.g., based on technical indicators) with an abstract layer for future enhancements.
 - **LLM Manager:** A placeholder module to later integrate multiple language models for trade signal orchestration.
 - **Order Management:** Robust order execution system with proper error handling and logging.
+- **Database System:** Comprehensive data storage solution with database integration layer for saving signals, trades, market data, and system alerts.
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
 - **Testing Suite:** Comprehensive unit and integration tests with high coverage metrics for all system components.
 - **Backtesting System:** Sophisticated backtesting capabilities with:
@@ -42,6 +43,7 @@ trading_bot/
 │   ├── llm_manager.py      # LLM orchestration placeholder (for decision support)
 │   ├── order_manager.py    # Module for order execution and logging
 │   ├── database.py         # Database management for storing trading data and analytics
+│   ├── db_integration.py   # Integration layer between trading system and database
 │   ├── backtesting.py      # Advanced backtesting engine for strategy development
 │   └── main.py             # Main entry point for running the bot
 ├── tests/                  # Comprehensive tests (pytest)
@@ -51,7 +53,11 @@ trading_bot/
 │   ├── test_strategy.py    # Tests for trading strategies
 │   ├── test_llm_manager.py # Tests for LLM integration
 │   ├── test_backtesting.py # Tests for backtesting capabilities
-│   └── test_database.py    # Tests for database operations
+│   ├── test_database.py    # Tests for database operations
+│   ├── test_db_integration.py # Tests for database integration layer
+│   ├── test_main_db_integration.py # Integration tests for main and database
+│   ├── conftests.py        # Pytest configuration and fixtures
+│   └── __init__.py         # Test package initialization
 ├── examples/               # Example scripts
 │   └── backtesting_example.py  # Demonstration of backtesting capabilities
 ├── data/                   # Directory for storing market data
@@ -249,6 +255,8 @@ Test categories:
 - **LLM tests:** Tests for LLM integration and decision making
 - **Backtesting tests:** Tests for the backtesting engine functionality
 - **Database tests:** Tests for database operations and data persistence
+- **Database Integration tests:** Tests for the database integration layer that connects trading functions with data storage
+- **Integration tests:** Tests for the integration between main trading functions and the database system
 
 ## Future Improvements
 
