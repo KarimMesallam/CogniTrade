@@ -205,3 +205,135 @@
 2025-03-24 11:17:14,028 - trading_bot - INFO - Trade a7257a6d-8bc6-4694-beaa-da8581bddb46 inserted into database
 2025-03-24 11:17:14,028 - trading_bot - INFO - Completed BTCUSDT Bollinger_Bands: 1.14% return
 2025-03-24 11:17:14,033 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_report.txt
+2025-03-24 12:18:41,739 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:41,740 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:41,743 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:18:41,744 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:18:41,744 - trading_bot - INFO - Running backtest 1/3: BTCUSDT with SMA_Crossover
+2025-03-24 12:18:41,745 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:41,746 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:18:41,747 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:18:41,751 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:18:41,755 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:18:42,079 - trading_bot - INFO - Alert created with ID: 51
+2025-03-24 12:18:42,079 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:18:42,086 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_SMA_Crossover_2025-01-23_2025-03-24.csv
+2025-03-24 12:18:42,092 - trading_bot - INFO - Performance metrics stored for SMA_Crossover on BTCUSDT
+2025-03-24 12:18:42,097 - trading_bot - INFO - Trade ee6e2df2-4d95-4557-88bc-4bc195813326 inserted into database
+2025-03-24 12:18:42,102 - trading_bot - INFO - Trade 7b242513-e96e-4885-ab54-16df1195f24c inserted into database
+2025-03-24 12:18:42,108 - trading_bot - INFO - Trade 99fa92fe-2b73-414d-8cb6-639761b9871d inserted into database
+2025-03-24 12:18:42,113 - trading_bot - INFO - Trade 6550b7fe-62d8-4671-9cee-5ba07d088818 inserted into database
+2025-03-24 12:18:42,119 - trading_bot - INFO - Trade 9f169d0f-1ce3-4355-a4cd-3f35a34d0995 inserted into database
+2025-03-24 12:18:42,124 - trading_bot - INFO - Trade 45d0ad75-d5a8-4cc6-943c-1e1309ed302b inserted into database
+2025-03-24 12:18:42,129 - trading_bot - INFO - Trade 09273927-84d3-468e-be3b-982ea856d666 inserted into database
+2025-03-24 12:18:42,134 - trading_bot - INFO - Trade 3f6ce629-8fa3-40e7-ab6a-4d65e751d410 inserted into database
+2025-03-24 12:18:42,140 - trading_bot - INFO - Trade fe0a8983-2bdb-4c5b-9725-41bc751cdf83 inserted into database
+2025-03-24 12:18:42,140 - trading_bot - INFO - Completed BTCUSDT SMA_Crossover: 1.43% return
+2025-03-24 12:18:42,140 - trading_bot - INFO - Running backtest 2/3: BTCUSDT with RSI
+2025-03-24 12:18:42,140 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:42,143 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:18:42,145 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:18:42,149 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:18:42,152 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:18:42,280 - trading_bot - INFO - Alert created with ID: 52
+2025-03-24 12:18:42,281 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:18:42,284 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_RSI_2025-01-23_2025-03-24.csv
+2025-03-24 12:18:42,289 - trading_bot - INFO - Performance metrics stored for RSI on BTCUSDT
+2025-03-24 12:18:42,296 - trading_bot - INFO - Trade e8ccfc79-c985-4007-ae61-eba1299bd379 inserted into database
+2025-03-24 12:18:42,301 - trading_bot - INFO - Trade e406a8f9-b379-4472-b4d6-6df69d697ea2 inserted into database
+2025-03-24 12:18:42,301 - trading_bot - INFO - Completed BTCUSDT RSI: 3.88% return
+2025-03-24 12:18:42,301 - trading_bot - INFO - Running backtest 3/3: BTCUSDT with Bollinger_Bands
+2025-03-24 12:18:42,301 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:42,304 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:18:42,305 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:18:42,308 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:18:42,311 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:18:42,448 - trading_bot - INFO - Alert created with ID: 53
+2025-03-24 12:18:42,449 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:18:42,455 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_Bollinger_Bands_2025-01-23_2025-03-24.csv
+2025-03-24 12:18:42,460 - trading_bot - INFO - Performance metrics stored for Bollinger_Bands on BTCUSDT
+2025-03-24 12:18:42,465 - trading_bot - INFO - Trade d502bf67-b702-418a-8526-48af7fb0cb97 inserted into database
+2025-03-24 12:18:42,471 - trading_bot - INFO - Trade c564b039-bb2f-485b-8c2a-a00d79502848 inserted into database
+2025-03-24 12:18:42,476 - trading_bot - INFO - Trade d657226c-f792-4f41-9aaf-bf40411fefd3 inserted into database
+2025-03-24 12:18:42,481 - trading_bot - INFO - Trade 7d237aa7-cae3-4bef-b13f-c76648d3f945 inserted into database
+2025-03-24 12:18:42,487 - trading_bot - INFO - Trade 2e53b08d-4444-4893-9f14-fc44a1502f58 inserted into database
+2025-03-24 12:18:42,494 - trading_bot - INFO - Trade e174fb32-a435-4f1e-8aec-dc59b09ed503 inserted into database
+2025-03-24 12:18:42,499 - trading_bot - INFO - Trade 9cd9e4ed-9d4b-48fb-b29e-f535e8451095 inserted into database
+2025-03-24 12:18:42,504 - trading_bot - INFO - Trade 5a99267d-2876-42dc-b518-1eb250995ef6 inserted into database
+2025-03-24 12:18:42,509 - trading_bot - INFO - Trade 48bc278d-500c-43e7-b811-aa93d55a235f inserted into database
+2025-03-24 12:18:42,514 - trading_bot - INFO - Trade 10836bbd-ebdd-4cf5-aa4a-0b9d592ff24b inserted into database
+2025-03-24 12:18:42,514 - trading_bot - INFO - Completed BTCUSDT Bollinger_Bands: 1.14% return
+2025-03-24 12:18:42,522 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_report.txt
+2025-03-24 12:21:40,723 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:21:40,723 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:21:40,731 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:21:40,732 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:21:40,733 - trading_bot - INFO - Running backtest 1/3: BTCUSDT with SMA_Crossover
+2025-03-24 12:21:40,733 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:21:40,734 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:21:40,736 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:21:40,742 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:21:40,744 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:21:41,042 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_1h_4h_20250324_122141_trades.csv
+2025-03-24 12:21:41,804 - trading_bot - INFO - Saved backtest plot to logs/BTCUSDT_1h_4h_20250324_122141_chart.png
+2025-03-24 12:21:41,808 - trading_bot - INFO - Generated comprehensive backtest report: logs/BTCUSDT_1h_4h_20250324_122141_report.html
+2025-03-24 12:21:41,808 - trading_bot - INFO - Backtest report generated: logs/BTCUSDT_1h_4h_20250324_122141_report.html
+2025-03-24 12:21:41,814 - trading_bot - INFO - Alert created with ID: 54
+2025-03-24 12:21:41,814 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:21:41,821 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_SMA_Crossover_2025-01-23_2025-03-24.csv
+2025-03-24 12:21:41,826 - trading_bot - INFO - Performance metrics stored for SMA_Crossover on BTCUSDT
+2025-03-24 12:21:41,831 - trading_bot - INFO - Trade 4ad8d194-c671-4694-8b74-93738c012995 inserted into database
+2025-03-24 12:21:41,836 - trading_bot - INFO - Trade 7e7a4f81-0ca7-4fe3-aff3-1131d2e636b2 inserted into database
+2025-03-24 12:21:41,843 - trading_bot - INFO - Trade 36757036-2c6c-4cdd-bd31-5c4c24429e4b inserted into database
+2025-03-24 12:21:41,851 - trading_bot - INFO - Trade c0464083-90c9-4cab-ab59-95e708c5f371 inserted into database
+2025-03-24 12:21:41,856 - trading_bot - INFO - Trade 46d3b366-2ee3-4762-8aea-0fa3115bd671 inserted into database
+2025-03-24 12:21:41,862 - trading_bot - INFO - Trade 6669def9-689f-4137-8ee5-a030e6295834 inserted into database
+2025-03-24 12:21:41,867 - trading_bot - INFO - Trade 62880f72-1f7f-4b68-a9a4-1b571072611d inserted into database
+2025-03-24 12:21:41,873 - trading_bot - INFO - Trade ef008040-e022-46b0-b989-03c8bc0d3333 inserted into database
+2025-03-24 12:21:41,878 - trading_bot - INFO - Trade 45eeea5b-eb1a-44b5-80f6-9dc8baf56caf inserted into database
+2025-03-24 12:21:41,878 - trading_bot - INFO - Completed BTCUSDT SMA_Crossover: 1.43% return
+2025-03-24 12:21:41,878 - trading_bot - INFO - Running backtest 2/3: BTCUSDT with RSI
+2025-03-24 12:21:41,879 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:21:41,882 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:21:41,883 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:21:41,887 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:21:41,890 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:21:42,020 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_1h_4h_20250324_122142_trades.csv
+2025-03-24 12:21:42,638 - trading_bot - INFO - Saved backtest plot to logs/BTCUSDT_1h_4h_20250324_122142_chart.png
+2025-03-24 12:21:42,641 - trading_bot - INFO - Generated comprehensive backtest report: logs/BTCUSDT_1h_4h_20250324_122142_report.html
+2025-03-24 12:21:42,642 - trading_bot - INFO - Backtest report generated: logs/BTCUSDT_1h_4h_20250324_122142_report.html
+2025-03-24 12:21:42,647 - trading_bot - INFO - Alert created with ID: 55
+2025-03-24 12:21:42,647 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:21:42,650 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_RSI_2025-01-23_2025-03-24.csv
+2025-03-24 12:21:42,656 - trading_bot - INFO - Performance metrics stored for RSI on BTCUSDT
+2025-03-24 12:21:42,662 - trading_bot - INFO - Trade c3419672-bb5e-4092-bd79-b2098c536c6a inserted into database
+2025-03-24 12:21:42,667 - trading_bot - INFO - Trade 3ef1f5a6-f0f4-44eb-bcf9-531436a1bfab inserted into database
+2025-03-24 12:21:42,667 - trading_bot - INFO - Completed BTCUSDT RSI: 3.88% return
+2025-03-24 12:21:42,667 - trading_bot - INFO - Running backtest 3/3: BTCUSDT with Bollinger_Bands
+2025-03-24 12:21:42,668 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:21:42,670 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:21:42,672 - trading_bot - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 12:21:42,676 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:21:42,679 - trading_bot - INFO - Added indicators to 4h data
+2025-03-24 12:21:42,818 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_1h_4h_20250324_122142_trades.csv
+2025-03-24 12:21:43,509 - trading_bot - INFO - Saved backtest plot to logs/BTCUSDT_1h_4h_20250324_122142_chart.png
+2025-03-24 12:21:43,512 - trading_bot - INFO - Generated comprehensive backtest report: logs/BTCUSDT_1h_4h_20250324_122142_report.html
+2025-03-24 12:21:43,512 - trading_bot - INFO - Backtest report generated: logs/BTCUSDT_1h_4h_20250324_122142_report.html
+2025-03-24 12:21:43,518 - trading_bot - INFO - Alert created with ID: 56
+2025-03-24 12:21:43,518 - trading_bot - WARNING - Backtest generated 1 alerts
+2025-03-24 12:21:43,523 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_Bollinger_Bands_2025-01-23_2025-03-24.csv
+2025-03-24 12:21:43,529 - trading_bot - INFO - Performance metrics stored for Bollinger_Bands on BTCUSDT
+2025-03-24 12:21:43,534 - trading_bot - INFO - Trade b78aa6e6-abc8-4514-b6f8-4f422589297d inserted into database
+2025-03-24 12:21:43,539 - trading_bot - INFO - Trade e6d65a7e-a9f8-432d-9212-577017e5bae0 inserted into database
+2025-03-24 12:21:43,544 - trading_bot - INFO - Trade 027379f5-7735-42e4-8f8b-74700309d6be inserted into database
+2025-03-24 12:21:43,549 - trading_bot - INFO - Trade a78d2ca6-4e02-4659-9df6-42a854a69149 inserted into database
+2025-03-24 12:21:43,554 - trading_bot - INFO - Trade 01ce386e-f557-4ed8-abc6-f051bc904274 inserted into database
+2025-03-24 12:21:43,560 - trading_bot - INFO - Trade c5c19cad-6887-4080-b1ef-be1539329e3a inserted into database
+2025-03-24 12:21:43,565 - trading_bot - INFO - Trade 3310a477-a184-401e-9cd2-58c433018957 inserted into database
+2025-03-24 12:21:43,570 - trading_bot - INFO - Trade 08aa0448-0461-4245-90f8-8f32a76070c3 inserted into database
+2025-03-24 12:21:43,575 - trading_bot - INFO - Trade 539f929f-96b9-4983-923d-3406f7bf17ae inserted into database
+2025-03-24 12:21:43,580 - trading_bot - INFO - Trade 6834bc02-aa7f-4ac3-9c4f-35621e2f512d inserted into database
+2025-03-24 12:21:43,580 - trading_bot - INFO - Completed BTCUSDT Bollinger_Bands: 1.14% return
+2025-03-24 12:21:44,152 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_20250324_122143_text.txt
+2025-03-24 12:21:44,152 - trading_bot - INFO - Generated comprehensive comparison report: logs/strategy_comparison_20250324_122143_report.html
+2025-03-24 12:21:44,157 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_report.txt

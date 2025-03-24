@@ -38,3 +38,38 @@
 2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
 2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
 2025-03-24 11:06:54,681 - trading_bot - INFO - Alert created with ID: 28
+2025-03-24 12:18:20,961 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:18:20,967 - trading_bot - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 12:18:20,973 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 12:18:20,973 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,974 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,974 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,974 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,975 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,975 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,975 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,976 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,976 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,976 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,976 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,977 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,977 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,977 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,977 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,978 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,978 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,978 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:20,979 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 12:18:21,225 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_sma_crossover_2025-01-23_2025-03-24.csv
+2025-03-24 12:18:21,981 - trading_bot - INFO - Saved backtest plot to logs/BTCUSDT_sma_crossover_2025-01-23_2025-03-24.png
+2025-03-24 12:18:21,988 - trading_bot - INFO - Performance metrics stored for SMA_Crossover on BTCUSDT
+2025-03-24 12:18:21,993 - trading_bot - INFO - Trade c92a3434-2fca-4482-b51f-c51401963cb4 inserted into database
+2025-03-24 12:18:21,998 - trading_bot - INFO - Trade 5247eac2-084c-4be0-ae95-3b801b3e03e5 inserted into database
+2025-03-24 12:18:22,003 - trading_bot - INFO - Trade 499abd80-b992-499c-89ac-51ce5a986871 inserted into database
+2025-03-24 12:18:22,008 - trading_bot - INFO - Trade 17dbe7a7-94fd-4ecf-bd40-9d3e9fab5c05 inserted into database
+2025-03-24 12:18:22,015 - trading_bot - INFO - Trade 41e3d7ad-5b6e-442b-aa4b-1a8f3bf4502e inserted into database
+2025-03-24 12:18:22,020 - trading_bot - INFO - Trade f62b966b-64fa-4c4e-8654-65c60d52336d inserted into database
+2025-03-24 12:18:22,025 - trading_bot - INFO - Trade b6e40627-2c29-4d7c-9f09-9c08998079b8 inserted into database
+2025-03-24 12:18:22,031 - trading_bot - INFO - Trade 38265ddb-0ec9-4651-a170-b16f685040d0 inserted into database
+2025-03-24 12:18:22,035 - trading_bot - INFO - Trade 2bc98686-3969-445a-a762-53b4df9123bc inserted into database
+2025-03-24 12:18:22,040 - trading_bot - INFO - Alert created with ID: 50

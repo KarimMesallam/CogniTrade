@@ -5,7 +5,7 @@ import logging
 import uuid
 import json
 import os
-from typing import Dict, List, Any, Optional, Union, Callable
+from typing import Dict, List, Any, Optional, Union, Callable, Iterable
 from datetime import datetime
 from bot.database import Database
 from bot.strategy import calculate_rsi, calculate_bollinger_bands, calculate_macd
@@ -236,8 +236,19 @@ class BacktestEngine:
         if self.position_size > 0:
             self._execute_trade('SELL', primary_data['timestamp'].iloc[-1], primary_data['close'].iloc[-1], self.position_size)
         
-        # Calculate and return backtest results
-        return self._calculate_results()
+        # Calculate results
+        results = self._calculate_results()
+        
+        # Set strategy name for reporting purposes
+        strategy_name = getattr(strategy_func, '__name__', 'Custom_Strategy')
+        results['strategy_name'] = strategy_name
+        
+        # Generate HTML report for the backtest automatically
+        report_path = self.generate_report(results)
+        if report_path:
+            logger.info(f"Backtest report generated: {report_path}")
+        
+        return results
     
     def _process_signal(self, signal: str, timestamp: datetime, price: float):
         """
@@ -1304,8 +1315,15 @@ class BacktestRunner:
             all_results[symbol] = symbol_results
         
         self.results = all_results
+        
+        # Generate comparison report and visualizations
+        comparison_df = self.compare_strategies()
+        
+        # Create comprehensive comparison report
+        self.generate_comparison_report(symbols, strategies.keys(), start_date, end_date)
+        
         return all_results
-    
+        
     def compare_strategies(self) -> pd.DataFrame:
         """
         Compare the performance of different strategies across symbols
@@ -1344,6 +1362,217 @@ class BacktestRunner:
             comparison_df = comparison_df.sort_values(['symbol', 'overall_rank'])
         
         return comparison_df
+        
+    def generate_comparison_report(self, symbols: List[str], strategies: Iterable[str],
+                                  start_date: str, end_date: str) -> str:
+        """
+        Generate a comprehensive HTML report comparing all backtest strategies
+        
+        Args:
+            symbols: List of symbols that were tested
+            strategies: List of strategy names
+            start_date: Start date of the backtests
+            end_date: End date of the backtests
+            
+        Returns:
+            Path to the generated HTML report
+        """
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.gridspec import GridSpec
+            
+            # Create directory if it doesn't exist
+            os.makedirs('logs', exist_ok=True)
+            
+            # Generate report filename
+            date_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+            report_name = f"strategy_comparison_{date_str}"
+            html_path = f"logs/{report_name}_report.html"
+            
+            # Get comparison dataframe
+            comparison_df = self.compare_strategies()
+            
+            # Calculate summary statistics
+            best_strategy = comparison_df.loc[comparison_df['overall_rank'] == comparison_df['overall_rank'].min()]
+            total_backtests = len(comparison_df)
+            
+            # Generate comparison visualizations
+            fig = plt.figure(figsize=(15, 10))
+            gs = GridSpec(2, 2, figure=fig)
+            
+            # 1. Returns comparison
+            ax1 = fig.add_subplot(gs[0, 0])
+            returns_df = comparison_df.pivot(index='symbol', columns='strategy', values='total_return_pct')
+            returns_df.plot(kind='bar', ax=ax1)
+            ax1.set_title('Strategy Returns by Symbol')
+            ax1.set_ylabel('Return (%)')
+            ax1.grid(axis='y')
+            
+            # 2. Risk-adjusted returns
+            ax2 = fig.add_subplot(gs[0, 1])
+            sharpe_df = comparison_df.pivot(index='symbol', columns='strategy', values='sharpe_ratio')
+            sharpe_df.plot(kind='bar', ax=ax2)
+            ax2.set_title('Risk-Adjusted Returns by Symbol')
+            ax2.set_ylabel('Sharpe Ratio')
+            ax2.grid(axis='y')
+            
+            # 3. Win rates
+            ax3 = fig.add_subplot(gs[1, 0])
+            winrate_df = comparison_df.pivot(index='symbol', columns='strategy', values='win_rate')
+            winrate_df.plot(kind='bar', ax=ax3)
+            ax3.set_title('Win Rates by Symbol')
+            ax3.set_ylabel('Win Rate (%)')
+            ax3.grid(axis='y')
+            
+            # 4. Drawdowns
+            ax4 = fig.add_subplot(gs[1, 1])
+            dd_df = comparison_df.pivot(index='symbol', columns='strategy', values='max_drawdown')
+            dd_df.plot(kind='bar', ax=ax4)
+            ax4.set_title('Maximum Drawdowns by Symbol')
+            ax4.set_ylabel('Drawdown (%)')
+            ax4.grid(axis='y')
+            
+            plt.tight_layout()
+            
+            # Save visualization
+            chart_path = f"logs/{report_name}_chart.png"
+            plt.savefig(chart_path)
+            plt.close()
+            
+            # Generate summary text report (already implemented)
+            text_report = self.generate_summary_report(f"logs/{report_name}_text.txt")
+            
+            # Generate HTML content
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Strategy Comparison Report</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; color: #333; }}
+                    h1, h2, h3 {{ color: #2c3e50; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                    th, td {{ text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }}
+                    th {{ background-color: #f2f2f2; }}
+                    tr:hover {{ background-color: #f5f5f5; }}
+                    .positive {{ color: green; }}
+                    .negative {{ color: red; }}
+                    .chart-container {{ margin: 20px 0; text-align: center; }}
+                    .metrics-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }}
+                    .metric-card {{ background-color: #f9f9f9; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+                    .metric-value {{ font-size: 24px; font-weight: bold; margin: 10px 0; }}
+                    .section {{ margin-bottom: 30px; }}
+                    .pre-wrap {{ white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 5px; }}
+                </style>
+            </head>
+            <body>
+                <h1>Strategy Comparison Report</h1>
+                <p>
+                    <strong>Period:</strong> {start_date} to {end_date}<br>
+                    <strong>Symbols:</strong> {', '.join(symbols)}<br>
+                    <strong>Strategies:</strong> {', '.join(strategies)}<br>
+                    <strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                </p>
+                
+                <div class="section">
+                    <h2>Performance Comparison</h2>
+                    <div class="chart-container">
+                        <img src="{os.path.basename(chart_path)}" alt="Performance Comparison" style="max-width:100%;">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Strategy Rankings</h2>
+                    <table>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Symbol</th>
+                            <th>Strategy</th>
+                            <th>Return (%)</th>
+                            <th>Sharpe Ratio</th>
+                            <th>Win Rate (%)</th>
+                            <th>Max Drawdown (%)</th>
+                            <th>Total Trades</th>
+                        </tr>
+                        {self._generate_ranking_table_rows(comparison_df)}
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Summary Report</h2>
+                    <pre class="pre-wrap">{text_report}</pre>
+                </div>
+                
+                <div class="section">
+                    <h2>Individual Backtest Reports</h2>
+                    <p>Links to detailed reports for each strategy:</p>
+                    <ul>
+                        {self._generate_strategy_report_links()}
+                    </ul>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Write HTML to file
+            with open(html_path, 'w') as f:
+                f.write(html_content)
+            
+            logger.info(f"Generated comprehensive comparison report: {html_path}")
+            return html_path
+            
+        except Exception as e:
+            logger.error(f"Error generating comparison report: {e}", exc_info=True)
+            return ""
+            
+    def _generate_ranking_table_rows(self, comparison_df: pd.DataFrame) -> str:
+        """Generate HTML table rows for strategy rankings"""
+        if comparison_df.empty:
+            return "<tr><td colspan='8'>No data available</td></tr>"
+            
+        # Sort by overall rank
+        sorted_df = comparison_df.sort_values('overall_rank')
+        
+        rows = []
+        for idx, row in sorted_df.iterrows():
+            rank = idx + 1
+            return_class = 'positive' if row['total_return_pct'] > 0 else 'negative'
+            drawdown_class = 'negative'  # Drawdowns are always negative
+            
+            row_html = f"""
+            <tr>
+                <td>{rank}</td>
+                <td>{row['symbol']}</td>
+                <td>{row['strategy']}</td>
+                <td class="{return_class}">{row['total_return_pct']:.2f}%</td>
+                <td>{row['sharpe_ratio']:.2f}</td>
+                <td>{row['win_rate']:.2f}%</td>
+                <td class="{drawdown_class}">{row['max_drawdown']:.2f}%</td>
+                <td>{row['total_trades']}</td>
+            </tr>
+            """
+            rows.append(row_html)
+        
+        return "\n".join(rows)
+        
+    def _generate_strategy_report_links(self) -> str:
+        """Generate HTML links to individual strategy reports"""
+        links = []
+        
+        for symbol, strategies in self.results.items():
+            for strategy_name, data in strategies.items():
+                # Use timestamp to avoid overwriting files
+                date_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+                # This assumes reports were saved with a naming pattern
+                report_link = f"logs/{symbol}_{strategy_name}_{date_str}_report.html"
+                links.append(f'<li><a href="{report_link}">{strategy_name} on {symbol}</a></li>')
+        
+        if not links:
+            return "<li>No individual reports available</li>"
+            
+        return "\n".join(links)
         
     def generate_summary_report(self, output_file: str = None) -> str:
         """
