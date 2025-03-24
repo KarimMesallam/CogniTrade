@@ -19,7 +19,10 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Binance API Integration:** Uses the official Binance API (via python-binance) for fetching market data, placing orders, and managing accounts.
 - **Paper Trading Mode:** Safely test strategies on Binance Testnet before going live.
 - **Strategy Module:** Contains logic for trading signals (e.g., based on technical indicators) with an abstract layer for future enhancements.
-- **LLM Manager:** A placeholder module to later integrate multiple language models for trade signal orchestration.
+- **Advanced LLM Integration:** 
+  - DeepSeek R1 integration for reasoning-based trading decisions
+  - GPT-4o structured output processing for improved confidence estimation and reasoning
+  - Fallback to rule-based decisions when LLM services are unavailable
 - **Order Management:** Robust order execution system with proper error handling and logging.
 - **Database System:** Comprehensive data storage solution with database integration layer for saving signals, trades, market data, and system alerts.
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
@@ -473,3 +476,101 @@ Contributions are welcome! Feel free to fork the repository and submit pull requ
 ## License
 
 This project is licensed under the MIT License.
+
+## LLM Integration
+
+The trading bot integrates state-of-the-art LLMs to enhance trading decisions:
+
+### DeepSeek R1 and GPT-4o Integration
+
+The LLM Manager integrates two powerful language models to provide sophisticated trading analysis:
+
+1. **DeepSeek R1** - Used as the primary reasoning engine to analyze market data and trading signals. DeepSeek R1 processes market indicators, historical data, and technical signals to provide a detailed analysis and initial trading recommendation.
+
+2. **GPT-4o Structured Output** - Processes DeepSeek R1's output to produce a consistent, structured JSON response with:
+   - A decisive trading action (BUY, SELL, or HOLD)
+   - A confidence score (0.5-1.0) indicating certainty level
+   - A concise reasoning summary
+
+This dual-LLM approach leverages DeepSeek R1's reasoning capabilities while using GPT-4o's structured output feature to ensure consistent decision formats.
+
+### Configuration
+
+To use the LLM integration, set the following environment variables in your `.env` file:
+
+```ini
+# DeepSeek R1 API Configuration
+LLM_API_KEY=your_deepseek_api_key
+LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
+LLM_MODEL=deepseek-reasoner
+
+# OpenAI GPT-4o API Configuration
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o
+```
+
+If either API key is missing, the system will gracefully fall back to simpler decision methods.
+
+### How It Works
+
+1. Market data and technical indicators are collected and prepared
+2. DeepSeek R1 analyzes the data with its reasoning capabilities
+3. The response is cleaned (removing <think>...</think> tags if present)
+4. GPT-4o processes the cleaned analysis to extract a structured decision
+5. The decision is used to execute trades or provide recommendations
+
+This approach combines the strengths of both models:
+- DeepSeek R1's deep reasoning and trading analysis capabilities
+- GPT-4o's ability to produce consistent, structured outputs
+
+## Testing the LLM Integration
+
+To test the integration with DeepSeek R1 and GPT-4o, you can use the following approaches:
+
+### 1. Direct API Testing
+
+Test the direct API connection to both models:
+
+```bash
+# Test the DeepSeek R1 API
+python tests/test_api_direct.py
+
+# Test the complete workflow with both APIs
+python tests/test_llm_workflow.py
+```
+
+### 2. Running Unit Tests with Real APIs
+
+The unit tests are designed to work with both mock data and real API calls. To run the tests with real APIs:
+
+```bash
+# Using the helper script
+python tests/run_api_tests.py
+
+# Or directly with pytest
+USE_REAL_API=1 python -m pytest tests/test_llm_manager.py::test_real_api_integration -v
+```
+
+### 3. Environment Setup
+
+The tests require API keys to be set in the environment. You can:
+
+1. Create a `.env` file in the project root with:
+```
+LLM_API_KEY=your-deepseek-key
+LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
+LLM_MODEL=deepseek-reasoner
+OPENAI_API_KEY=your-openai-key
+OPENAI_MODEL=gpt-4o
+USE_REAL_API=1
+```
+
+2. Or set the environment variables directly:
+```bash
+export LLM_API_KEY=your-deepseek-key
+export LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
+export LLM_MODEL=deepseek-reasoner
+export OPENAI_API_KEY=your-openai-key
+export OPENAI_MODEL=gpt-4o
+export USE_REAL_API=1
+```
