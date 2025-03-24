@@ -108,8 +108,8 @@ trading_bot/
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/ai-trading-bot.git
-   cd ai-trading-bot
+   git clone git@github.com:KarimMesallam/TradingBot.git
+   cd TradingBot
    ```
 
 2. **Set Up a Virtual Environment:**
