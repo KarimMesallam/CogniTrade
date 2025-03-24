@@ -27,6 +27,9 @@ class Database:
         
         # Create tables if they don't exist
         self._initialize_database()
+        
+        # Force recreate the alerts table which might have schema issues
+        self._recreate_alerts_table()
     
     def _initialize_database(self):
         """Initialize database tables if they don't exist."""
@@ -144,6 +147,30 @@ class Database:
                 return True
         except Exception as e:
             logger.error(f"Error initializing database: {e}")
+            return False
+    
+    def _recreate_alerts_table(self):
+        """Force recreate the alerts table to fix any schema issues."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                # Drop and recreate alerts table
+                cursor.execute('DROP TABLE IF EXISTS alerts')
+                cursor.execute('''
+                CREATE TABLE alerts (
+                    alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    alert_type TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    acknowledged INTEGER DEFAULT 0,
+                    timestamp TEXT NOT NULL,
+                    related_data TEXT
+                )
+                ''')
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error recreating alerts table: {e}")
             return False
     
     def insert_trade(self, trade_data: Dict[str, Any]) -> bool:
