@@ -64,7 +64,9 @@ trading_bot/
 │   ├── conftests.py        # Pytest configuration and fixtures
 │   └── __init__.py         # Test package initialization
 ├── examples/               # Example scripts
-│   └── backtesting_example.py  # Demonstration of backtesting capabilities
+│   ├── simple_backtest.py      # Simple SMA crossover strategy example
+│   ├── rsi_backtest.py         # RSI strategy implementation example
+│   └── compare_strategies.py   # Tool for comparing strategy performance
 ├── data/                   # Directory for storing market data
 ├── logs/                   # Trading and backtesting logs
 ├── order_logs/             # Logs of executed orders
@@ -238,7 +240,7 @@ comparison = runner.compare_strategies()
 report = runner.generate_summary_report(output_file='backtest_report.txt')
 ```
 
-See the `examples/backtesting_example.py` file for comprehensive examples of the backtesting system.
+See the example scripts in the `examples/` directory for comprehensive demonstrations of the backtesting system.
 
 ### Running Tests
 
@@ -274,6 +276,70 @@ Test categories:
 - **Database tests:** Tests for database operations and data persistence
 - **Database Integration tests:** Tests for the database integration layer that connects trading functions with data storage
 - **Integration tests:** Tests for the integration between main trading functions and the database system
+
+## Examples
+
+### Simple Backtesting
+
+The project includes several example scripts to demonstrate backtesting capabilities:
+
+#### 1. Simple Moving Average Crossover (`examples/simple_backtest.py`)
+
+A basic example of backtesting a Simple Moving Average (SMA) crossover strategy:
+
+```bash
+# Run the simple SMA crossover backtest
+python examples/simple_backtest.py
+```
+
+This script:
+- Downloads historical data from Binance for the configured symbol
+- Implements a basic SMA crossover strategy (buy when short SMA crosses above long SMA, sell when it crosses below)
+- Runs a full backtest with position sizing and commission calculation
+- Generates trade logs and performance visualization
+- Calculates and displays performance metrics
+
+#### 2. RSI Strategy Backtest (`examples/rsi_backtest.py`)
+
+A more advanced example using the Relative Strength Index (RSI) indicator:
+
+```bash
+# Run the RSI strategy backtest
+python examples/rsi_backtest.py
+```
+
+This script:
+- Implements an RSI-based mean reversion strategy
+- Uses overbought/oversold conditions for trading signals
+- Visualizes RSI values alongside price and equity curves
+- Shows how to use a different timeframe (4h) for testing
+
+#### 3. Strategy Comparison (`examples/compare_strategies.py`)
+
+Compare and analyze different trading strategies:
+
+```bash
+# Compare multiple strategy backtest results
+python examples/compare_strategies.py
+```
+
+This script:
+- Loads trade logs from previous backtest runs
+- Analyzes and compares performance metrics across strategies
+- Generates side-by-side visual comparisons
+- Provides educational insights about each strategy type
+- Explains market conditions best suited for different strategies
+
+### Running Your Own Backtest
+
+You can create your own backtesting script by following the pattern in these examples:
+
+1. Download historical data from Binance
+2. Implement your strategy logic
+3. Run the backtest with appropriate parameters
+4. Analyze the results using metrics and visualizations
+
+Remember that backtesting results are not guarantees of future performance - they are meant to be educational and help refine your trading approach.
 
 ## Future Improvements
 

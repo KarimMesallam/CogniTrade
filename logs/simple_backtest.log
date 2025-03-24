@@ -1,0 +1,5 @@
+2025-03-24 10:39:40,745 - trading_bot - INFO - Database initialized successfully
+2025-03-24 10:39:40,747 - trading_bot - WARNING - No historical data for BTCUSDT at 1h timeframe
+2025-03-24 10:39:41,526 - trading_bot - INFO - Downloading market data for BTCUSDT at 1h timeframe
+2025-03-24 10:39:42,398 - trading_bot - ERROR - Error storing market data: table market_data has no column named close_time
+2025-03-24 10:39:42,398 - trading_bot - ERROR - Failed to store downloaded market data

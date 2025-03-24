@@ -1,0 +1,10 @@
+2025-03-24 10:37:26,096 - trading_bot - INFO - Database initialized successfully
+2025-03-24 10:37:26,102 - trading_bot - WARNING - No historical data for BTCUSDT at 1h timeframe
+2025-03-24 10:37:26,103 - trading_bot - WARNING - No historical data for BTCUSDT at 4h timeframe
+2025-03-24 10:37:26,103 - trading_bot - INFO - Downloading market data for backtesting...
+2025-03-24 10:37:26,104 - trading_bot - INFO - Downloading market data for BTCUSDT at 1h timeframe
+2025-03-24 10:37:24,209 - trading_bot - WARNING - No data returned for BTCUSDT at 1h timeframe
+2025-03-24 10:37:24,209 - trading_bot - INFO - Downloading market data for BTCUSDT at 4h timeframe
+2025-03-24 10:37:24,982 - trading_bot - WARNING - No data returned for BTCUSDT at 4h timeframe
+2025-03-24 10:37:24,982 - trading_bot - INFO - Running backtest for BTCUSDT from 2023-01-01 to 2023-03-31
+2025-03-24 10:37:24,982 - trading_bot - ERROR - No market data available for backtesting
