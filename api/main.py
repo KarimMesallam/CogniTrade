@@ -3,6 +3,7 @@ import sys
 import os
 import json
 import asyncio
+import logging
 from typing import Dict, List, Optional, Any, Union
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,9 @@ import uvicorn
 
 # Add parent directory to path so we can import bot modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Set up logging
+logger = logging.getLogger("trading_bot")
 
 # Import bot modules
 from bot import binance_api, strategy, backtesting, order_manager, database, config, llm_manager
@@ -369,6 +373,9 @@ async def run_backtest(config: BacktestConfig):
         # Run the backtest
         results = engine.run_backtest(strat_func)
         
+        if not results:
+            raise HTTPException(status_code=500, detail="Backtest failed to produce results")
+        
         # Format the results for the response
         formatted_results = {
             "symbol": config.symbol,
@@ -377,44 +384,26 @@ async def run_backtest(config: BacktestConfig):
             "end_date": config.end_date,
             "strategy": config.strategy_name,
             "initial_capital": config.initial_capital,
-            "final_value": results["final_value"],
-            "profit_loss": results["profit_loss"],
-            "profit_loss_percent": results["profit_loss_percent"],
+            "final_value": results["final_equity"],
+            "profit_loss": results.get("total_profit", results["final_equity"] - config.initial_capital),
+            "profit_loss_percent": results.get("total_return_pct", 
+                                              ((results["final_equity"] - config.initial_capital) / config.initial_capital) * 100),
             "sharpe_ratio": results["sharpe_ratio"],
             "max_drawdown": results["max_drawdown"],
             "trades": len(results["trades"]),
-            "win_rate": results["win_rate"],
-            "avg_profit": results["avg_profit"],
-            "avg_loss": results["avg_loss"],
-            "profit_factor": results["profit_factor"]
+            "win_rate": results.get("win_rate", 0),
+            "avg_profit": results.get("avg_profit", 0),
+            "avg_loss": results.get("avg_loss", 0),
+            "profit_factor": results.get("profit_factor", 0)
         }
         
         return {"status": "success", "results": formatted_results}
+    except HTTPException as e:
+        # Re-raise HTTP exceptions
+        raise e
     except Exception as e:
-        # For now, return mock data in case of errors
-        import random
-        
-        return {
-            "status": "success",
-            "results": {
-                "symbol": config.symbol,
-                "timeframes": config.timeframes,
-                "start_date": config.start_date,
-                "end_date": config.end_date,
-                "strategy": config.strategy_name,
-                "initial_capital": config.initial_capital,
-                "final_value": config.initial_capital * random.uniform(0.8, 1.4),
-                "profit_loss": config.initial_capital * random.uniform(-0.2, 0.4),
-                "profit_loss_percent": random.uniform(-20, 40),
-                "sharpe_ratio": random.uniform(0.5, 2.5),
-                "max_drawdown": random.uniform(5, 25),
-                "trades": random.randint(10, 50),
-                "win_rate": random.uniform(40, 70),
-                "avg_profit": random.uniform(1, 5),
-                "avg_loss": random.uniform(1, 3),
-                "profit_factor": random.uniform(0.8, 2.0)
-            }
-        }
+        logger.error(f"Error running backtest: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error running backtest: {str(e)}")
 
 # Get order history
 @app.get("/orders/history")

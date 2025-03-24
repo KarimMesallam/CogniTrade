@@ -16,6 +16,10 @@ from bot import binance_api, strategy, backtesting, order_manager, database, con
 # Create test client - updated for newer FastAPI/starlette versions
 client = TestClient(app)
 
+# Set up module-level mocks for strategy and backtesting
+strategy.sma_crossover_strategy = MagicMock(return_value='BUY')
+strategy.rsi_strategy = MagicMock(return_value='SELL')
+
 # Fixture for mocking the database
 @pytest.fixture
 def mock_db():
@@ -45,6 +49,14 @@ def mock_llm_manager():
         manager_mock = MagicMock()
         mock.return_value = manager_mock
         yield manager_mock
+
+# Mock strategy functions
+@pytest.fixture(autouse=True)
+def mock_strategy_functions():
+    # Create strategy function mocks
+    with patch('bot.strategy.sma_crossover_strategy', MagicMock(return_value='BUY')), \
+         patch('bot.strategy.rsi_strategy', MagicMock(return_value='SELL')):
+        yield
 
 # Test API health check
 def test_health_check():
@@ -225,18 +237,24 @@ def test_run_backtest(mock_backtest_engine):
     mock_engine_instance = MagicMock()
     mock_backtest_engine.return_value = mock_engine_instance
     
-    # Mock the run_backtest method to return test results
+    # Mock the run_backtest method to return test results that match the actual BacktestEngine output format
     mock_engine_instance.run_backtest.return_value = {
-        "final_value": 12000.0,
-        "profit_loss": 2000.0,
-        "profit_loss_percent": 20.0,
+        "symbol": "BTCUSDT",
+        "timeframes": ["1h", "4h"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-01-31",
+        "initial_capital": 10000.0,
+        "final_equity": 12000.0,
+        "total_profit": 2000.0,
+        "total_return_pct": 20.0,
         "sharpe_ratio": 1.5,
-        "max_drawdown": 10.0,
+        "max_drawdown": -10.0,
         "trades": [MagicMock(), MagicMock()],  # Just need the length
         "win_rate": 60.0,
         "avg_profit": 3.0,
         "avg_loss": 2.0,
-        "profit_factor": 1.5
+        "profit_factor": 1.5,
+        "equity_curve": []
     }
     
     backtest_config = {
@@ -260,8 +278,7 @@ def test_run_backtest(mock_backtest_engine):
     assert "results" in response.json()
     
     results = response.json()["results"]
-    # The test is returning mock data with random values, so we can't check exact values
-    # Instead, let's just verify the structure
+    # Verify we're getting proper values, not random ones
     assert "profit_loss_percent" in results
     assert "sharpe_ratio" in results
     assert isinstance(results["profit_loss_percent"], (int, float))
@@ -281,9 +298,18 @@ def test_run_backtest(mock_backtest_engine):
     # Test with unknown strategy
     backtest_config["strategy_name"] = "unknown_strategy"
     response = client.post("/backtest/run", json=backtest_config)
-    # API doesn't raise error for unknown strategy, it falls back to mock data
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
+    # API should now return an error for unknown strategy
+    assert response.status_code == 400
+    assert "detail" in response.json()
+    assert "Unknown strategy" in response.json()["detail"]
+    
+    # Test error handling
+    mock_engine_instance.run_backtest.side_effect = Exception("Test error")
+    backtest_config["strategy_name"] = "sma_crossover"  # Use a valid strategy
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 500
+    assert "detail" in response.json()
+    assert "Error running backtest" in response.json()["detail"]
 
 # Test get order history endpoint
 def test_get_order_history():
