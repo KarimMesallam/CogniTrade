@@ -6,6 +6,7 @@ import numpy as np
 import logging
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
+import unittest.mock
 
 # Add the parent directory to the path to import the bot modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -536,4 +537,212 @@ def test_generate_summary_report(backtest_runner):
     
     # Check that best strategy is included
     assert "Strategy1 on ETHUSDT: 20.00% return" in report
-    assert "Strategy1 on ETHUSDT: Sharpe 1.80" in report 
+    assert "Strategy1 on ETHUSDT: Sharpe 1.80" in report
+
+@patch('json.dumps')
+def test_save_results_with_timestamp_serialization(mock_json_dumps, backtest_engine):
+    """Test saving backtest results with proper timestamp serialization"""
+    # Create sample trades with timestamp objects
+    sample_trades = [
+        {
+            'trade_id': '1',
+            'symbol': 'BTCUSDT',
+            'side': 'BUY',
+            'timestamp': pd.Timestamp('2023-01-05 10:00:00'),
+            'price': 20000,
+            'quantity': 0.5,
+            'value': 10000,
+            'commission': 10
+        },
+        {
+            'trade_id': '2',
+            'symbol': 'BTCUSDT',
+            'side': 'SELL',
+            'timestamp': datetime(2023, 1, 10, 14, 0, 0),
+            'price': 22000,
+            'quantity': 0.5,
+            'value': 11000,
+            'commission': 11,
+            'profit_loss': 990
+        }
+    ]
+    
+    # Create sample results with trades containing datetime/timestamp objects
+    results = {
+        'symbol': 'BTCUSDT',
+        'timeframes': ['1h'],
+        'start_date': '2023-01-01',
+        'end_date': '2023-01-31',
+        'initial_capital': 10000,
+        'final_equity': 11000,
+        'total_return_pct': 10,
+        'total_trades': 2,
+        'win_count': 1,
+        'loss_count': 0,
+        'win_rate': 100,
+        'max_drawdown': -5,
+        'sharpe_ratio': 1.5,
+        'trades': sample_trades
+    }
+    
+    # Mock Database.insert_trade to check serialization
+    with patch.object(backtest_engine.db, 'insert_trade') as mock_insert:
+        mock_insert.return_value = True
+        
+        # Mock Database.store_performance_metrics
+        with patch.object(backtest_engine.db, 'store_performance_metrics') as mock_store:
+            mock_store.return_value = True
+            
+            # Call save_results
+            backtest_engine.save_results(results, 'Test_Strategy')
+            
+            # Verify json.dumps was called (for raw_data serialization)
+            assert mock_json_dumps.called
+            
+            # Check that insert_trade was called for each trade
+            assert mock_insert.call_count == 2
+            
+            # Check that timestamps were properly converted to strings
+            for call_args in mock_insert.call_args_list:
+                trade_data = call_args[0][0]
+                assert isinstance(trade_data['timestamp'], str)
+                assert isinstance(trade_data['raw_data'], str)  # Should be JSON string
+
+@patch('bot.backtesting.plt')
+@patch('builtins.open', new_callable=unittest.mock.mock_open)
+def test_generate_report(mock_open, mock_plt, backtest_engine):
+    """Test generating a comprehensive backtest report"""
+    # Create a simple sample results dictionary
+    results = {
+        'symbol': 'BTCUSDT',
+        'timeframes': ['1h'],
+        'start_date': '2023-01-01',
+        'end_date': '2023-01-31',
+        'initial_capital': 10000,
+        'final_equity': 11000,
+        'total_profit': 1000,
+        'total_return_pct': 10,
+        'total_trades': 2,
+        'win_count': 1, 
+        'loss_count': 1,
+        'win_rate': 50,
+        'max_drawdown': -5,
+        'sharpe_ratio': 1.2,
+        'trades': [
+            {
+                'trade_id': '1',
+                'symbol': 'BTCUSDT',
+                'side': 'BUY',
+                'timestamp': pd.Timestamp('2023-01-05 10:00:00'),
+                'price': 20000,
+                'quantity': 0.5,
+                'profit_loss': 0
+            },
+            {
+                'trade_id': '2',
+                'symbol': 'BTCUSDT',
+                'side': 'SELL',
+                'timestamp': pd.Timestamp('2023-01-10 14:00:00'),
+                'price': 22000,
+                'quantity': 0.5,
+                'profit_loss': 1000
+            }
+        ],
+        'equity_curve': [
+            {'timestamp': pd.Timestamp('2023-01-01'), 'equity': 10000},
+            {'timestamp': pd.Timestamp('2023-01-31'), 'equity': 11000}
+        ]
+    }
+    
+    # Mock the dependencies
+    with patch.object(backtest_engine, 'plot_results') as mock_plot:
+        with patch.object(backtest_engine, 'generate_trade_log') as mock_trade_log:
+            with patch('os.makedirs') as mock_makedirs:
+                # Call the method
+                report_path = backtest_engine.generate_report(results, output_dir='test_reports')
+                
+                # Check the calls
+                mock_makedirs.assert_called_once()
+                mock_plot.assert_called_once()
+                mock_trade_log.assert_called_once()
+                mock_open.assert_called()
+                
+                # Check the report path is not empty (report was generated)
+                assert report_path != ""
+
+@patch('matplotlib.pyplot.figure')
+def test_enhanced_plotting_with_indicators(mock_figure, backtest_engine):
+    """Test the enhanced plotting functionality with technical indicators"""
+    # Create sample market data with indicators
+    df = pd.DataFrame({
+        'timestamp': pd.date_range(start='2023-01-01', periods=100, freq='1h'),
+        'open': np.random.normal(20000, 500, 100),
+        'high': np.random.normal(20500, 500, 100),
+        'low': np.random.normal(19500, 500, 100),
+        'close': np.random.normal(20000, 500, 100),
+        'volume': np.random.normal(100, 30, 100),
+    })
+    
+    # Add indicators
+    df['rsi'] = np.random.uniform(0, 100, 100)  # Simulated RSI
+    df['sma_20'] = df['close'].rolling(window=20).mean()
+    df['sma_50'] = df['close'].rolling(window=50).mean()
+    df['upper_band'] = df['close'] + np.random.normal(500, 100, 100)
+    df['middle_band'] = df['close']
+    df['lower_band'] = df['close'] - np.random.normal(500, 100, 100)
+    df['macd_line'] = np.random.normal(0, 100, 100)
+    df['signal_line'] = np.random.normal(0, 100, 100)
+    df['macd_histogram'] = df['macd_line'] - df['signal_line']
+    
+    # Set market data
+    backtest_engine.market_data = {'1h': df}
+    
+    # Create sample results
+    results = {
+        'symbol': 'BTCUSDT',
+        'timeframes': ['1h'],
+        'start_date': '2023-01-01',
+        'end_date': '2023-01-31',
+        'initial_capital': 10000,
+        'final_equity': 11000,
+        'total_return_pct': 10,
+        'total_trades': 2,
+        'win_count': 1,
+        'loss_count': 1,
+        'win_rate': 50,
+        'max_drawdown': -5,
+        'sharpe_ratio': 1.2,
+        'trades': [
+            {
+                'trade_id': '1',
+                'symbol': 'BTCUSDT',
+                'side': 'BUY',
+                'timestamp': df['timestamp'].iloc[20],
+                'price': df['close'].iloc[20],
+                'quantity': 0.5,
+                'profit_loss': 0
+            },
+            {
+                'trade_id': '2',
+                'symbol': 'BTCUSDT',
+                'side': 'SELL',
+                'timestamp': df['timestamp'].iloc[40],
+                'price': df['close'].iloc[40],
+                'quantity': 0.5,
+                'profit_loss': 1000
+            }
+        ],
+        'equity_curve': [
+            {'timestamp': t, 'equity': 10000 + i * 100} 
+            for i, t in enumerate(df['timestamp'])
+        ]
+    }
+    
+    # Test with default options
+    backtest_engine.plot_results(results)
+    mock_figure.assert_called()
+    
+    # Test with custom indicators
+    mock_figure.reset_mock()
+    backtest_engine.plot_results(results, show_indicators=True, custom_indicators=['sma_20', 'sma_50'])
+    mock_figure.assert_called() 
