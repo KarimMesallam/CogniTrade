@@ -11,6 +11,8 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Extensible:** Easily add new exchanges, trading strategies, and real-time data streams.
 - **Advanced Backtesting:** Completely refactored backtesting engine with modular architecture, better error handling, and improved performance.
 - **Comprehensive Testing:** High-coverage test suite for all components with mocks for external dependencies.
+- **Vectorized Backtesting:** Optimized performance with vectorized operations for high-speed strategy testing.
+- **Arithmetic Validation:** Robust validation of profit/loss calculations with controlled datasets.
 
 ## Features
 
@@ -34,6 +36,8 @@ This project aims to take you from basic trading bot functionality to a robust s
   - Comprehensive performance metrics calculation
   - Data validation and robust safeguards
   - Synthetic test data generation with configurable parameters
+  - Vectorized operations for high-speed strategy testing
+  - Precise arithmetic validation for profit/loss calculations
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 
 ## Project Structure (Backend-Only Version)
@@ -73,6 +77,8 @@ trading_bot/
 │   ├── test_strategy.py       # Tests for trading strategies
 │   ├── test_llm_manager.py    # Tests for LLM integration
 │   ├── test_backtesting/      # Tests for the new backtesting modules
+│   ├── test_vectorized_backtesting.py # Tests for vectorized backtesting performance
+│   ├── test_arithmetic_validation.py  # Validation of profit/loss calculations
 │   ├── test_database.py       # Tests for database operations
 │   ├── test_db_integration.py # Tests for database integration layer
 │   ├── test_main_db_integration.py # Integration tests for main and database
@@ -223,6 +229,51 @@ print(f"HTML report: {report_paths['HTML Report']}")
 print(f"Equity chart: {report_paths['Equity Chart']}")
 ```
 
+#### Vectorized Backtesting
+
+For high-performance backtesting with large datasets, use the vectorized approach:
+
+```python
+from bot.backtesting import run_backtest
+
+def vectorized_strategy(data_dict, symbol, vectorized=True):
+    """Vectorized strategy that processes all data at once."""
+    primary_tf = list(data_dict.keys())[0]
+    df = data_dict[primary_tf].copy()
+    
+    # Calculate indicators (vectorized operations)
+    df['sma_short'] = df['close'].rolling(window=10).mean()
+    df['sma_long'] = df['close'].rolling(window=30).mean()
+    
+    # Generate signals for all rows at once
+    df['signal'] = 'HOLD'  # Default signal
+    
+    # Buy condition: Short MA crosses above Long MA
+    buy_condition = (df['sma_short'].shift(1) < df['sma_long'].shift(1)) & (df['sma_short'] > df['sma_long'])
+    df.loc[buy_condition, 'signal'] = 'BUY'
+    
+    # Sell condition: Short MA crosses below Long MA
+    sell_condition = (df['sma_short'].shift(1) > df['sma_long'].shift(1)) & (df['sma_short'] < df['sma_long'])
+    df.loc[sell_condition, 'signal'] = 'SELL'
+    
+    # If vectorized mode, return the DataFrame with signals
+    if vectorized:
+        return df[['timestamp', 'signal']]
+    
+    # For non-vectorized mode, return just the latest signal
+    return df.iloc[-1]['signal']
+
+# Run the backtest with the vectorized strategy
+result = run_backtest(
+    symbol="BTCTEST",
+    timeframes=["1h"],
+    start_date="2023-01-01",
+    end_date="2023-06-30",
+    strategy_func=vectorized_strategy,
+    initial_capital=10000.0
+)
+```
+
 #### Parameter Optimization
 
 Find the optimal parameters for your trading strategy:
@@ -321,6 +372,8 @@ Test categories:
 - **Strategy tests:** Tests for trading strategy logic
 - **LLM tests:** Tests for LLM integration and decision making
 - **Backtesting tests:** Tests for the backtesting engine functionality
+- **Vectorized Backtesting tests:** Tests for high-performance vectorized operations
+- **Arithmetic Validation tests:** Ensures accurate profit/loss calculations using controlled datasets
 - **Database tests:** Tests for database operations and data persistence
 - **Database Integration tests:** Tests for the database integration layer that connects trading functions with data storage
 - **Integration tests:** Tests for the integration between main trading functions and the database system
@@ -410,6 +463,8 @@ You can create your own backtesting script by following these steps:
 - **Enhanced Logging & Monitoring:** Integrate more robust logging and alerting for operational insights.
 - **Reinforcement Learning:** Implement RL-based strategies that can learn and adapt to changing market conditions.
 - **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters (after core backend functionality is stable).
+- **Parallel Processing:** Further optimize performance with multi-threaded and multi-process operations.
+- **Custom Indicators:** Expand the library of technical indicators and custom signal generators.
 
 ## Contributing
 
