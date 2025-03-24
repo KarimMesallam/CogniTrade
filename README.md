@@ -30,8 +30,9 @@ This project aims to take you from basic trading bot functionality to a robust s
   - Detailed trade logging for post-trade analysis
   - Visualization of equity curves, drawdowns, and trade performance
   - Strategy comparison across different symbols and timeframes
+- **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 
-## Project Structure
+## Project Structure (Backend-Only Version)
 
 ```
 trading_bot/
@@ -46,6 +47,10 @@ trading_bot/
 │   ├── db_integration.py   # Integration layer between trading system and database
 │   ├── backtesting.py      # Advanced backtesting engine for strategy development
 │   └── main.py             # Main entry point for running the bot
+├── api/
+│   ├── __init__.py
+│   ├── main.py             # FastAPI backend for bot control and data access
+│   └── requirements.txt    # API-specific dependencies
 ├── tests/                  # Comprehensive tests (pytest)
 │   ├── test_binance_api.py # Tests for Binance API wrapper with >80% coverage
 │   ├── test_main.py        # Tests for the main trading loop with proper mocks
@@ -125,6 +130,18 @@ The bot will:
    - Implements exponential backoff for error handling
 
 All activity is logged to both the console and a file named `trading_bot.log`.
+
+### Using the API
+
+The project includes a FastAPI backend that you can use to interact with the trading bot:
+
+```bash
+# Start the API server
+cd api
+uvicorn main:app --reload
+```
+
+The API will be available at http://localhost:8000 with automatic API documentation at http://localhost:8000/docs.
 
 ### Backtesting Strategies
 
@@ -266,7 +283,7 @@ Test categories:
 - **Multi-Exchange Support:** Add wrappers for additional exchanges (e.g., using CCXT) for more diversified trading.
 - **Enhanced Logging & Monitoring:** Integrate more robust logging and alerting for operational insights.
 - **Reinforcement Learning:** Implement RL-based strategies that can learn and adapt to changing market conditions.
-- **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters.
+- **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters (after core backend functionality is stable).
 
 ## Contributing
 
