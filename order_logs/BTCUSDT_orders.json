@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2025-03-24T22:43:19.894483",
+    "timestamp": "2025-03-24T23:03:01.028603",
     "symbol": "BTCUSDT",
     "order_id": 123,
     "client_order_id": "test_client_order_id",
@@ -38,6 +38,91 @@
         }
       ]
     },
-    "trade_id": "BTCUSDT_BUY_123_1742848999"
+    "trade_id": "BTCUSDT_BUY_123_1742850181"
+  },
+  {
+    "timestamp": "2025-03-24T23:03:12.164984",
+    "symbol": "BTCUSDT",
+    "order_id": 12345,
+    "client_order_id": "test_client_id",
+    "action": "BUY",
+    "type": "MARKET",
+    "side": "BUY",
+    "quantity": "0.001",
+    "price": "50000.00",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "50000.00",
+        "qty": "0.001",
+        "commission": "0.000001",
+        "commissionAsset": "BTC"
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 12345,
+      "clientOrderId": "test_client_id",
+      "transactTime": 1742850190645,
+      "price": "50000.00",
+      "origQty": "0.001",
+      "executedQty": "0.001",
+      "status": "FILLED",
+      "timeInForce": "GTC",
+      "type": "MARKET",
+      "side": "BUY",
+      "fills": [
+        {
+          "price": "50000.00",
+          "qty": "0.001",
+          "commission": "0.000001",
+          "commissionAsset": "BTC"
+        }
+      ],
+      "trade_id": "BTCUSDT_BUY_12345_1742850190"
+    },
+    "trade_id": "BTCUSDT_BUY_12345_1742850192"
+  },
+  {
+    "timestamp": "2025-03-24T23:03:12.213706",
+    "symbol": "BTCUSDT",
+    "order_id": 99999,
+    "client_order_id": "test_client_id",
+    "action": "BUY",
+    "type": "MARKET",
+    "side": "BUY",
+    "quantity": "0.001",
+    "price": "50000.00",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "50000.00",
+        "qty": "0.001",
+        "commission": "0.000001",
+        "commissionAsset": "BTC"
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 99999,
+      "clientOrderId": "test_client_id",
+      "transactTime": 1742850192207,
+      "price": "50000.00",
+      "origQty": "0.001",
+      "executedQty": "0.001",
+      "status": "FILLED",
+      "timeInForce": "GTC",
+      "type": "MARKET",
+      "side": "BUY",
+      "fills": [
+        {
+          "price": "50000.00",
+          "qty": "0.001",
+          "commission": "0.000001",
+          "commissionAsset": "BTC"
+        }
+      ]
+    },
+    "trade_id": "BTCUSDT_BUY_99999_1742850192"
   }
 ]

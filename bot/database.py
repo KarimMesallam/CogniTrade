@@ -48,7 +48,12 @@ class Database:
                     profit_loss REAL,
                     roi_pct REAL,
                     commission REAL,
-                    notes TEXT
+                    notes TEXT,
+                    order_id TEXT,
+                    timeframe TEXT,
+                    execution_time REAL,
+                    fees REAL,
+                    raw_data TEXT
                 )
                 ''')
                 
@@ -63,7 +68,9 @@ class Database:
                     timestamp TEXT NOT NULL,
                     indicators TEXT,
                     llm_decision TEXT,
-                    executed INTEGER DEFAULT 0
+                    executed INTEGER DEFAULT 0,
+                    trade_id TEXT,
+                    price REAL
                 )
                 ''')
                 
@@ -85,7 +92,7 @@ class Database:
                 
                 # Create performance_metrics table
                 cursor.execute('''
-                CREATE TABLE IF NOT EXISTS performance_metrics (
+                CREATE TABLE IF NOT EXISTS performance (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     symbol TEXT NOT NULL,
                     strategy TEXT NOT NULL,
@@ -98,7 +105,13 @@ class Database:
                     sharpe_ratio REAL,
                     max_drawdown_pct REAL,
                     total_return_pct REAL,
-                    timestamp TEXT NOT NULL
+                    profit_loss REAL,
+                    win_count INTEGER,
+                    loss_count INTEGER,
+                    volatility REAL,
+                    metrics_data TEXT,
+                    timestamp TEXT NOT NULL,
+                    max_drawdown REAL
                 )
                 ''')
                 
@@ -465,6 +478,10 @@ class Database:
             if 'metrics_data' in metrics and isinstance(metrics['metrics_data'], dict):
                 metrics['metrics_data'] = json.dumps(metrics['metrics_data'])
             
+            # Add a timestamp if not provided
+            if 'timestamp' not in metrics:
+                metrics['timestamp'] = datetime.now().isoformat()
+                
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
@@ -473,7 +490,7 @@ class Database:
                 placeholders = ', '.join(['?' for _ in metrics])
                 values = list(metrics.values())
                 
-                query = f"INSERT INTO performance_metrics ({fields}) VALUES ({placeholders})"
+                query = f"INSERT INTO performance ({fields}) VALUES ({placeholders})"
                 cursor.execute(query, values)
                 conn.commit()
                 
@@ -505,11 +522,11 @@ class Database:
             
             # Create alert record
             alert = {
-                'type': alert_type,
+                'alert_type': alert_type,
                 'severity': severity,
                 'message': message,
                 'timestamp': datetime.now().isoformat(),
-                'acknowledged': False,
+                'acknowledged': 0,
                 'related_data': related_data_json
             }
             

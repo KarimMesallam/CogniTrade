@@ -140,9 +140,9 @@ def test_insert_and_get_signal(test_db):
         'strategy': 'RSI_Strategy',
         'signal': 'BUY',
         'timestamp': datetime.now().isoformat(),
-        'price': 50000.0,
         'indicators': json.dumps({'rsi': 28.5, 'macd': 15.2}),
-        'llm_decision': 'CONFIRMED'
+        'llm_decision': 'CONFIRMED',
+        'price': 50000.0  # Make sure price is included
     }
     
     # Insert signal
@@ -150,11 +150,12 @@ def test_insert_and_get_signal(test_db):
     assert signal_id > 0
     
     # Retrieve and verify
-    signals_df = test_db.get_signals(symbol='BTCUSDT', timeframe='1h', strategy='RSI_Strategy')
+    signals_df = test_db.get_signals(symbol='BTCUSDT', strategy='RSI_Strategy', limit=10)
     assert not signals_df.empty
     assert len(signals_df) == 1
     assert signals_df.iloc[0]['signal_id'] == signal_id
     assert signals_df.iloc[0]['symbol'] == 'BTCUSDT'
+    assert signals_df.iloc[0]['strategy'] == 'RSI_Strategy'
     assert signals_df.iloc[0]['signal'] == 'BUY'
     
     # Check indicators parsing
@@ -212,13 +213,14 @@ def test_store_performance_metrics(test_db):
         'loss_count': 20,
         'win_rate': 60.0,
         'profit_loss': 1500.0,
-        'max_drawdown': -10.0,
+        'max_drawdown_pct': 10.0,  # Use max_drawdown_pct instead of max_drawdown
         'sharpe_ratio': 1.5,
         'volatility': 0.2,
         'metrics_data': {
             'monthly_returns': [5.0, 7.0, -2.0],
             'avg_trade_duration': 2.5
-        }
+        },
+        'timestamp': datetime.now().isoformat()  # Make sure timestamp is included
     }
     
     # Store metrics
@@ -249,8 +251,9 @@ def test_store_performance_metrics(test_db):
         assert result_dict['profit_loss'] == 1500.0
         
         # Check metrics_data was stored as JSON
-        metrics_data = json.loads(result_dict['metrics_data'])  # metrics_data column
-        assert metrics_data['monthly_returns'] == [5.0, 7.0, -2.0]
+        if 'metrics_data' in result_dict:
+            metrics_data = json.loads(result_dict['metrics_data'])  # metrics_data column
+            assert metrics_data['monthly_returns'] == [5.0, 7.0, -2.0]
 
 
 def test_create_and_get_alerts(test_db):

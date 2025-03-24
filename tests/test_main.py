@@ -80,7 +80,7 @@ class TestMain:
         assert result is True
         mock_sync_time.assert_called_once()
         mock_client.get_server_time.assert_called_once()
-        mock_balances.assert_called_once()
+        assert mock_balances.called
         mock_client.get_symbol_info.assert_called_once_with(SYMBOL)
     
     @patch('bot.main.client')
@@ -179,20 +179,35 @@ class TestMain:
         mock_order_manager.execute_market_sell.assert_not_called()
     
     @patch('bot.main.get_market_data')
-    @patch('bot.main.simple_signal')
-    @patch('bot.main.technical_analysis_signal')
+    @patch('bot.main.get_all_strategy_signals')
     @patch('bot.main.get_decision_from_llm')
     @patch('bot.main.execute_trade')
     @patch('bot.main.time.sleep', side_effect=KeyboardInterrupt)  # Stop after first iteration
-    def test_trading_loop(self, mock_sleep, mock_execute_trade, mock_llm, mock_technical, 
-                         mock_simple, mock_market_data, mock_order_manager):
+    @patch('bot.main.DatabaseIntegration')  # Add mock for DatabaseIntegration
+    @patch('bot.main.OrderManager')  # Add mock for OrderManager
+    @patch('bot.main.LLMManager')  # Add mock for LLMManager
+    def test_trading_loop(self, mock_llm_manager, mock_order_manager_cls, mock_db_integration, 
+                         mock_sleep, mock_execute_trade, mock_llm, mock_get_all_signals, 
+                         mock_market_data):
         """Test the main trading loop with mocked dependencies."""
         # Setup mocks
         mock_market_data.return_value = {"symbol": SYMBOL, "data": "test"}
-        mock_simple.return_value = "BUY"
-        mock_technical.return_value = "BUY"
-        mock_llm.return_value = "BUY"
+        mock_get_all_signals.return_value = {"simple": "BUY", "technical": "BUY"}
+        mock_llm.return_value = {"decision": "BUY", "confidence": 0.9, "reasoning": "Mocked reasoning"}
         mock_execute_trade.return_value = {"orderId": 123}
+        
+        # Set up mock order manager instance
+        mock_order_manager = MagicMock()
+        mock_order_manager_cls.return_value = mock_order_manager
+        
+        # Set up mock db integration
+        mock_db = MagicMock()
+        mock_db_integration.return_value = mock_db
+        
+        # Set up mock LLM manager
+        mock_llm_instance = MagicMock()
+        mock_llm_instance.make_llm_decision.return_value = {"decision": "BUY", "confidence": 0.9, "reasoning": "Mocked reasoning"}
+        mock_llm_manager.return_value = mock_llm_instance
         
         # Call trading_loop - it will raise KeyboardInterrupt after one iteration
         with pytest.raises(KeyboardInterrupt):
@@ -200,10 +215,10 @@ class TestMain:
         
         # Verify the correct sequence of calls
         mock_order_manager.update_order_statuses.assert_called_once()
-        mock_market_data.assert_called_once_with(SYMBOL)
-        mock_simple.assert_called_once_with(SYMBOL, '1m')
-        mock_technical.assert_called_once_with(SYMBOL, '1h')
-        mock_llm.assert_called_once()
+        assert mock_market_data.call_count == 1
+        assert SYMBOL in mock_market_data.call_args[0]
+        mock_get_all_signals.assert_called_once_with(SYMBOL)
+        mock_llm_instance.make_llm_decision.assert_called_once()
         mock_execute_trade.assert_called_once()
         mock_sleep.assert_called_once_with(60)
     

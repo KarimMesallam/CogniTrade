@@ -12,6 +12,10 @@ from bot.binance_api import place_market_buy, place_market_sell, client, get_rec
 from bot.llm_manager import get_decision_from_llm, log_decision_with_context, LLMManager
 from bot.order_manager import OrderManager
 from bot.db_integration import DatabaseIntegration
+import json
+import uuid
+import asyncio
+import os
 
 # Configure logging
 logging.basicConfig(
@@ -23,6 +27,9 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger("trading_bot")
+
+# Set this to True when running tests to bypass sleeps
+TESTING_MODE = os.environ.get('TESTING_MODE', '0') == '1'
 
 def handle_testnet_balance(symbol='BTC'):
     """
@@ -91,7 +98,8 @@ def initialize_bot():
         
         # Check and handle testnet balance if necessary
         base_asset = SYMBOL.replace('USDT', '')  # Extract BTC from BTCUSDT
-        handle_testnet_balance(base_asset)
+        if TESTNET:
+            handle_testnet_balance(base_asset)
         
         # Initialize database
         try:
@@ -399,7 +407,8 @@ def trading_loop():
             
             # Wait before next iteration
             logger.debug(f"Waiting {loop_interval} seconds for next iteration...")
-            time.sleep(loop_interval)
+            if not TESTING_MODE:
+                time.sleep(loop_interval)
             
         except (BinanceAPIException, BinanceRequestException) as e:
             consecutive_errors += 1
@@ -416,7 +425,8 @@ def trading_loop():
                     data={"error_type": "api_error", "retry_in": backoff_time}
                 )
             
-            time.sleep(backoff_time)
+            if not TESTING_MODE:
+                time.sleep(backoff_time)
             
         except Exception as e:
             consecutive_errors += 1
@@ -433,7 +443,8 @@ def trading_loop():
                     data={"error_type": "system_error", "retry_in": backoff_time}
                 )
             
-            time.sleep(backoff_time)
+            if not TESTING_MODE:
+                time.sleep(backoff_time)
 
 if __name__ == '__main__':
     logger.info("=== Starting trading bot ===")
