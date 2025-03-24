@@ -1,10 +1,10 @@
-# Trading Bot with Binance & LLM Integration
+# CogniTrade: AI-Enhanced Trading Platform with Binance & LLM Integration
 
-A scalable Python project for automated trading that combines traditional trading strategies with modern AI/LLM orchestration for decision making. The bot connects to Binance (starting with paper trading via the Testnet) and is designed to easily integrate multiple LLMs to refine trade signals and manage order execution.
+A scalable Python project for automated trading that combines traditional trading strategies with modern AI/LLM orchestration for decision making. CogniTrade connects to Binance (starting with paper trading via the Testnet) and is designed to easily integrate multiple LLMs to refine trade signals and manage order execution.
 
 ## Overview
 
-This project aims to take you from basic trading bot functionality to a robust system that leverages AI:
+CogniTrade aims to take you from basic trading bot functionality to a robust system that leverages AI:
 - **Paper Trading:** Start with simulated trades using Binance Testnet.
 - **Scalable Architecture:** Modular design to support multiple strategies and future integration with various LLMs.
 - **AI Orchestration:** A dedicated module to incorporate LLMs (e.g., DeepSeek R1, GPT-4o, o3-mini, Claude 3.7 Sonnet) for enhanced decision making.
@@ -43,7 +43,7 @@ This project aims to take you from basic trading bot functionality to a robust s
   - Precise arithmetic validation for profit/loss calculations
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 
-## Project Structure (Backend-Only Version)
+## CogniTrade Project Structure (Backend-Only Version)
 
 ```
 trading_bot/
@@ -108,8 +108,8 @@ trading_bot/
 1. **Clone the Repository:**
 
    ```bash
-   git clone git@github.com:KarimMesallam/TradingBot.git
-   cd TradingBot
+   git clone git@github.com:KarimMesallam/CogniTrade.git
+   cd CogniTrade
    ```
 
 2. **Set Up a Virtual Environment:**
@@ -137,9 +137,9 @@ trading_bot/
 
 ## Usage
 
-### Running the Bot
+### Running CogniTrade
 
-Start the bot (for paper trading) by running:
+Start CogniTrade (for paper trading) by running:
 
 ```bash
 # Method 1: Using the run_bot.py script
@@ -149,7 +149,7 @@ Start the bot (for paper trading) by running:
 python -m bot.main
 ```
 
-The bot will:
+CogniTrade will:
 1. Initialize the Binance connection using your API keys
 2. Check account balances and verify that the configured symbol can be traded
 3. Enter a continuous trading loop that:
@@ -163,7 +163,7 @@ All activity is logged to both the console and a file named `trading_bot.log`.
 
 ### Using the API
 
-The project includes a FastAPI backend that you can use to interact with the trading bot:
+The project includes a FastAPI backend that you can use to interact with CogniTrade:
 
 ```bash
 # Start the API server
@@ -459,7 +459,7 @@ You can create your own backtesting script by following these steps:
 
 ## LLM Integration
 
-The trading bot integrates state-of-the-art LLMs to enhance trading decisions:
+CogniTrade integrates state-of-the-art LLMs to enhance trading decisions:
 
 ### DeepSeek R1 and GPT-4o Integration
 
