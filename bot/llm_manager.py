@@ -79,9 +79,12 @@ class LLMManager:
             # Full pipeline (primary + secondary model)
             if self.api_key and self.api_endpoint and self.model and self.secondary_api_key:
                 # Call primary LLM API first
+                logger.info("Calling primary LLM model for initial analysis...")
                 primary_response = self._call_primary_model(prompt)
+                logger.info("Primary model analysis received")
                 
                 # Process the response with secondary model for structured output
+                logger.info("Processing with secondary model for structured output...")
                 decision_result = self._process_with_secondary_model(primary_response, symbol)
                 
                 decision = decision_result.get("decision", "HOLD")
@@ -92,6 +95,17 @@ class LLMManager:
                 if confidence < self.required_confidence:
                     logger.info(f"LLM decision confidence {confidence} below required threshold {self.required_confidence}. Defaulting to HOLD.")
                     decision = "HOLD"
+                
+                # Add the full primary and secondary model responses to the result
+                result = {
+                    "decision": decision.upper(),
+                    "confidence": confidence,
+                    "reasoning": reasoning,
+                    "primary_model_response": primary_response,
+                    "secondary_model_response": decision_result.get("secondary_model_response", "")
+                }
+                
+                return result
             
             # Primary model only
             elif self.api_key and self.api_endpoint and self.model:
@@ -109,6 +123,7 @@ class LLMManager:
             
             # Rule-based fallback
             else:
+                logger.warning("No valid LLM API keys found. Falling back to rule-based decision.")
                 return self._make_rule_based_decision(market_data, strategy_signals)
                 
             return {
@@ -137,6 +152,9 @@ class LLMManager:
         try:
             # Get provider-specific settings
             provider = get_primary_model_config().get("provider", "").lower()
+            
+            # Log API request attempt
+            logger.info(f"Calling primary model API ({provider}) with model: {self.model}")
             
             # Prepare the request payload based on the provider
             if provider == "deepseek":
@@ -187,6 +205,9 @@ class LLMManager:
                 "Authorization": f"Bearer {self.api_key}"
             }
             
+            # Log API endpoint
+            logger.debug(f"Making API request to: {self.api_endpoint}")
+            
             response = requests.post(
                 self.api_endpoint,
                 headers=headers,
@@ -204,16 +225,24 @@ class LLMManager:
                     # Generic fallback
                     content = response_data.get("output", response_data.get("content", str(response_data)))
                 
-                # Log the raw response for debugging
-                logger.debug(f"Raw {provider} response: {content}")
+                # Log response status and response summary
+                logger.info(f"Primary model API call successful, received response of length: {len(content)}")
+                
+                # Log the full primary model response for transparency
+                logger.info(f"Primary model full response: {content}")
                 
                 return content
             else:
-                logger.error(f"LLM API error: {response.status_code}, {response.text}")
+                error_msg = f"Primary LLM API error: {response.status_code}, {response.text}"
+                logger.error(error_msg)
                 return f"Error calling {provider} API: {response.status_code}"
                 
         except Exception as e:
-            logger.error(f"Exception calling primary LLM API: {e}")
+            error_msg = f"Exception calling primary LLM API: {e}"
+            logger.error(error_msg)
+            # Include more detailed error info for debugging
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
             return f"Error: {str(e)}"
     
     def _process_with_secondary_model(self, primary_response, symbol):
@@ -239,6 +268,9 @@ class LLMManager:
             # Remove <think>...</think> tags if they exist in the primary response
             clean_response = self._clean_primary_response(primary_response)
             
+            # Log the cleaned primary response for debugging
+            logger.info(f"Cleaned primary response for secondary model: {clean_response}")
+            
             # Structure for secondary model to extract decision data
             prompt = f"""
             Analyze this trading analysis for {symbol} and extract the key information:
@@ -248,52 +280,37 @@ class LLMManager:
             Based on the analysis, provide a structured output with:
             1. The final trading decision (BUY, SELL, or HOLD)
             2. A confidence score between 0.5 and 1.0
-            3. A summary of the reasoning behind this decision
+            3. A brief reasoning explanation that summarizes the key factors behind this decision
+
+            Format your response as a valid JSON object with these keys:
+            {{
+                "decision": "BUY|SELL|HOLD",
+                "confidence": 0.7,
+                "reasoning": "Brief explanation"
+            }}
             """
             
             # Get provider-specific settings
             provider = get_secondary_model_config().get("provider", "").lower()
+            logger.info(f"Calling secondary model API ({provider}) with model: {self.secondary_model}")
             
-            # Different handling for different providers
+            # Prepare the request payload based on the provider
             if provider == "openai":
-                # Define the response structure we want the model to follow
-                response_format = {
-                    "type": "json_object"
-                }
-                
-                # Define the system message with schema information
-                system_message = """
-                You are a financial analysis assistant that extracts key trading insights from detailed analyses.
-                
-                Extract the following from the user's input:
-                - trading decision (BUY, SELL, or HOLD)
-                - confidence level (a number between 0.5 and 1.0)
-                - reasoning behind the decision (brief summary)
-                
-                Return your response as a JSON object with the following structure:
-                {
-                    "decision": "BUY" or "SELL" or "HOLD",
-                    "confidence": <number between 0.5 and 1.0>,
-                    "reasoning": "<brief summary of the reasoning>"
-                }
-                """
-                
                 payload = {
                     "model": self.secondary_model,
                     "messages": [
-                        {"role": "system", "content": system_message},
+                        {"role": "system", "content": "You are a trading assistant that extracts structured decision data from trading analysis."},
                         {"role": "user", "content": prompt}
                     ],
-                    "response_format": response_format,
                     "temperature": self.secondary_temperature,
-                    "max_tokens": 500
+                    "response_format": {"type": "json_object"}
                 }
             else:
-                # Generic payload for other providers
+                # Generic payload format for other providers
                 payload = {
                     "model": self.secondary_model,
                     "messages": [
-                        {"role": "system", "content": "Extract a trading decision from this analysis."},
+                        {"role": "system", "content": "You are a trading assistant that extracts structured decision data from trading analysis."},
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": self.secondary_temperature
@@ -303,6 +320,8 @@ class LLMManager:
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.secondary_api_key}"
             }
+            
+            logger.debug(f"Making secondary API request to: {self.secondary_api_endpoint}")
             
             response = requests.post(
                 self.secondary_api_endpoint,
@@ -320,35 +339,90 @@ class LLMManager:
                     # Generic fallback
                     content = response_data.get("output", response_data.get("content", str(response_data)))
                 
-                # Parse the response
-                if provider == "openai":
-                    try:
-                        # Try to parse as JSON if it's OpenAI with structured output
-                        structured_result = json.loads(content)
-                    except json.JSONDecodeError:
-                        # Fall back to extraction if it's not valid JSON
-                        structured_result = self._extract_decision_from_text(content)
-                else:
-                    # For other providers, attempt extraction
-                    structured_result = self._extract_decision_from_text(content)
-                    
-                logger.info(f"Secondary model structured output: {structured_result}")
+                logger.info(f"Secondary model API call successful, received response: {content}")
                 
-                return structured_result
+                # Extract the decision data from the response
+                try:
+                    # Try to parse the JSON content
+                    decision_data = json.loads(content)
+                    
+                    # Log the structured output
+                    logger.info(f"Secondary model structured output: {json.dumps(decision_data)}")
+                    
+                    # Ensure the decision is in the correct format (BUY, SELL, HOLD)
+                    if "decision" in decision_data:
+                        decision_data["decision"] = decision_data["decision"].upper()
+                        if decision_data["decision"] not in ["BUY", "SELL", "HOLD"]:
+                            logger.warning(f"Invalid decision value: {decision_data['decision']}. Defaulting to HOLD.")
+                            decision_data["decision"] = "HOLD"
+                    
+                    # Ensure confidence is a float between 0.5 and 1.0
+                    if "confidence" in decision_data:
+                        try:
+                            confidence = float(decision_data["confidence"])
+                            decision_data["confidence"] = max(0.5, min(1.0, confidence))
+                        except:
+                            logger.warning("Invalid confidence value. Defaulting to 0.5.")
+                            decision_data["confidence"] = 0.5
+                    
+                    # Add original full responses for transparency
+                    decision_data["primary_model_response"] = primary_response
+                    decision_data["secondary_model_response"] = content
+                    
+                    return decision_data
+                except json.JSONDecodeError:
+                    # If the content is not valid JSON, try to extract the decision manually
+                    logger.warning(f"Failed to parse JSON from secondary model response: {content}")
+                    
+                    # Extract decision using regex
+                    decision = "HOLD"
+                    if "BUY" in content.upper():
+                        decision = "BUY"
+                    elif "SELL" in content.upper():
+                        decision = "SELL"
+                    
+                    # Extract a confidence value if present
+                    confidence_match = re.search(r'"confidence":\s*(0\.\d+)', content)
+                    confidence = 0.5
+                    if confidence_match:
+                        confidence = float(confidence_match.group(1))
+                    
+                    # Extract reasoning if present
+                    reasoning_match = re.search(r'"reasoning":\s*"([^"]+)"', content)
+                    reasoning = "Could not extract structured reasoning"
+                    if reasoning_match:
+                        reasoning = reasoning_match.group(1)
+                    
+                    logger.info(f"Manually extracted decision: {decision}, confidence: {confidence}")
+                    
+                    return {
+                        "decision": decision,
+                        "confidence": confidence,
+                        "reasoning": reasoning,
+                        "primary_model_response": primary_response,
+                        "secondary_model_response": content
+                    }
             else:
-                logger.error(f"Secondary model API error: {response.status_code}, {response.text}")
+                error_msg = f"Secondary model API error: {response.status_code}, {response.text}"
+                logger.error(error_msg)
                 return {
                     "decision": "HOLD",
                     "confidence": 0.5,
-                    "reasoning": f"Error processing with secondary model: API error {response.status_code}"
+                    "reasoning": f"Error calling secondary API: {response.status_code}",
+                    "primary_model_response": primary_response
                 }
                 
         except Exception as e:
-            logger.error(f"Exception processing with secondary model: {e}")
+            error_msg = f"Exception in secondary model processing: {e}"
+            logger.error(error_msg)
+            # Include more detailed error info for debugging
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
             return {
                 "decision": "HOLD",
                 "confidence": 0.5,
-                "reasoning": f"Error processing with secondary model: {str(e)}"
+                "reasoning": f"Error: {str(e)}",
+                "primary_model_response": primary_response
             }
     
     def _clean_primary_response(self, response):

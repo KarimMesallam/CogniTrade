@@ -33,12 +33,19 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
   - Support for multiple LLM providers with configurable parameters
   - Fallback to rule-based decisions when LLM services are unavailable
   - Detailed confidence scores for decision making
+  - Complete transparency with both primary and secondary model responses stored in database
+  - Enhanced reasoning capabilities with processed structured outputs
 - **Flexible Decision Making:**
   - Multiple consensus methods (simple majority, weighted majority, unanimous)
   - Configurable strategy weights and confidence thresholds
   - LLM agreement requirements for trade execution
 - **Order Management:** Robust order execution system with proper error handling and logging.
-- **Database System:** Comprehensive data storage solution with database integration layer for saving signals, trades, market data, and system alerts.
+- **Database System:** Comprehensive data storage solution with optimized SQLite schema
+  - Robust database integration layer for saving signals, trades, market data, and system alerts
+  - Transparent logging of LLM decisions with full model responses
+  - Clean separation between database access and trading logic
+  - Optimized schema with appropriate indexes for performance
+  - Self-healing database tables that ensure correct schema on initialization
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
 - **Testing Suite:** Comprehensive unit and integration tests with high coverage metrics for all system components.
 - **Enhanced Backtesting System:** Completely refactored backtesting capabilities with:
@@ -651,11 +658,16 @@ The LLM Manager integrates multiple language models with a configurable setup:
    - A confidence score (0.5-1.0) indicating certainty level
    - A concise reasoning summary
 
-3. **Configurable Providers** - Support for different LLM providers with customizable:
-   - Models
-   - API endpoints
-   - Temperature
-   - Other parameters
+3. **Complete Transparency** - Both model responses are preserved:
+   - Primary model's complete analytical response
+   - Secondary model's structured JSON output
+   - All responses stored in the database for auditability
+   - Easy access to reasoning behind each trading decision
+
+4. **Database Integration** - All LLM decisions and responses are saved:
+   - Trading signals include both raw and processed LLM responses
+   - Historical record of all model interactions
+   - Full ability to audit and analyze model performance over time
 
 ### Advanced Configuration
 
@@ -707,6 +719,10 @@ The improved decision-making process now includes:
 - **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters (after core backend functionality is stable).
 - **Parallel Processing:** Further optimize performance with multi-threaded and multi-process operations.
 - **Custom Indicators:** Expand the library of technical indicators and custom signal generators.
+- **LLM Evaluation:** Add tools to evaluate LLM performance and compare different models.
+- **Analytics Dashboard:** Create visualizations for LLM decision making and reasoning patterns.
+- **Auto-Tuning:** Implement machine learning to fine-tune strategy parameters based on historical performance.
+- **Advanced Risk Management:** Enhance the order management system with more sophisticated risk controls.
 
 ## Contributing
 

@@ -243,12 +243,21 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
                 strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
                 timeframe = strategy_config.get("timeframe", "1m")
                 
+                # Extract LLM model responses if available in market_data
+                llm_data = None
+                if 'llm_result' in market_data:
+                    llm_data = {
+                        'primary_model_response': market_data['llm_result'].get('primary_model_response', ''),
+                        'secondary_model_response': market_data['llm_result'].get('secondary_model_response', '')
+                    }
+                
                 signal_ids[strategy_name] = db_integration.save_signal(
                     symbol=symbol,
                     timeframe=timeframe,
                     strategy=strategy_name,
                     signal=signal_value,
-                    llm_decision=llm_decision
+                    llm_decision=llm_decision,
+                    llm_data=llm_data
                 )
         
         # Check if LLM agreement is required from config
@@ -398,6 +407,9 @@ def trading_loop():
             
             logger.info(f"LLM decision: {llm_decision} (confidence: {llm_confidence:.2f})")
             logger.info(f"LLM reasoning: {llm_reasoning}")
+            
+            # Add LLM result to market data for database storage
+            market_data['llm_result'] = llm_result
             
             # Execute trade if appropriate
             order = execute_trade(signals, llm_decision, SYMBOL, market_data, order_manager, db_integration)

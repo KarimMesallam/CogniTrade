@@ -25,7 +25,7 @@ class DatabaseIntegration:
     
     def save_signal(self, symbol: str, timeframe: str, strategy: str, 
                     signal: str, indicators: Dict[str, Any] = None,
-                    llm_decision: str = None) -> int:
+                    llm_decision: str = None, llm_data: Dict[str, Any] = None) -> int:
         """
         Save a trading signal to the database.
         
@@ -36,6 +36,7 @@ class DatabaseIntegration:
             signal: Signal type ('BUY', 'SELL', 'HOLD')
             indicators: Optional dictionary of indicator values
             llm_decision: Optional LLM decision
+            llm_data: Optional dictionary containing LLM model responses
             
         Returns:
             Signal ID if successful, -1 otherwise
@@ -51,6 +52,13 @@ class DatabaseIntegration:
                 'llm_decision': llm_decision,
                 'executed': False
             }
+            
+            # Include LLM model responses if provided
+            if llm_data:
+                if 'primary_model_response' in llm_data:
+                    signal_data['primary_model_response'] = llm_data['primary_model_response']
+                if 'secondary_model_response' in llm_data:
+                    signal_data['secondary_model_response'] = llm_data['secondary_model_response']
             
             signal_id = self.db.insert_signal(signal_data)
             if signal_id > 0:

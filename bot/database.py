@@ -27,9 +27,6 @@ class Database:
         
         # Create tables if they don't exist
         self._initialize_database()
-        
-        # Force recreate the alerts table which might have schema issues
-        self._recreate_alerts_table()
     
     def _initialize_database(self):
         """Initialize database tables if they don't exist."""
@@ -73,7 +70,9 @@ class Database:
                     llm_decision TEXT,
                     executed INTEGER DEFAULT 0,
                     trade_id TEXT,
-                    price REAL
+                    price REAL,
+                    primary_model_response TEXT,
+                    secondary_model_response TEXT
                 )
                 ''')
                 
@@ -147,30 +146,6 @@ class Database:
                 return True
         except Exception as e:
             logger.error(f"Error initializing database: {e}")
-            return False
-    
-    def _recreate_alerts_table(self):
-        """Force recreate the alerts table to fix any schema issues."""
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                # Drop and recreate alerts table
-                cursor.execute('DROP TABLE IF EXISTS alerts')
-                cursor.execute('''
-                CREATE TABLE alerts (
-                    alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    alert_type TEXT NOT NULL,
-                    severity TEXT NOT NULL,
-                    message TEXT NOT NULL,
-                    acknowledged INTEGER DEFAULT 0,
-                    timestamp TEXT NOT NULL,
-                    related_data TEXT
-                )
-                ''')
-                conn.commit()
-                return True
-        except Exception as e:
-            logger.error(f"Error recreating alerts table: {e}")
             return False
     
     def insert_trade(self, trade_data: Dict[str, Any]) -> bool:
@@ -249,39 +224,72 @@ class Database:
     
     def insert_signal(self, signal_data: Dict[str, Any]) -> int:
         """
-        Insert a new trading signal into the database
+        Insert a new trading signal into the database.
         
         Args:
-            signal_data: Dictionary containing signal information
-        
+            signal_data: Dictionary containing signal data with keys:
+                - symbol: Trading pair symbol
+                - timeframe: Timeframe of the signal
+                - strategy: Strategy that generated the signal
+                - signal: Signal type (BUY, SELL, HOLD)
+                - timestamp: ISO format timestamp
+                - indicators: Optional JSON string or dictionary of indicator values
+                - llm_decision: Optional LLM decision string
+                - executed: Optional boolean indicating if the signal was executed
+                - price: Optional price at signal time
+                - primary_model_response: Optional raw response from primary LLM model
+                - secondary_model_response: Optional structured response from secondary LLM model
+                
         Returns:
             Signal ID if successful, -1 otherwise
         """
         try:
-            required_fields = ['symbol', 'timeframe', 'strategy', 'signal', 'timestamp']
-            for field in required_fields:
-                if field not in signal_data:
-                    raise ValueError(f"Missing required field: {field}")
-            
-            # Convert indicators dict to JSON if present
-            if 'indicators' in signal_data and isinstance(signal_data['indicators'], dict):
-                signal_data['indicators'] = json.dumps(signal_data['indicators'])
-            
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
                 
-                # Build the SQL query dynamically
-                fields = ', '.join(signal_data.keys())
-                placeholders = ', '.join(['?' for _ in signal_data])
-                values = list(signal_data.values())
+                # Handle indicators dictionary
+                indicators_json = None
+                if 'indicators' in signal_data and signal_data['indicators']:
+                    if isinstance(signal_data['indicators'], dict):
+                        indicators_json = json.dumps(signal_data['indicators'])
+                    else:
+                        indicators_json = signal_data['indicators']
                 
-                query = f"INSERT INTO signals ({fields}) VALUES ({placeholders})"
-                cursor.execute(query, values)
-                conn.commit()
+                # Convert executed to integer
+                executed = 1 if signal_data.get('executed', False) else 0
                 
-                # Get the last inserted row id
+                # Extract primary and secondary model responses if present
+                primary_response = None
+                if 'primary_model_response' in signal_data and signal_data['primary_model_response']:
+                    primary_response = signal_data['primary_model_response']
+                
+                secondary_response = None
+                if 'secondary_model_response' in signal_data and signal_data['secondary_model_response']:
+                    secondary_response = signal_data['secondary_model_response']
+                
+                # Insert the signal
+                cursor.execute('''
+                INSERT INTO signals 
+                (symbol, timeframe, strategy, signal, timestamp, indicators, llm_decision, executed, price, primary_model_response, secondary_model_response) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    signal_data['symbol'],
+                    signal_data['timeframe'],
+                    signal_data['strategy'],
+                    signal_data['signal'],
+                    signal_data['timestamp'],
+                    indicators_json,
+                    signal_data.get('llm_decision'),
+                    executed,
+                    signal_data.get('price'),
+                    primary_response,
+                    secondary_response
+                ))
+                
+                # Get the ID of the inserted signal
                 signal_id = cursor.lastrowid
                 logger.info(f"Signal inserted with ID: {signal_id}")
+                
                 return signal_id
         except Exception as e:
             logger.error(f"Error inserting signal: {e}")
