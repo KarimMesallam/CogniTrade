@@ -20,6 +20,47 @@ logging.basicConfig(
 )
 logger = logging.getLogger("trading_bot")
 
+def handle_testnet_balance(symbol='BTC'):
+    """
+    Check if we're using testnet and if balances are too low.
+    
+    For Binance Testnet, if balance is zero, we inform the user about how to get more test funds.
+    Testnet accounts are automatically funded upon creation but may be reset periodically.
+    
+    Args:
+        symbol: Asset symbol to check (default: BTC)
+        
+    Returns:
+        bool: True if balance is sufficient or handled successfully
+    """
+    if not TESTNET:
+        return True
+    
+    try:
+        # Check balance for the specific asset
+        balance = get_account_balance(symbol)
+        if balance and balance.get('free', 0) > 0:
+            logger.info(f"Testnet {symbol} balance: {balance['free']}")
+            return True
+        
+        # If balance is zero or not found, provide instructions to the user
+        logger.warning(f"Your Testnet {symbol} balance is zero or insufficient.")
+        logger.info("===== BINANCE TESTNET FUND INFORMATION =====")
+        logger.info("The Binance Testnet resets periodically (typically once a month).")
+        logger.info("After a reset, your test funds should be automatically replenished.")
+        logger.info("Options to get more test funds:")
+        logger.info("1. Visit https://testnet.binance.vision/ and login with GitHub")
+        logger.info("2. Wait for the next scheduled reset of the testnet")
+        logger.info("3. Create a new API key which may trigger a balance refresh")
+        logger.info("Note: There is no direct API method to request more test funds.")
+        logger.info("==============================================")
+        
+        # We return True since this is just informational and shouldn't stop the bot
+        return True
+    except Exception as e:
+        logger.error(f"Error checking testnet balance: {e}")
+        return False
+
 def initialize_bot():
     """Initialize the trading bot and verify connectivity."""
     try:
@@ -43,6 +84,10 @@ def initialize_bot():
         if not symbol_info:
             logger.error(f"Symbol {SYMBOL} not found or not available for trading")
             return False
+        
+        # Check and handle testnet balance if necessary
+        base_asset = SYMBOL.replace('USDT', '')  # Extract BTC from BTCUSDT
+        handle_testnet_balance(base_asset)
         
         # Initialize database
         try:
