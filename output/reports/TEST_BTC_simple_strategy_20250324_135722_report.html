@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest Report: TEST_BTC</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            margin: 20px; 
+            color: #333; 
+        }
+        h1, h2, h3 { color: #2c3e50; }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+        th, td { 
+            text-align: left; 
+            padding: 8px; 
+            border-bottom: 1px solid #ddd; 
+        }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .positive { color: green; }
+        .negative { color: red; }
+        .chart-container { 
+            margin: 20px 0; 
+            text-align: center; 
+        }
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+        .metric-card { 
+            background-color: #f9f9f9; 
+            padding: 15px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        .metric-value { 
+            font-size: 24px; 
+            font-weight: bold; 
+            margin: 10px 0; 
+        }
+        .section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>Backtest Report: TEST_BTC</h1>
+    <p>
+        <strong>Strategy:</strong> simple_strategy<br>
+        <strong>Period:</strong> 2025-01-23 to 2025-03-24<br>
+        <strong>Timeframes:</strong> 1h<br>
+        <strong>Generated:</strong> 2025-03-24 13:57:22
+    </p>
+    
+    <div class="section">
+        <h2>Performance Summary</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total Return</h3>
+                <div class="metric-value positive">
+                    99900.0%
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Initial Capital</h3>
+                <div class="metric-value">$10000.0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Final Equity</h3>
+                <div class="metric-value">$10000000.0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Win Rate</h3>
+                <div class="metric-value">40.0%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Profit Factor</h3>
+                <div class="metric-value">7314679253.19</div>
+            </div>
+            <div class="metric-card">
+                <h3>Expectancy</h3>
+                <div class="metric-value positive">
+                    $7.939384231734486e+16
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Total Trades</h3>
+                <div class="metric-value">5</div>
+            </div>
+            <div class="metric-card">
+                <h3>Max Drawdown</h3>
+                <div class="metric-value negative">-56.72%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Sharpe Ratio</h3>
+                <div class="metric-value">7.88</div>
+            </div>
+            <div class="metric-card">
+                <h3>Sortino Ratio</h3>
+                <div class="metric-value">20.49</div>
+            </div>
+            <div class="metric-card">
+                <h3>Calmar Ratio</h3>
+                <div class="metric-value">15.57</div>
+            </div>
+            <div class="metric-card">
+                <h3>Recovery Factor</h3>
+                <div class="metric-value">1761.43</div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    
+    <div class="section">
+        <h2>Trade Analysis</h2>
+        
+        <h3>Trade Statistics</h3>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Total Trades</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>Winning Trades</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>Losing Trades</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>Win Rate</td>
+                <td>40.0%</td>
+            </tr>
+            <tr>
+                <td>Average Win</td>
+                <td class="positive">$1.9848460582049728e+17</td>
+            </tr>
+            <tr>
+                <td>Average Loss</td>
+                <td class="negative">$-18090071.48</td>
+            </tr>
+            <tr>
+                <td>Risk/Reward Ratio</td>
+                <td>10972018879.78</td>
+            </tr>
+        </table>
+        
+        <h3>Trade List</h3>
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Side</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>P/L</th>
+                <th>ROI %</th>
+            </tr>
+            
+            <tr>
+                <td>2025-02-01 11:00:00</td>
+                <td>BUY</td>
+                <td>0.0</td>
+                <td>162077570.107258</td>
+                <td class="">
+                    
+                </td>
+                <td class="">
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-02 05:00:00</td>
+                <td>SELL</td>
+                <td>0.0</td>
+                <td>162077570.107258</td>
+                <td class="negative">
+                    -922.34
+                </td>
+                <td class="negative">
+                    -9.71%
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-02 21:00:00</td>
+                <td>BUY</td>
+                <td>0.0</td>
+                <td>143573164.625168</td>
+                <td class="">
+                    
+                </td>
+                <td class="">
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-03 06:00:00</td>
+                <td>SELL</td>
+                <td>0.0</td>
+                <td>143573164.625168</td>
+                <td class="negative">
+                    -2676.31
+                </td>
+                <td class="negative">
+                    -31.07%
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-05 07:00:00</td>
+                <td>BUY</td>
+                <td>0.0</td>
+                <td>270999273.55499</td>
+                <td class="">
+                    
+                </td>
+                <td class="">
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-14 05:00:00</td>
+                <td>SELL</td>
+                <td>0.73</td>
+                <td>270999273.55499</td>
+                <td class="positive">
+                    196486387.28
+                </td>
+                <td class="positive">
+                    3240172.6%
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-18 13:00:00</td>
+                <td>BUY</td>
+                <td>0.0</td>
+                <td>207318313118.6774</td>
+                <td class="">
+                    
+                </td>
+                <td class="">
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-18 19:00:00</td>
+                <td>SELL</td>
+                <td>0.0</td>
+                <td>207318313118.6774</td>
+                <td class="negative">
+                    -54266615.79
+                </td>
+                <td class="negative">
+                    -29.07%
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-02-28 00:00:00</td>
+                <td>BUY</td>
+                <td>0.0</td>
+                <td>3.907796603663838e+17</td>
+                <td class="">
+                    
+                </td>
+                <td class="">
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>2025-03-05 15:00:00</td>
+                <td>SELL</td>
+                <td>1.02</td>
+                <td>3.907796603663838e+17</td>
+                <td class="positive">
+                    3.9696921144450816e+17
+                </td>
+                <td class="positive">
+                    294187451445.32%
+                </td>
+            </tr>
+            
+        </table>
+    </div>
+    
+</body>
+</html>

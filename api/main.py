@@ -17,7 +17,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 logger = logging.getLogger("trading_bot")
 
 # Import bot modules
-from bot import binance_api, strategy, backtesting, order_manager, database, config, llm_manager
+from bot import binance_api, strategy, order_manager, database, config, llm_manager
+from bot.backtesting import run_backtest, generate_report, optimize_strategy
 
 # Create a TradingBot class for the API
 class TradingBot:
@@ -330,18 +331,8 @@ async def get_strategies():
 
 # Run backtest
 @app.post("/backtest/run")
-async def run_backtest(config: BacktestConfig):
+async def run_backtest_endpoint(config: BacktestConfig):
     try:
-        # Create a backtest engine with the provided configuration
-        engine = backtesting.BacktestEngine(
-            symbol=config.symbol,
-            timeframes=config.timeframes,
-            start_date=config.start_date,
-            end_date=config.end_date,
-            initial_capital=config.initial_capital,
-            commission=config.commission
-        )
-        
         # Get the requested strategy function
         strat_func = None
         if config.strategy_name == "sma_crossover":
@@ -370,10 +361,18 @@ async def run_backtest(config: BacktestConfig):
         else:
             raise HTTPException(status_code=400, detail=f"Unknown strategy: {config.strategy_name}")
         
-        # Run the backtest
-        results = engine.run_backtest(strat_func)
+        # Run the backtest using the new API
+        result = run_backtest(
+            symbol=config.symbol,
+            timeframes=config.timeframes,
+            start_date=config.start_date,
+            end_date=config.end_date,
+            strategy_func=strat_func,
+            initial_capital=config.initial_capital,
+            commission_rate=config.commission
+        )
         
-        if not results:
+        if not result:
             raise HTTPException(status_code=500, detail="Backtest failed to produce results")
         
         # Format the results for the response
@@ -384,17 +383,16 @@ async def run_backtest(config: BacktestConfig):
             "end_date": config.end_date,
             "strategy": config.strategy_name,
             "initial_capital": config.initial_capital,
-            "final_value": results["final_equity"],
-            "profit_loss": results.get("total_profit", results["final_equity"] - config.initial_capital),
-            "profit_loss_percent": results.get("total_return_pct", 
-                                              ((results["final_equity"] - config.initial_capital) / config.initial_capital) * 100),
-            "sharpe_ratio": results["sharpe_ratio"],
-            "max_drawdown": results["max_drawdown"],
-            "trades": len(results["trades"]),
-            "win_rate": results.get("win_rate", 0),
-            "avg_profit": results.get("avg_profit", 0),
-            "avg_loss": results.get("avg_loss", 0),
-            "profit_factor": results.get("profit_factor", 0)
+            "final_value": result.final_equity,
+            "profit_loss": result.final_equity - config.initial_capital,
+            "profit_loss_percent": result.metrics.total_return_pct,
+            "sharpe_ratio": result.metrics.sharpe_ratio,
+            "max_drawdown": result.metrics.max_drawdown_pct,
+            "trades": result.total_trades,
+            "win_rate": result.metrics.win_rate,
+            "avg_profit": result.metrics.avg_win if hasattr(result.metrics, 'avg_win') else 0,
+            "avg_loss": result.metrics.avg_loss if hasattr(result.metrics, 'avg_loss') else 0,
+            "profit_factor": result.metrics.profit_factor if hasattr(result.metrics, 'profit_factor') else 0
         }
         
         return {"status": "success", "results": formatted_results}

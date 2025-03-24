@@ -337,3 +337,35 @@
 2025-03-24 12:21:44,152 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_20250324_122143_text.txt
 2025-03-24 12:21:44,152 - trading_bot - INFO - Generated comprehensive comparison report: logs/strategy_comparison_20250324_122143_report.html
 2025-03-24 12:21:44,157 - trading_bot - INFO - Summary report saved to logs/strategy_comparison_report.txt
+2025-03-24 13:59:02,915 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:59:02,921 - trading_bot.data - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 13:59:02,921 - trading_bot.backtest - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 13:59:02,923 - trading_bot.data - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:59:02,923 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:59:02,923 - trading_bot.backtest - INFO - Running sma_crossover_strategy on 1 symbols
+2025-03-24 13:59:02,924 - trading_bot.backtest - INFO - Running backtests sequentially
+2025-03-24 13:59:02,924 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:59:02,924 - trading_bot.backtest - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 13:59:02,925 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:59:02,940 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:59:02,946 - trading_bot.backtest - INFO - Added indicators to 4h data
+2025-03-24 13:59:00,594 - trading_bot.backtest - INFO - Backtest completed in -2.34 seconds with 18 trades
+2025-03-24 13:59:00,594 - trading_bot.backtest - INFO - Completed backtests for 1 symbols in -2.33 seconds
+2025-03-24 13:59:00,594 - trading_bot.backtest - INFO - Running rsi_strategy on 1 symbols
+2025-03-24 13:59:00,594 - trading_bot.backtest - INFO - Running backtests sequentially
+2025-03-24 13:59:00,595 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:59:00,596 - trading_bot.backtest - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 13:59:00,596 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:59:00,612 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:59:00,618 - trading_bot.backtest - INFO - Added indicators to 4h data
+2025-03-24 13:59:00,746 - trading_bot.backtest - INFO - Backtest completed in 0.14 seconds with 2 trades
+2025-03-24 13:59:00,746 - trading_bot.backtest - INFO - Completed backtests for 1 symbols in 0.15 seconds
+2025-03-24 13:59:00,747 - trading_bot.backtest - INFO - Running bollinger_band_strategy on 1 symbols
+2025-03-24 13:59:00,747 - trading_bot.backtest - INFO - Running backtests sequentially
+2025-03-24 13:59:00,747 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:59:00,748 - trading_bot.backtest - INFO - Loaded 443 candles for BTCUSDT at 1h timeframe
+2025-03-24 13:59:00,748 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:59:00,763 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:59:00,768 - trading_bot.backtest - INFO - Added indicators to 4h data
+2025-03-24 13:59:00,914 - trading_bot.backtest - INFO - Backtest completed in 0.16 seconds with 20 trades
+2025-03-24 13:59:00,914 - trading_bot.backtest - INFO - Completed backtests for 1 symbols in 0.17 seconds

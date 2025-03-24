@@ -1,0 +1,968 @@
+2025-03-24 14:03:38,765 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:03:38,765 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:03:38,768 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:03:38,769 - arithmetic_test - INFO - Initializing backtest engine
+2025-03-24 14:03:38,772 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:03:38,774 - trading_bot.data - WARNING - No market data available for TEST at 1h timeframe
+2025-03-24 14:03:38,775 - trading_bot.backtest - WARNING - No historical data for TEST at 1h timeframe: No market data available for TEST at 1h timeframe
+2025-03-24 14:03:38,775 - trading_bot.backtest - ERROR - Error loading market data: Failed to load market data for primary timeframe 1h
+2025-03-24 14:03:38,775 - arithmetic_test - ERROR - Error running arithmetic validation test: Failed to initialize backtest engine: Failed to load market data for primary timeframe 1h
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 82, in __init__
+    self._load_market_data()
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 157, in _load_market_data
+    raise DataError(
+bot.backtesting.exceptions.base.DataError: Failed to load market data for primary timeframe 1h
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/arithmetic_test.py", line 221, in run_arithmetic_test
+    engine = BacktestEngine(
+             ^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 86, in __init__
+    raise DataError(f"Failed to initialize backtest engine: {e.message}", e.details)
+bot.backtesting.exceptions.base.DataError: Failed to initialize backtest engine: Failed to load market data for primary timeframe 1h
+2025-03-24 14:04:01,571 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:04:01,571 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:04:01,573 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:04:01,573 - arithmetic_test - INFO - Creating test database at test_arithmetic.db
+2025-03-24 14:04:01,573 - arithmetic_test - ERROR - Error running arithmetic validation test: [Errno 2] No such file or directory: ''
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/arithmetic_test.py", line 223, in run_arithmetic_test
+    db = Database(test_db_path)
+         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/database.py", line 25, in __init__
+    os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+  File "<frozen os>", line 225, in makedirs
+FileNotFoundError: [Errno 2] No such file or directory: ''
+2025-03-24 14:04:22,385 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:04:22,385 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:04:22,386 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:04:22,387 - arithmetic_test - INFO - Creating test database at /tmp/tmpf6euhjm7/test_arithmetic.db
+2025-03-24 14:04:22,387 - arithmetic_test - INFO - Initializing backtest engine
+2025-03-24 14:04:22,418 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:04:22,420 - trading_bot.data - WARNING - No market data available for TEST at 1h timeframe
+2025-03-24 14:04:22,420 - trading_bot.backtest - WARNING - No historical data for TEST at 1h timeframe: No market data available for TEST at 1h timeframe
+2025-03-24 14:04:22,420 - trading_bot.backtest - ERROR - Error loading market data: Failed to load market data for primary timeframe 1h
+2025-03-24 14:04:22,420 - arithmetic_test - ERROR - Error running arithmetic validation test: Failed to initialize backtest engine: Failed to load market data for primary timeframe 1h
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 82, in __init__
+    self._load_market_data()
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 157, in _load_market_data
+    raise DataError(
+bot.backtesting.exceptions.base.DataError: Failed to load market data for primary timeframe 1h
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/arithmetic_test.py", line 227, in run_arithmetic_test
+    engine = BacktestEngine(
+             ^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 86, in __init__
+    raise DataError(f"Failed to initialize backtest engine: {e.message}", e.details)
+bot.backtesting.exceptions.base.DataError: Failed to initialize backtest engine: Failed to load market data for primary timeframe 1h
+2025-03-24 14:04:51,616 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:04:51,617 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:04:51,621 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:04:51,622 - arithmetic_test - INFO - Using test path: /tmp/tmpgqkgffuw/test_arithmetic.db
+2025-03-24 14:04:51,622 - arithmetic_test - INFO - Initializing test backtest engine
+2025-03-24 14:04:51,657 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:04:51,657 - arithmetic_test - INFO - Skipping database loading in test engine
+2025-03-24 14:04:51,657 - arithmetic_test - INFO - Running backtest with perfect timing strategy
+2025-03-24 14:04:51,670 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:04:51,728 - trading_bot.backtest - INFO - Backtest completed in 0.06 seconds with 2 trades
+2025-03-24 14:04:51,728 - arithmetic_test - INFO - Validating results
+2025-03-24 14:04:51,728 - arithmetic_test - ERROR - Error running arithmetic validation test: Final equity mismatch: 10489.5 vs expected 11002.961025
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/arithmetic_test.py", line 262, in run_arithmetic_test
+    assert abs(result.final_equity - expected['final_capital']) < 0.01, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Final equity mismatch: 10489.5 vs expected 11002.961025
+2025-03-24 14:08:04,721 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:08:04,722 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:08:04,725 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:08:04,725 - arithmetic_test - INFO - 
+==== Expected Calculation Details ====
+2025-03-24 14:08:04,725 - arithmetic_test - INFO - Initial Capital: $10000.00
+2025-03-24 14:08:04,725 - arithmetic_test - INFO - 
+Trade 1 - Buy at {buy_price_1}, Sell at {sell_price_1}:
+2025-03-24 14:08:04,725 - arithmetic_test - INFO -   Available Capital: $5000.00
+2025-03-24 14:08:04,725 - arithmetic_test - INFO -   Position Size: 50.000000
+2025-03-24 14:08:04,725 - arithmetic_test - INFO -   Buy Commission: $5.00
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Remaining Capital: $4995.00
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Sell Value: $5500.00
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Sell Commission: $5.50
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Proceeds: $5494.50
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Profit: $494.50
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Capital After Trade: $10489.50
+2025-03-24 14:08:04,726 - arithmetic_test - INFO - 
+Trade 2 - Buy at {buy_price_2}, Sell at {sell_price_2}:
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Available Capital: $5244.75
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Position Size: 52.977273
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Buy Commission: $5.24
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Remaining Capital: $5239.51
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Sell Value: $5769.23
+2025-03-24 14:08:04,726 - arithmetic_test - INFO -   Sell Commission: $5.77
+2025-03-24 14:08:04,727 - arithmetic_test - INFO -   Proceeds: $5763.46
+2025-03-24 14:08:04,727 - arithmetic_test - INFO -   Profit: $518.71
+2025-03-24 14:08:04,727 - arithmetic_test - INFO - 
+Final Capital: $11002.96
+2025-03-24 14:08:04,727 - arithmetic_test - INFO - Total Return: 10.03%
+2025-03-24 14:08:04,727 - arithmetic_test - INFO - Using test path: /tmp/tmpu666ee3m/test_arithmetic.db
+2025-03-24 14:08:04,727 - arithmetic_test - INFO - Initializing test backtest engine
+2025-03-24 14:08:04,762 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:08:04,762 - arithmetic_test - INFO - Skipping database loading in test engine
+2025-03-24 14:08:04,762 - arithmetic_test - INFO - Running backtest with perfect timing strategy
+2025-03-24 14:08:04,775 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:08:04,832 - trading_bot.backtest - INFO - Backtest completed in 0.06 seconds with 2 trades
+2025-03-24 14:08:04,833 - arithmetic_test - INFO - Validating results
+2025-03-24 14:08:04,833 - arithmetic_test - ERROR - Error running arithmetic validation test: Final equity mismatch: 10489.5 vs expected 11002.961025
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/arithmetic_test.py", line 292, in run_arithmetic_test
+    assert abs(result.final_equity - expected['final_capital']) < tolerance, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Final equity mismatch: 10489.5 vs expected 11002.961025
+2025-03-24 14:09:58,800 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:09:58,800 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:09:58,802 - arithmetic_test - INFO - Test data contains 62 candles with price ~100.00
+2025-03-24 14:09:58,802 - arithmetic_test - INFO - Test data contains 2 candles with price ~110.00
+2025-03-24 14:09:58,803 - arithmetic_test - INFO - Test data contains 2 candles with price ~99.00
+2025-03-24 14:09:58,803 - arithmetic_test - INFO - Test data contains 1 candles with price ~108.90
+2025-03-24 14:09:58,804 - arithmetic_test - INFO -   At time: 2025-01-10 23:00:00
+2025-03-24 14:09:58,804 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:09:58,804 - arithmetic_test - INFO - Using test path: /tmp/tmp_1zw5uy3/test_arithmetic.db
+2025-03-24 14:09:58,804 - arithmetic_test - INFO - Initializing diagnostic backtest engine
+2025-03-24 14:09:58,838 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:09:58,838 - arithmetic_test - INFO - Skipping database loading in test engine
+2025-03-24 14:09:58,838 - arithmetic_test - INFO - Running backtest with perfect timing strategy
+2025-03-24 14:09:58,848 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:09:58,849 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,849 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,850 - arithmetic_test - INFO - [Engine] BUY executed: 50.000000 units at 100.00
+2025-03-24 14:09:58,850 - arithmetic_test - INFO - [Engine] Capital change: 10000.00 -> 4995.00
+2025-03-24 14:09:58,850 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,850 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,850 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,851 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,851 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,851 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,851 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,851 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,852 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,852 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,852 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,852 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,852 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,853 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,853 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,853 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,853 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,853 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,854 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,854 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,854 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,854 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,854 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,855 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,855 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 15:00:00, Price: 100.00
+2025-03-24 14:09:58,855 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,855 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,855 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,856 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,856 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,856 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,856 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,856 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,856 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,857 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,857 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,857 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,857 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,857 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,857 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,858 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,858 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,858 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,858 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,858 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,858 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,859 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,859 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,859 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,859 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,859 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,860 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,860 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,860 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,860 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,860 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,861 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,861 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,861 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,861 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,861 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,862 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,862 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,862 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,862 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,862 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,862 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,863 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,863 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,863 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,863 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,863 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,863 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,864 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,864 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,864 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,864 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,864 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,864 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,865 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,865 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,865 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,865 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,865 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,865 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,866 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 11:00:00, Price: 100.00
+2025-03-24 14:09:58,866 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,866 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,866 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,866 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:09:58,867 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:09:58,867 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:09:58,867 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.17
+2025-03-24 14:09:58,867 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.34
+2025-03-24 14:09:58,868 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.51
+2025-03-24 14:09:58,868 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:09:58,869 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.85
+2025-03-24 14:09:58,869 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.02
+2025-03-24 14:09:58,869 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.19
+2025-03-24 14:09:58,870 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.36
+2025-03-24 14:09:58,870 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.53
+2025-03-24 14:09:58,871 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.69
+2025-03-24 14:09:58,871 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.86
+2025-03-24 14:09:58,871 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.03
+2025-03-24 14:09:58,872 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.20
+2025-03-24 14:09:58,872 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.37
+2025-03-24 14:09:58,872 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.54
+2025-03-24 14:09:58,873 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.71
+2025-03-24 14:09:58,873 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.88
+2025-03-24 14:09:58,874 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.05
+2025-03-24 14:09:58,874 - arithmetic_test - INFO - [Strategy] Time: 2025-01-04 07:00:00, Price: 103.22
+2025-03-24 14:09:58,874 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.22
+2025-03-24 14:09:58,874 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.39
+2025-03-24 14:09:58,875 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.56
+2025-03-24 14:09:58,875 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.73
+2025-03-24 14:09:58,875 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.90
+2025-03-24 14:09:58,876 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.07
+2025-03-24 14:09:58,876 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.24
+2025-03-24 14:09:58,877 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.41
+2025-03-24 14:09:58,877 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.58
+2025-03-24 14:09:58,877 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.75
+2025-03-24 14:09:58,878 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.92
+2025-03-24 14:09:58,878 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.08
+2025-03-24 14:09:58,878 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.25
+2025-03-24 14:09:58,879 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.42
+2025-03-24 14:09:58,879 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.59
+2025-03-24 14:09:58,880 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.76
+2025-03-24 14:09:58,880 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.93
+2025-03-24 14:09:58,880 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.10
+2025-03-24 14:09:58,881 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.27
+2025-03-24 14:09:58,881 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.44
+2025-03-24 14:09:58,882 - arithmetic_test - INFO - [Strategy] Time: 2025-01-05 03:00:00, Price: 106.61
+2025-03-24 14:09:58,882 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.61
+2025-03-24 14:09:58,882 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.78
+2025-03-24 14:09:58,882 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.95
+2025-03-24 14:09:58,883 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.12
+2025-03-24 14:09:58,883 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.29
+2025-03-24 14:09:58,884 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.46
+2025-03-24 14:09:58,884 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.63
+2025-03-24 14:09:58,884 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.80
+2025-03-24 14:09:58,885 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.97
+2025-03-24 14:09:58,885 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.14
+2025-03-24 14:09:58,885 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.31
+2025-03-24 14:09:58,886 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.47
+2025-03-24 14:09:58,886 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.64
+2025-03-24 14:09:58,887 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.81
+2025-03-24 14:09:58,887 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.98
+2025-03-24 14:09:58,887 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.15
+2025-03-24 14:09:58,888 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.32
+2025-03-24 14:09:58,888 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.49
+2025-03-24 14:09:58,889 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.66
+2025-03-24 14:09:58,889 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.83
+2025-03-24 14:09:58,889 - arithmetic_test - INFO - [Strategy] Time: 2025-01-05 23:00:00, Price: 110.00
+2025-03-24 14:09:58,890 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:09:58,890 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:09:58,890 - arithmetic_test - INFO - [Engine] SELL executed: 50.000000 units at 110.00
+2025-03-24 14:09:58,890 - arithmetic_test - INFO - [Engine] Capital change: 4995.00 -> 10489.50
+2025-03-24 14:09:58,891 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:09:58,891 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:09:58,891 - arithmetic_test - WARNING - [Engine] Signal SELL not executed. Position: 0.000000 -> 0.000000
+2025-03-24 14:09:58,891 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.81
+2025-03-24 14:09:58,891 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.63
+2025-03-24 14:09:58,892 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.44
+2025-03-24 14:09:58,892 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.25
+2025-03-24 14:09:58,893 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.07
+2025-03-24 14:09:58,893 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.88
+2025-03-24 14:09:58,893 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.69
+2025-03-24 14:09:58,894 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.51
+2025-03-24 14:09:58,894 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.32
+2025-03-24 14:09:58,894 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.14
+2025-03-24 14:09:58,895 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.95
+2025-03-24 14:09:58,895 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.76
+2025-03-24 14:09:58,896 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.58
+2025-03-24 14:09:58,896 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.39
+2025-03-24 14:09:58,896 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.20
+2025-03-24 14:09:58,897 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.02
+2025-03-24 14:09:58,897 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.83
+2025-03-24 14:09:58,897 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.64
+2025-03-24 14:09:58,898 - arithmetic_test - INFO - [Strategy] Time: 2025-01-06 19:00:00, Price: 106.46
+2025-03-24 14:09:58,898 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.46
+2025-03-24 14:09:58,898 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.27
+2025-03-24 14:09:58,899 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.08
+2025-03-24 14:09:58,899 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.90
+2025-03-24 14:09:58,900 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.71
+2025-03-24 14:09:58,900 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.53
+2025-03-24 14:09:58,900 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.34
+2025-03-24 14:09:58,901 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.15
+2025-03-24 14:09:58,901 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.97
+2025-03-24 14:09:58,901 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.78
+2025-03-24 14:09:58,902 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.59
+2025-03-24 14:09:58,902 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.41
+2025-03-24 14:09:58,903 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.22
+2025-03-24 14:09:58,903 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.03
+2025-03-24 14:09:58,904 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.85
+2025-03-24 14:09:58,905 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.66
+2025-03-24 14:09:58,906 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.47
+2025-03-24 14:09:58,906 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.29
+2025-03-24 14:09:58,907 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.10
+2025-03-24 14:09:58,907 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.92
+2025-03-24 14:09:58,908 - arithmetic_test - INFO - [Strategy] Time: 2025-01-07 15:00:00, Price: 102.73
+2025-03-24 14:09:58,908 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.73
+2025-03-24 14:09:58,909 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.54
+2025-03-24 14:09:58,909 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.36
+2025-03-24 14:09:58,910 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.17
+2025-03-24 14:09:58,911 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.98
+2025-03-24 14:09:58,911 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.80
+2025-03-24 14:09:58,912 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.61
+2025-03-24 14:09:58,912 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.42
+2025-03-24 14:09:58,913 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.24
+2025-03-24 14:09:58,913 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.05
+2025-03-24 14:09:58,913 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.86
+2025-03-24 14:09:58,914 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:09:58,914 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.49
+2025-03-24 14:09:58,915 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.31
+2025-03-24 14:09:58,915 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.12
+2025-03-24 14:09:58,916 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.93
+2025-03-24 14:09:58,916 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.75
+2025-03-24 14:09:58,917 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.56
+2025-03-24 14:09:58,917 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.37
+2025-03-24 14:09:58,918 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.19
+2025-03-24 14:09:58,919 - arithmetic_test - INFO - [Strategy] Time: 2025-01-08 11:00:00, Price: 99.00
+2025-03-24 14:09:58,919 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:09:58,919 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:09:58,919 - arithmetic_test - INFO - [Engine] BUY executed: 52.977273 units at 99.00
+2025-03-24 14:09:58,919 - arithmetic_test - INFO - [Engine] Capital change: 10489.50 -> 5239.51
+2025-03-24 14:09:58,920 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:09:58,920 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:09:58,920 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:09:58,921 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.17
+2025-03-24 14:09:58,921 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.34
+2025-03-24 14:09:58,921 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.50
+2025-03-24 14:09:58,922 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.67
+2025-03-24 14:09:58,922 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.84
+2025-03-24 14:09:58,923 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.01
+2025-03-24 14:09:58,924 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.01
+2025-03-24 14:09:58,924 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:09:58,924 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.17
+2025-03-24 14:09:58,925 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.34
+2025-03-24 14:09:58,925 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.51
+2025-03-24 14:09:58,926 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:09:58,926 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.85
+2025-03-24 14:09:58,926 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.01
+2025-03-24 14:09:58,927 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.18
+2025-03-24 14:09:58,927 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.35
+2025-03-24 14:09:58,928 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.52
+2025-03-24 14:09:58,928 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.68
+2025-03-24 14:09:58,929 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.85
+2025-03-24 14:09:58,930 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.02
+2025-03-24 14:09:58,930 - arithmetic_test - INFO - [Strategy] Time: 2025-01-09 07:00:00, Price: 102.19
+2025-03-24 14:09:58,930 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.19
+2025-03-24 14:09:58,931 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.36
+2025-03-24 14:09:58,931 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.52
+2025-03-24 14:09:58,932 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.69
+2025-03-24 14:09:58,932 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.86
+2025-03-24 14:09:58,932 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.03
+2025-03-24 14:09:58,933 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.19
+2025-03-24 14:09:58,933 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.36
+2025-03-24 14:09:58,934 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.53
+2025-03-24 14:09:58,934 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.70
+2025-03-24 14:09:58,934 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.87
+2025-03-24 14:09:58,935 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.03
+2025-03-24 14:09:58,935 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.20
+2025-03-24 14:09:58,936 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.37
+2025-03-24 14:09:58,937 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.54
+2025-03-24 14:09:58,937 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.71
+2025-03-24 14:09:58,937 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.87
+2025-03-24 14:09:58,938 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.04
+2025-03-24 14:09:58,938 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.21
+2025-03-24 14:09:58,939 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.38
+2025-03-24 14:09:58,939 - arithmetic_test - INFO - [Strategy] Time: 2025-01-10 03:00:00, Price: 105.54
+2025-03-24 14:09:58,939 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.54
+2025-03-24 14:09:58,940 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.71
+2025-03-24 14:09:58,941 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.88
+2025-03-24 14:09:58,941 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.05
+2025-03-24 14:09:58,942 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.22
+2025-03-24 14:09:58,942 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.38
+2025-03-24 14:09:58,943 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.55
+2025-03-24 14:09:58,943 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.72
+2025-03-24 14:09:58,944 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.89
+2025-03-24 14:09:58,944 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.05
+2025-03-24 14:09:58,944 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.22
+2025-03-24 14:09:58,945 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.39
+2025-03-24 14:09:58,945 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.56
+2025-03-24 14:09:58,946 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.73
+2025-03-24 14:09:58,946 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.89
+2025-03-24 14:09:58,946 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.06
+2025-03-24 14:09:58,947 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.23
+2025-03-24 14:09:58,947 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.40
+2025-03-24 14:09:58,948 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.56
+2025-03-24 14:09:58,948 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.73
+2025-03-24 14:09:58,948 - arithmetic_test - INFO - [Strategy] Time: 2025-01-10 23:00:00, Price: 108.90
+2025-03-24 14:09:58,948 - arithmetic_test - INFO - [Strategy] SELL signal at price 108.90
+2025-03-24 14:09:58,949 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 108.90
+2025-03-24 14:09:58,949 - arithmetic_test - INFO - [Engine] SELL executed: 52.977273 units at 108.90
+2025-03-24 14:09:58,949 - arithmetic_test - INFO - [Engine] Capital change: 5239.51 -> 11002.96
+2025-03-24 14:09:58,953 - trading_bot.backtest - INFO - Backtest completed in 0.11 seconds with 4 trades
+2025-03-24 14:09:58,953 - arithmetic_test - INFO - 
+==== All Trades ====
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Trade 1: BUY at 100.00, Quantity: 50.000000
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Trade 2: SELL at 110.00, Quantity: 50.000000
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Trade 3: BUY at 99.00, Quantity: 52.977273
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Trade 4: SELL at 108.90, Quantity: 52.977273
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - 
+Final position size: 0.000000
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Final capital: $11002.96
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - 
+==== Final Results Comparison ====
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Initial Capital - Expected: $10000.00, Actual: $10000.00
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Final Capital - Expected: $11002.96, Actual: $11002.96
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Total Return % - Expected: 10.03%, Actual: 10.03%
+2025-03-24 14:09:58,954 - arithmetic_test - INFO - Final Capital Difference: $0.00
+2025-03-24 14:09:58,955 - arithmetic_test - INFO - Return % Difference: 0.00 percentage points
+2025-03-24 14:18:15,640 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:18:15,640 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:18:15,643 - arithmetic_test - INFO - Test data contains 62 candles with price ~100.00
+2025-03-24 14:18:15,643 - arithmetic_test - INFO - Test data contains 2 candles with price ~110.00
+2025-03-24 14:18:15,643 - arithmetic_test - INFO - Test data contains 2 candles with price ~99.00
+2025-03-24 14:18:15,644 - arithmetic_test - INFO - Test data contains 1 candles with price ~108.90
+2025-03-24 14:18:15,644 - arithmetic_test - INFO -   At time: 2025-01-10 23:00:00
+2025-03-24 14:18:15,644 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:18:15,645 - arithmetic_test - INFO - Using test path: /tmp/tmp2h78qb49/test_arithmetic.db
+2025-03-24 14:18:15,645 - arithmetic_test - INFO - Initializing diagnostic backtest engine
+2025-03-24 14:18:15,677 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:18:15,677 - arithmetic_test - INFO - Skipping database loading in test engine
+2025-03-24 14:18:15,677 - arithmetic_test - INFO - Running backtest with perfect timing strategy
+2025-03-24 14:18:15,687 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:18:15,689 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,690 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,690 - arithmetic_test - INFO - [Engine] BUY executed: 50.000000 units at 100.00
+2025-03-24 14:18:15,690 - arithmetic_test - INFO - [Engine] Capital change: 10000.00 -> 4995.00
+2025-03-24 14:18:15,691 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,691 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,691 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,692 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,692 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,692 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,692 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,692 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,693 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,693 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,693 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,693 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,694 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,694 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,694 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,694 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,694 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,694 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,695 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,695 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,695 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,695 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,695 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,695 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,696 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 15:00:00, Price: 100.00
+2025-03-24 14:18:15,696 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,696 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,696 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,697 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,697 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,697 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,697 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,697 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,697 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,698 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,698 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,698 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,698 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,698 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,698 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,699 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,699 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,699 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,699 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,700 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,700 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,700 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,700 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,700 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,701 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,701 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,701 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,701 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,701 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,701 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,702 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,702 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,702 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,702 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,702 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,702 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,703 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,703 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,703 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,703 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,704 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,704 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,704 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,704 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,704 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,705 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,705 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,705 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,705 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,705 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,705 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,706 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,706 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,706 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,706 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,706 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,706 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,707 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,707 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,707 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,708 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 11:00:00, Price: 100.00
+2025-03-24 14:18:15,708 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,708 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,708 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,708 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:18:15,709 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:18:15,709 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:18:15,709 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.17
+2025-03-24 14:18:15,710 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.34
+2025-03-24 14:18:15,710 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.51
+2025-03-24 14:18:15,710 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:18:15,711 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.85
+2025-03-24 14:18:15,711 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.02
+2025-03-24 14:18:15,712 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.19
+2025-03-24 14:18:15,712 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.36
+2025-03-24 14:18:15,713 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.53
+2025-03-24 14:18:15,713 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.69
+2025-03-24 14:18:15,713 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.86
+2025-03-24 14:18:15,714 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.03
+2025-03-24 14:18:15,714 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.20
+2025-03-24 14:18:15,715 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.37
+2025-03-24 14:18:15,715 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.54
+2025-03-24 14:18:15,715 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.71
+2025-03-24 14:18:15,716 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.88
+2025-03-24 14:18:15,716 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.05
+2025-03-24 14:18:15,716 - arithmetic_test - INFO - [Strategy] Time: 2025-01-04 07:00:00, Price: 103.22
+2025-03-24 14:18:15,717 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.22
+2025-03-24 14:18:15,717 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.39
+2025-03-24 14:18:15,717 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.56
+2025-03-24 14:18:15,718 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.73
+2025-03-24 14:18:15,718 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.90
+2025-03-24 14:18:15,718 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.07
+2025-03-24 14:18:15,719 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.24
+2025-03-24 14:18:15,719 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.41
+2025-03-24 14:18:15,719 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.58
+2025-03-24 14:18:15,720 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.75
+2025-03-24 14:18:15,720 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.92
+2025-03-24 14:18:15,721 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.08
+2025-03-24 14:18:15,721 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.25
+2025-03-24 14:18:15,721 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.42
+2025-03-24 14:18:15,722 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.59
+2025-03-24 14:18:15,722 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.76
+2025-03-24 14:18:15,722 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.93
+2025-03-24 14:18:15,723 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.10
+2025-03-24 14:18:15,723 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.27
+2025-03-24 14:18:15,724 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.44
+2025-03-24 14:18:15,724 - arithmetic_test - INFO - [Strategy] Time: 2025-01-05 03:00:00, Price: 106.61
+2025-03-24 14:18:15,724 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.61
+2025-03-24 14:18:15,724 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.78
+2025-03-24 14:18:15,725 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.95
+2025-03-24 14:18:15,725 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.12
+2025-03-24 14:18:15,726 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.29
+2025-03-24 14:18:15,726 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.46
+2025-03-24 14:18:15,726 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.63
+2025-03-24 14:18:15,727 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.80
+2025-03-24 14:18:15,727 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.97
+2025-03-24 14:18:15,727 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.14
+2025-03-24 14:18:15,728 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.31
+2025-03-24 14:18:15,728 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.47
+2025-03-24 14:18:15,729 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.64
+2025-03-24 14:18:15,729 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.81
+2025-03-24 14:18:15,729 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.98
+2025-03-24 14:18:15,730 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.15
+2025-03-24 14:18:15,730 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.32
+2025-03-24 14:18:15,730 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.49
+2025-03-24 14:18:15,731 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.66
+2025-03-24 14:18:15,731 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.83
+2025-03-24 14:18:15,731 - arithmetic_test - INFO - [Strategy] Time: 2025-01-05 23:00:00, Price: 110.00
+2025-03-24 14:18:15,732 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:18:15,732 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:18:15,732 - arithmetic_test - INFO - [Engine] SELL executed: 50.000000 units at 110.00
+2025-03-24 14:18:15,732 - arithmetic_test - INFO - [Engine] Capital change: 4995.00 -> 10489.50
+2025-03-24 14:18:15,733 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:18:15,733 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:18:15,733 - arithmetic_test - WARNING - [Engine] Signal SELL not executed. Position: 0.000000 -> 0.000000
+2025-03-24 14:18:15,733 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.81
+2025-03-24 14:18:15,734 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.63
+2025-03-24 14:18:15,734 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.44
+2025-03-24 14:18:15,734 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.25
+2025-03-24 14:18:15,735 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 109.07
+2025-03-24 14:18:15,735 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.88
+2025-03-24 14:18:15,735 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.69
+2025-03-24 14:18:15,736 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.51
+2025-03-24 14:18:15,736 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.32
+2025-03-24 14:18:15,737 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.14
+2025-03-24 14:18:15,737 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.95
+2025-03-24 14:18:15,737 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.76
+2025-03-24 14:18:15,738 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.58
+2025-03-24 14:18:15,738 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.39
+2025-03-24 14:18:15,738 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.20
+2025-03-24 14:18:15,739 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.02
+2025-03-24 14:18:15,739 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.83
+2025-03-24 14:18:15,739 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.64
+2025-03-24 14:18:15,740 - arithmetic_test - INFO - [Strategy] Time: 2025-01-06 19:00:00, Price: 106.46
+2025-03-24 14:18:15,740 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.46
+2025-03-24 14:18:15,741 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.27
+2025-03-24 14:18:15,741 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.08
+2025-03-24 14:18:15,741 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.90
+2025-03-24 14:18:15,742 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.71
+2025-03-24 14:18:15,742 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.53
+2025-03-24 14:18:15,742 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.34
+2025-03-24 14:18:15,743 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.15
+2025-03-24 14:18:15,743 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.97
+2025-03-24 14:18:15,743 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.78
+2025-03-24 14:18:15,744 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.59
+2025-03-24 14:18:15,744 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.41
+2025-03-24 14:18:15,745 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.22
+2025-03-24 14:18:15,745 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.03
+2025-03-24 14:18:15,747 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.85
+2025-03-24 14:18:15,747 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.66
+2025-03-24 14:18:15,747 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.47
+2025-03-24 14:18:15,748 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.29
+2025-03-24 14:18:15,748 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.10
+2025-03-24 14:18:15,749 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.92
+2025-03-24 14:18:15,749 - arithmetic_test - INFO - [Strategy] Time: 2025-01-07 15:00:00, Price: 102.73
+2025-03-24 14:18:15,749 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.73
+2025-03-24 14:18:15,749 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.54
+2025-03-24 14:18:15,750 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.36
+2025-03-24 14:18:15,750 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.17
+2025-03-24 14:18:15,751 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.98
+2025-03-24 14:18:15,751 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.80
+2025-03-24 14:18:15,751 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.61
+2025-03-24 14:18:15,752 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.42
+2025-03-24 14:18:15,752 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.24
+2025-03-24 14:18:15,752 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.05
+2025-03-24 14:18:15,753 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.86
+2025-03-24 14:18:15,753 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:18:15,754 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.49
+2025-03-24 14:18:15,754 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.31
+2025-03-24 14:18:15,754 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.12
+2025-03-24 14:18:15,755 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.93
+2025-03-24 14:18:15,755 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.75
+2025-03-24 14:18:15,755 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.56
+2025-03-24 14:18:15,756 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.37
+2025-03-24 14:18:15,756 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.19
+2025-03-24 14:18:15,757 - arithmetic_test - INFO - [Strategy] Time: 2025-01-08 11:00:00, Price: 99.00
+2025-03-24 14:18:15,757 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:18:15,757 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:18:15,757 - arithmetic_test - INFO - [Engine] BUY executed: 52.977273 units at 99.00
+2025-03-24 14:18:15,757 - arithmetic_test - INFO - [Engine] Capital change: 10489.50 -> 5239.51
+2025-03-24 14:18:15,758 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:18:15,758 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:18:15,758 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:18:15,758 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.17
+2025-03-24 14:18:15,759 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.34
+2025-03-24 14:18:15,759 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.50
+2025-03-24 14:18:15,759 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.67
+2025-03-24 14:18:15,760 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 99.84
+2025-03-24 14:18:15,760 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.01
+2025-03-24 14:18:15,760 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.01
+2025-03-24 14:18:15,760 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:18:15,761 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.17
+2025-03-24 14:18:15,761 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.34
+2025-03-24 14:18:15,762 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.51
+2025-03-24 14:18:15,762 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.68
+2025-03-24 14:18:15,762 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 100.85
+2025-03-24 14:18:15,763 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.01
+2025-03-24 14:18:15,763 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.18
+2025-03-24 14:18:15,763 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.35
+2025-03-24 14:18:15,764 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.52
+2025-03-24 14:18:15,764 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.68
+2025-03-24 14:18:15,765 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 101.85
+2025-03-24 14:18:15,765 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.02
+2025-03-24 14:18:15,765 - arithmetic_test - INFO - [Strategy] Time: 2025-01-09 07:00:00, Price: 102.19
+2025-03-24 14:18:15,765 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.19
+2025-03-24 14:18:15,766 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.36
+2025-03-24 14:18:15,766 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.52
+2025-03-24 14:18:15,767 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.69
+2025-03-24 14:18:15,767 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 102.86
+2025-03-24 14:18:15,767 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.03
+2025-03-24 14:18:15,768 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.19
+2025-03-24 14:18:15,768 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.36
+2025-03-24 14:18:15,768 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.53
+2025-03-24 14:18:15,769 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.70
+2025-03-24 14:18:15,769 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 103.87
+2025-03-24 14:18:15,769 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.03
+2025-03-24 14:18:15,770 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.20
+2025-03-24 14:18:15,770 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.37
+2025-03-24 14:18:15,771 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.54
+2025-03-24 14:18:15,771 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.71
+2025-03-24 14:18:15,771 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 104.87
+2025-03-24 14:18:15,772 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.04
+2025-03-24 14:18:15,772 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.21
+2025-03-24 14:18:15,773 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.38
+2025-03-24 14:18:15,773 - arithmetic_test - INFO - [Strategy] Time: 2025-01-10 03:00:00, Price: 105.54
+2025-03-24 14:18:15,773 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.54
+2025-03-24 14:18:15,774 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.71
+2025-03-24 14:18:15,774 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 105.88
+2025-03-24 14:18:15,774 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.05
+2025-03-24 14:18:15,775 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.22
+2025-03-24 14:18:15,775 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.38
+2025-03-24 14:18:15,775 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.55
+2025-03-24 14:18:15,776 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.72
+2025-03-24 14:18:15,776 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 106.89
+2025-03-24 14:18:15,777 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.05
+2025-03-24 14:18:15,777 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.22
+2025-03-24 14:18:15,777 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.39
+2025-03-24 14:18:15,778 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.56
+2025-03-24 14:18:15,778 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.73
+2025-03-24 14:18:15,778 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 107.89
+2025-03-24 14:18:15,779 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.06
+2025-03-24 14:18:15,779 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.23
+2025-03-24 14:18:15,779 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.40
+2025-03-24 14:18:15,780 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.56
+2025-03-24 14:18:15,780 - arithmetic_test - INFO - [Engine] Processing signal: HOLD at price 108.73
+2025-03-24 14:18:15,781 - arithmetic_test - INFO - [Strategy] Time: 2025-01-10 23:00:00, Price: 108.90
+2025-03-24 14:18:15,781 - arithmetic_test - INFO - [Strategy] SELL signal at price 108.90
+2025-03-24 14:18:15,781 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 108.90
+2025-03-24 14:18:15,781 - arithmetic_test - INFO - [Engine] SELL executed: 52.977273 units at 108.90
+2025-03-24 14:18:15,781 - arithmetic_test - INFO - [Engine] Capital change: 5239.51 -> 11002.96
+2025-03-24 14:18:15,788 - trading_bot.backtest - INFO - Backtest completed in 0.10 seconds with 4 trades
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - 
+==== All Trades ====
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - Trade 1: BUY at 100.00, Quantity: 50.000000
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - Trade 2: SELL at 110.00, Quantity: 50.000000
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - Trade 3: BUY at 99.00, Quantity: 52.977273
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - Trade 4: SELL at 108.90, Quantity: 52.977273
+2025-03-24 14:18:15,788 - arithmetic_test - INFO - 
+Final position size: 0.000000
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Final capital: $11002.96
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - 
+==== Final Results Comparison ====
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Initial Capital - Expected: $10000.00, Actual: $10000.00
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Final Capital - Expected: $11002.96, Actual: $11002.96
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Total Return % - Expected: 10.03%, Actual: 10.03%
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Final Capital Difference: $0.00
+2025-03-24 14:18:15,789 - arithmetic_test - INFO - Return % Difference: 0.00 percentage points
+2025-03-24 14:20:39,714 - arithmetic_test - INFO - Starting arithmetic validation test
+2025-03-24 14:20:39,714 - arithmetic_test - INFO - Creating controlled test dataset
+2025-03-24 14:20:39,720 - arithmetic_test - INFO - Test data contains 62 candles with price ~100.00
+2025-03-24 14:20:39,720 - arithmetic_test - INFO - Test data contains 2 candles with price ~110.00
+2025-03-24 14:20:39,721 - arithmetic_test - INFO - Test data contains 2 candles with price ~99.00
+2025-03-24 14:20:39,721 - arithmetic_test - INFO - Test data contains 1 candles with price ~108.90
+2025-03-24 14:20:39,721 - arithmetic_test - INFO -   At time: 2025-01-10 23:00:00
+2025-03-24 14:20:39,722 - arithmetic_test - INFO - Calculating expected results
+2025-03-24 14:20:39,722 - arithmetic_test - INFO - Using test path: /tmp/tmp2a9kw_98/test_arithmetic.db
+2025-03-24 14:20:39,722 - arithmetic_test - INFO - Initializing diagnostic backtest engine
+2025-03-24 14:20:39,755 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:20:39,756 - arithmetic_test - INFO - Skipping database loading in test engine
+2025-03-24 14:20:39,756 - arithmetic_test - INFO - Running backtest with perfect timing strategy
+2025-03-24 14:20:39,767 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:20:39,768 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 06:00:00, Price: 100.00
+2025-03-24 14:20:39,768 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,768 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,769 - arithmetic_test - INFO - [Engine] BUY executed: 50.000000 units at 100.00
+2025-03-24 14:20:39,769 - arithmetic_test - INFO - [Engine] Capital change: 10000.00 -> 4995.00
+2025-03-24 14:20:39,770 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 07:00:00, Price: 100.00
+2025-03-24 14:20:39,770 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,770 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,770 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,770 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 08:00:00, Price: 100.00
+2025-03-24 14:20:39,770 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,771 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,771 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,771 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 09:00:00, Price: 100.00
+2025-03-24 14:20:39,771 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,771 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,771 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,772 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 10:00:00, Price: 100.00
+2025-03-24 14:20:39,772 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,772 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,772 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,772 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 11:00:00, Price: 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,773 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 12:00:00, Price: 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,773 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,774 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 13:00:00, Price: 100.00
+2025-03-24 14:20:39,774 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,774 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,774 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,774 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 14:00:00, Price: 100.00
+2025-03-24 14:20:39,774 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,775 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,775 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,775 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 15:00:00, Price: 100.00
+2025-03-24 14:20:39,775 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,775 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,775 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 16:00:00, Price: 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 17:00:00, Price: 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,776 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,777 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 18:00:00, Price: 100.00
+2025-03-24 14:20:39,777 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,777 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,777 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,777 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 19:00:00, Price: 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,778 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 20:00:00, Price: 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,778 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,779 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 21:00:00, Price: 100.00
+2025-03-24 14:20:39,779 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,779 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,779 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,779 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 22:00:00, Price: 100.00
+2025-03-24 14:20:39,779 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,780 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,780 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,780 - arithmetic_test - INFO - [Strategy] Time: 2025-01-02 23:00:00, Price: 100.00
+2025-03-24 14:20:39,780 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,780 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,780 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 00:00:00, Price: 100.00
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,781 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 01:00:00, Price: 100.00
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,781 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,782 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,782 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 02:00:00, Price: 100.00
+2025-03-24 14:20:39,782 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,782 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,782 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 03:00:00, Price: 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 04:00:00, Price: 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,783 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,784 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 05:00:00, Price: 100.00
+2025-03-24 14:20:39,784 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,784 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,784 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,784 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 06:00:00, Price: 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,785 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 07:00:00, Price: 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,785 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,786 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 08:00:00, Price: 100.00
+2025-03-24 14:20:39,786 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,786 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,786 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 09:00:00, Price: 100.00
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,787 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 10:00:00, Price: 100.00
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,787 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,788 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,788 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 11:00:00, Price: 100.00
+2025-03-24 14:20:39,788 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,788 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,788 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,789 - arithmetic_test - INFO - [Strategy] Time: 2025-01-03 12:00:00, Price: 100.00
+2025-03-24 14:20:39,789 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.00
+2025-03-24 14:20:39,789 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.00
+2025-03-24 14:20:39,789 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 50.000000 -> 50.000000
+2025-03-24 14:20:39,802 - arithmetic_test - INFO - [Strategy] Time: 2025-01-05 23:00:00, Price: 110.00
+2025-03-24 14:20:39,802 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:20:39,802 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:20:39,803 - arithmetic_test - INFO - [Engine] SELL executed: 50.000000 units at 110.00
+2025-03-24 14:20:39,803 - arithmetic_test - INFO - [Engine] Capital change: 4995.00 -> 10489.50
+2025-03-24 14:20:39,803 - arithmetic_test - INFO - [Strategy] Time: 2025-01-06 00:00:00, Price: 110.00
+2025-03-24 14:20:39,803 - arithmetic_test - INFO - [Strategy] SELL signal at price 110.00
+2025-03-24 14:20:39,803 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 110.00
+2025-03-24 14:20:39,804 - arithmetic_test - WARNING - [Engine] Signal SELL not executed. Position: 0.000000 -> 0.000000
+2025-03-24 14:20:39,818 - arithmetic_test - INFO - [Strategy] Time: 2025-01-08 11:00:00, Price: 99.00
+2025-03-24 14:20:39,818 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:20:39,818 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:20:39,818 - arithmetic_test - INFO - [Engine] BUY executed: 52.977273 units at 99.00
+2025-03-24 14:20:39,818 - arithmetic_test - INFO - [Engine] Capital change: 10489.50 -> 5239.51
+2025-03-24 14:20:39,819 - arithmetic_test - INFO - [Strategy] Time: 2025-01-08 12:00:00, Price: 99.00
+2025-03-24 14:20:39,819 - arithmetic_test - INFO - [Strategy] BUY signal at price 99.00
+2025-03-24 14:20:39,819 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 99.00
+2025-03-24 14:20:39,819 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:20:39,821 - arithmetic_test - INFO - [Strategy] Time: 2025-01-08 18:00:00, Price: 100.01
+2025-03-24 14:20:39,821 - arithmetic_test - INFO - [Strategy] BUY signal at price 100.01
+2025-03-24 14:20:39,821 - arithmetic_test - INFO - [Engine] Processing signal: BUY at price 100.01
+2025-03-24 14:20:39,821 - arithmetic_test - WARNING - [Engine] Signal BUY not executed. Position: 52.977273 -> 52.977273
+2025-03-24 14:20:39,835 - arithmetic_test - INFO - [Strategy] Time: 2025-01-10 23:00:00, Price: 108.90
+2025-03-24 14:20:39,835 - arithmetic_test - INFO - [Strategy] SELL signal at price 108.90
+2025-03-24 14:20:39,835 - arithmetic_test - INFO - [Engine] Processing signal: SELL at price 108.90
+2025-03-24 14:20:39,835 - arithmetic_test - INFO - [Engine] SELL executed: 52.977273 units at 108.90
+2025-03-24 14:20:39,835 - arithmetic_test - INFO - [Engine] Capital change: 5239.51 -> 11002.96
+2025-03-24 14:20:39,842 - trading_bot.backtest - INFO - Backtest completed in 0.08 seconds with 4 trades
+2025-03-24 14:20:39,842 - arithmetic_test - INFO - 
+==== All Trades ====
+2025-03-24 14:20:39,842 - arithmetic_test - INFO - Trade 1: BUY at 100.00, Quantity: 50.000000
+2025-03-24 14:20:39,842 - arithmetic_test - INFO - Trade 2: SELL at 110.00, Quantity: 50.000000
+2025-03-24 14:20:39,842 - arithmetic_test - INFO - Trade 3: BUY at 99.00, Quantity: 52.977273
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Trade 4: SELL at 108.90, Quantity: 52.977273
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - 
+Final position size: 0.000000
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Final capital: $11002.96
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - 
+==== Final Results Comparison ====
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Initial Capital - Expected: $10000.00, Actual: $10000.00
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Final Capital - Expected: $11002.96, Actual: $11002.96
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Total Return % - Expected: 10.03%, Actual: 10.03%
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Final Capital Difference: $0.00
+2025-03-24 14:20:39,843 - arithmetic_test - INFO - Return % Difference: 0.00 percentage points

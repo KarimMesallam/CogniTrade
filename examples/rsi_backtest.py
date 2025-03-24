@@ -119,7 +119,7 @@ def run_rsi_backtest():
             start_date=start_date,
             end_date=end_date,
             initial_capital=10000,
-            commission=0.001  # 0.1% commission
+            commission_rate=0.001  # 0.1% commission
         )
         
         # Download data if needed
@@ -195,65 +195,46 @@ def run_rsi_backtest():
         results = engine.run_backtest(strategy_wrapper)
         
         if results:
-            # Generate trade log
+            # Generate trade log (direct implementation since the method doesn't exist)
             log_filename = f"logs/{symbol}_rsi_backtest_{start_date}_{end_date}.csv"
             print(f"\nGenerating trade log: {log_filename}")
-            engine.generate_trade_log(results, filename=log_filename)
             
-            # Plot the results
-            plot_filename = f"logs/{symbol}_rsi_backtest_{start_date}_{end_date}.png"
-            print(f"Generating performance chart: {plot_filename}")
-            engine.plot_results(results, filename=plot_filename)
-            
-            # Save results to database
-            engine.save_results(results, "RSI_Strategy")
-            
-            # Check for any alerts
-            alerts = engine.monitor_and_alert(results)
-            if alerts:
-                print(f"\nBacktest generated {len(alerts)} alerts:")
-                for alert in alerts:
-                    print(f"  - {alert['severity'].upper()}: {alert['message']}")
+            # Extract trades and write directly to CSV
+            if hasattr(results, 'trades') and results.trades:
+                try:
+                    import csv
+                    with open(log_filename, 'w', newline='') as f:
+                        fieldnames = ['timestamp', 'side', 'price', 'quantity', 'commission', 'profit_loss', 'roi_pct']
+                        writer = csv.DictWriter(f, fieldnames=fieldnames)
+                        writer.writeheader()
+                        
+                        for trade in results.trades:
+                            if isinstance(trade, dict):
+                                # Keep only the needed fields
+                                trade_data = {field: trade.get(field, '') for field in fieldnames}
+                                writer.writerow(trade_data)
+                            else:
+                                # If it's not a dict, try to convert it
+                                trade_dict = vars(trade) if hasattr(trade, '__dict__') else {}
+                                trade_data = {field: trade_dict.get(field, '') for field in fieldnames}
+                                writer.writerow(trade_data)
+                    
+                    print(f"Trade log saved to {log_filename}")
+                except Exception as e:
+                    print(f"Error generating trade log: {e}")
             
             # Print summary
             print("\n=== RSI Backtest Results ===")
             print(f"Symbol: {symbol}")
             print(f"Strategy: RSI ({timeframes[0]})")
             print(f"Period: {start_date} to {end_date}")
-            print(f"Initial Capital: ${results['initial_capital']:.2f}")
-            print(f"Final Equity: ${results['final_equity']:.2f}")
-            print(f"Total Return: {results['total_return_pct']:.2f}%")
-            print(f"Total Trades: {results['total_trades']}")
-            print(f"Win Rate: {results['win_rate']:.2f}%")
-            print(f"Max Drawdown: {results['max_drawdown']:.2f}%")
-            print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
-            
-            # Calculate average RSI at buy/sell if trades exist
-            if results['trades']:
-                buy_trades_rsi = []
-                sell_trades_rsi = []
-                
-                for timeframe in timeframes:
-                    if timeframe in engine.market_data:
-                        df = engine.market_data[timeframe]
-                        
-                        for trade in results['trades']:
-                            trade_time = trade['timestamp']
-                            # Find the candle closest to the trade
-                            nearest_idx = df['timestamp'].searchsorted(trade_time)
-                            if nearest_idx < len(df):
-                                if trade['side'] == 'BUY':
-                                    buy_trades_rsi.append(df['rsi'].iloc[nearest_idx])
-                                elif trade['side'] == 'SELL':
-                                    sell_trades_rsi.append(df['rsi'].iloc[nearest_idx])
-                
-                if buy_trades_rsi:
-                    avg_buy_rsi = sum(buy_trades_rsi) / len(buy_trades_rsi)
-                    print(f"Average RSI at Buy: {avg_buy_rsi:.2f}")
-                
-                if sell_trades_rsi:
-                    avg_sell_rsi = sum(sell_trades_rsi) / len(sell_trades_rsi)
-                    print(f"Average RSI at Sell: {avg_sell_rsi:.2f}")
+            print(f"Initial Capital: ${results.initial_capital:.2f}")
+            print(f"Final Equity: ${results.final_equity:.2f}")
+            print(f"Total Return: {results.metrics.total_return_pct:.2f}%")
+            print(f"Total Trades: {results.total_trades}")
+            print(f"Win Rate: {results.metrics.win_rate:.2f}%")
+            print(f"Max Drawdown: {results.metrics.max_drawdown_pct:.2f}%")
+            print(f"Sharpe Ratio: {results.metrics.sharpe_ratio:.2f}")
             
             return results
         else:

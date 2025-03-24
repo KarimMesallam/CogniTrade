@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest Report: {{ result.symbol }}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            margin: 20px; 
+            color: #333; 
+        }
+        h1, h2, h3 { color: #2c3e50; }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+        th, td { 
+            text-align: left; 
+            padding: 8px; 
+            border-bottom: 1px solid #ddd; 
+        }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .positive { color: green; }
+        .negative { color: red; }
+        .chart-container { 
+            margin: 20px 0; 
+            text-align: center; 
+        }
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+        .metric-card { 
+            background-color: #f9f9f9; 
+            padding: 15px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        .metric-value { 
+            font-size: 24px; 
+            font-weight: bold; 
+            margin: 10px 0; 
+        }
+        .section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>Backtest Report: {{ result.symbol }}</h1>
+    <p>
+        <strong>Strategy:</strong> {{ result.strategy_name }}<br>
+        <strong>Period:</strong> {{ result.start_date }} to {{ result.end_date }}<br>
+        <strong>Timeframes:</strong> {{ result.timeframes|join(', ') }}<br>
+        <strong>Generated:</strong> {{ generation_time }}
+    </p>
+    
+    <div class="section">
+        <h2>Performance Summary</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total Return</h3>
+                <div class="metric-value {% if result.metrics.total_return_pct > 0 %}positive{% else %}negative{% endif %}">
+                    {{ result.metrics.total_return_pct|round(2) }}%
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Initial Capital</h3>
+                <div class="metric-value">${{ result.initial_capital|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Final Equity</h3>
+                <div class="metric-value">${{ result.final_equity|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Win Rate</h3>
+                <div class="metric-value">{{ result.metrics.win_rate|round(2) }}%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Profit Factor</h3>
+                <div class="metric-value">{{ result.metrics.profit_factor|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Expectancy</h3>
+                <div class="metric-value {% if result.metrics.expectancy > 0 %}positive{% else %}negative{% endif %}">
+                    ${{ result.metrics.expectancy|round(2) }}
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Total Trades</h3>
+                <div class="metric-value">{{ result.total_trades }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Max Drawdown</h3>
+                <div class="metric-value negative">{{ result.metrics.max_drawdown_pct|round(2) }}%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Sharpe Ratio</h3>
+                <div class="metric-value">{{ result.metrics.sharpe_ratio|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Sortino Ratio</h3>
+                <div class="metric-value">{{ result.metrics.sortino_ratio|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Calmar Ratio</h3>
+                <div class="metric-value">{{ result.metrics.calmar_ratio|round(2) }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Recovery Factor</h3>
+                <div class="metric-value">{{ result.metrics.recovery_factor|round(2) }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if chart_paths %}
+    <div class="section">
+        <h2>Performance Charts</h2>
+        {% for name, path in chart_paths.items() %}
+        <div class="chart-container">
+            <h3>{{ name }}</h3>
+            <img src="{{ path }}" alt="{{ name }}" style="max-width:100%;">
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if include_trades and result.trades %}
+    <div class="section">
+        <h2>Trade Analysis</h2>
+        
+        <h3>Trade Statistics</h3>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Total Trades</td>
+                <td>{{ result.total_trades }}</td>
+            </tr>
+            <tr>
+                <td>Winning Trades</td>
+                <td>{{ result.winning_trades }}</td>
+            </tr>
+            <tr>
+                <td>Losing Trades</td>
+                <td>{{ result.losing_trades }}</td>
+            </tr>
+            <tr>
+                <td>Win Rate</td>
+                <td>{{ result.metrics.win_rate|round(2) }}%</td>
+            </tr>
+            <tr>
+                <td>Average Win</td>
+                <td class="positive">${{ result.metrics.avg_win|round(2) }}</td>
+            </tr>
+            <tr>
+                <td>Average Loss</td>
+                <td class="negative">${{ result.metrics.avg_loss|round(2) }}</td>
+            </tr>
+            <tr>
+                <td>Risk/Reward Ratio</td>
+                <td>{{ result.metrics.risk_reward_ratio|round(2) }}</td>
+            </tr>
+        </table>
+        
+        <h3>Trade List</h3>
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Side</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>P/L</th>
+                <th>ROI %</th>
+            </tr>
+            {% for trade in result.trades %}
+            <tr>
+                <td>{{ trade.timestamp }}</td>
+                <td>{{ trade.side }}</td>
+                <td>{{ trade.price|round(2) }}</td>
+                <td>{{ trade.quantity|round(6) }}</td>
+                <td class="{% if trade.profit_loss and trade.profit_loss > 0 %}positive{% elif trade.profit_loss and trade.profit_loss < 0 %}negative{% endif %}">
+                    {% if trade.profit_loss %}{{ trade.profit_loss|round(2) }}{% endif %}
+                </td>
+                <td class="{% if trade.roi_pct and trade.roi_pct > 0 %}positive{% elif trade.roi_pct and trade.roi_pct < 0 %}negative{% endif %}">
+                    {% if trade.roi_pct %}{{ trade.roi_pct|round(2) }}%{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>

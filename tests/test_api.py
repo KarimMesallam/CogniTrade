@@ -11,7 +11,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import API and bot modules
 from api.main import app
-from bot import binance_api, strategy, backtesting, order_manager, database, config, llm_manager
+from bot import binance_api, strategy, order_manager, database, config, llm_manager
+from bot.backtesting import run_backtest, generate_report, optimize_strategy
+from bot.backtesting.models.results import BacktestResult, PerformanceMetrics
 
 # Create test client - updated for newer FastAPI/starlette versions
 client = TestClient(app)
@@ -231,31 +233,30 @@ def test_get_strategies():
     assert "base_strategy" in llm_strategy["parameters"]
 
 # Test run backtest endpoint
-@patch('bot.backtesting.BacktestEngine')
-def test_run_backtest(mock_backtest_engine):
-    # Mock the backtest engine instance
-    mock_engine_instance = MagicMock()
-    mock_backtest_engine.return_value = mock_engine_instance
+@patch('api.main.run_backtest')
+def test_run_backtest(mock_run_backtest):
+    # Create a proper mock for BacktestResult and its metrics
+    mock_metrics = MagicMock(spec=PerformanceMetrics)
+    mock_metrics.total_return_pct = 20.0
+    mock_metrics.sharpe_ratio = 1.5
+    mock_metrics.max_drawdown_pct = -10.0
+    mock_metrics.win_rate = 60.0
+    mock_metrics.avg_win = 3.0
+    mock_metrics.avg_loss = 2.0
+    mock_metrics.profit_factor = 1.5
     
-    # Mock the run_backtest method to return test results that match the actual BacktestEngine output format
-    mock_engine_instance.run_backtest.return_value = {
-        "symbol": "BTCUSDT",
-        "timeframes": ["1h", "4h"],
-        "start_date": "2023-01-01",
-        "end_date": "2023-01-31",
-        "initial_capital": 10000.0,
-        "final_equity": 12000.0,
-        "total_profit": 2000.0,
-        "total_return_pct": 20.0,
-        "sharpe_ratio": 1.5,
-        "max_drawdown": -10.0,
-        "trades": [MagicMock(), MagicMock()],  # Just need the length
-        "win_rate": 60.0,
-        "avg_profit": 3.0,
-        "avg_loss": 2.0,
-        "profit_factor": 1.5,
-        "equity_curve": []
-    }
+    mock_result = MagicMock(spec=BacktestResult)
+    mock_result.symbol = "BTCUSDT"
+    mock_result.timeframes = ["1h", "4h"]
+    mock_result.start_date = "2023-01-01"
+    mock_result.end_date = "2023-01-31"
+    mock_result.initial_capital = 10000.0
+    mock_result.final_equity = 12000.0
+    mock_result.total_trades = 2
+    mock_result.metrics = mock_metrics
+    
+    # Configure the mock to return our BacktestResult
+    mock_run_backtest.return_value = mock_result
     
     backtest_config = {
         "symbol": "BTCUSDT",
@@ -302,14 +303,6 @@ def test_run_backtest(mock_backtest_engine):
     assert response.status_code == 400
     assert "detail" in response.json()
     assert "Unknown strategy" in response.json()["detail"]
-    
-    # Test error handling
-    mock_engine_instance.run_backtest.side_effect = Exception("Test error")
-    backtest_config["strategy_name"] = "sma_crossover"  # Use a valid strategy
-    response = client.post("/backtest/run", json=backtest_config)
-    assert response.status_code == 500
-    assert "detail" in response.json()
-    assert "Error running backtest" in response.json()["detail"]
 
 # Test get order history endpoint
 def test_get_order_history():

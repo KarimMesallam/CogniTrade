@@ -1,0 +1,33 @@
+2025-03-24 12:44:17,328 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:44:17,333 - trading_bot.data - INFO - Generated synthetic data for EXAMPLE (2161 candles)
+2025-03-24 12:44:17,348 - trading_bot - INFO - Stored 2161 market data points for EXAMPLE 1h
+2025-03-24 12:44:17,348 - trading_bot.data - INFO - Stored synthetic data in database
+2025-03-24 12:44:17,349 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:44:17,356 - trading_bot.data - INFO - Loaded 1000 candles for EXAMPLE at 1h timeframe
+2025-03-24 12:44:17,357 - trading_bot.backtest - INFO - Loaded 1000 candles for EXAMPLE at 1h timeframe
+2025-03-24 12:44:19,413 - trading_bot - INFO - Time offset with Binance server: -2483ms
+2025-03-24 12:44:19,413 - trading_bot.backtest - ERROR - Error preparing data: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 172, in prepare_data
+    self.market_data[timeframe] = self.data_manager.add_indicators(self.market_data[timeframe])
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/data/market_data.py", line 593, in add_indicators
+    from bot.strategy import (
+ImportError: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+2025-03-24 12:44:19,413 - trading_bot.backtest - ERROR - Error running backtest: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 172, in prepare_data
+    self.market_data[timeframe] = self.data_manager.add_indicators(self.market_data[timeframe])
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/data/market_data.py", line 593, in add_indicators
+    from bot.strategy import (
+ImportError: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 202, in run_backtest
+    self.prepare_data()
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 176, in prepare_data
+    raise DataError(f"Failed to prepare data with indicators: {str(e)}")
+bot.backtesting.exceptions.base.DataError: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)

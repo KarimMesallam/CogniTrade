@@ -1,16 +1,27 @@
-# Backtest Summary Report
-Generated: 2025-03-24 12:21:44
+Strategy Comparison Report
+==================================================
+Symbol: BTCUSDT
+Period: 2025-01-23 to 2025-03-24
+==================================================
 
-Total backtests run: 3
-Symbols tested: 1
-Strategies tested: 3
+Strategy: RSI
+  Return: 10.99%
+  Sharpe: 0.99
+  Max DD: -4.62%
+  Win Rate: 100.00%
+  Trades: 1
 
-## Top Strategies by Return
-- RSI on BTCUSDT: 3.88% return, 100.00% win rate, 2 trades
-- SMA_Crossover on BTCUSDT: 1.43% return, 44.44% win rate, 9 trades
-- Bollinger_Bands on BTCUSDT: 1.14% return, 50.00% win rate, 10 trades
+Strategy: SMA_Crossover
+  Return: 1.52%
+  Sharpe: 0.20
+  Max DD: -3.82%
+  Win Rate: 44.44%
+  Trades: 9
 
-## Top Strategies by Risk-Adjusted Return (Sharpe)
-- RSI on BTCUSDT: Sharpe 0.44, 3.88% return, -7.35% max drawdown
-- SMA_Crossover on BTCUSDT: Sharpe 0.20, 1.43% return, -3.82% max drawdown
-- Bollinger_Bands on BTCUSDT: Sharpe 0.14, 1.14% return, -7.43% max drawdown
+Strategy: Bollinger_Bands
+  Return: 1.14%
+  Sharpe: 0.14
+  Max DD: -7.43%
+  Win Rate: 50.00%
+  Trades: 10
+

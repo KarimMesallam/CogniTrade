@@ -1,0 +1,21 @@
+2025-03-24 13:52:57,790 - trading_bot - ERROR - Backtest error: BacktestEngine.__init__() got an unexpected keyword argument 'commission'
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/rsi_backtest.py", line 116, in run_rsi_backtest
+    engine = BacktestEngine(
+             ^^^^^^^^^^^^^^^
+TypeError: BacktestEngine.__init__() got an unexpected keyword argument 'commission'
+2025-03-24 13:57:36,253 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:57:36,258 - trading_bot.data - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:57:36,258 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:57:36,264 - trading_bot.backtest - INFO - Added indicators to 4h data
+2025-03-24 13:57:36,282 - trading_bot.backtest - INFO - Backtest completed in 0.02 seconds with 2 trades
+2025-03-24 13:57:36,282 - trading_bot - ERROR - Backtest error: 'BacktestEngine' object has no attribute 'generate_trade_log'
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/rsi_backtest.py", line 201, in run_rsi_backtest
+    engine.generate_trade_log(results, filename=log_filename)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'BacktestEngine' object has no attribute 'generate_trade_log'
+2025-03-24 13:58:52,142 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:58:52,143 - trading_bot.backtest - INFO - Loaded 111 candles for BTCUSDT at 4h timeframe
+2025-03-24 13:58:52,153 - trading_bot.backtest - INFO - Added indicators to 4h data
+2025-03-24 13:58:52,174 - trading_bot.backtest - INFO - Backtest completed in 0.02 seconds with 2 trades

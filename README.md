@@ -9,7 +9,7 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Scalable Architecture:** Modular design to support multiple strategies and future integration with various LLMs.
 - **AI Orchestration:** A dedicated module to incorporate LLMs (e.g., DeepSeek R1, GPT-4o, o3-mini, Claude 3.7 Sonnet) for enhanced decision making.
 - **Extensible:** Easily add new exchanges, trading strategies, and real-time data streams.
-- **Advanced Backtesting:** Comprehensive backtesting module with multi-timeframe analysis, strategy optimization, and performance visualization.
+- **Advanced Backtesting:** Completely refactored backtesting engine with modular architecture, better error handling, and improved performance.
 - **Comprehensive Testing:** High-coverage test suite for all components with mocks for external dependencies.
 
 ## Features
@@ -22,14 +22,18 @@ This project aims to take you from basic trading bot functionality to a robust s
 - **Database System:** Comprehensive data storage solution with database integration layer for saving signals, trades, market data, and system alerts.
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
 - **Testing Suite:** Comprehensive unit and integration tests with high coverage metrics for all system components.
-- **Backtesting System:** Sophisticated backtesting capabilities with:
+- **Enhanced Backtesting System:** Completely refactored backtesting capabilities with:
+  - Modular architecture with separation of concerns (core, data, models, reporting, etc.)
+  - Type-safe data structures using Python dataclasses 
+  - Improved error handling with specific exception types
+  - Market data caching for better performance
   - Multi-timeframe analysis for more robust trading decisions
-  - Strategy optimization through parameter grid search
+  - Clean HTML reports using Jinja2 templates
+  - Advanced visualization with matplotlib
+  - Strategy optimization through parallel parameter grid search
   - Comprehensive performance metrics calculation
-  - Monitoring and alerting system for detecting poor performance
-  - Detailed trade logging for post-trade analysis
-  - Visualization of equity curves, drawdowns, and trade performance
-  - Strategy comparison across different symbols and timeframes
+  - Data validation and robust safeguards
+  - Synthetic test data generation with configurable parameters
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 
 ## Project Structure (Backend-Only Version)
@@ -38,41 +42,56 @@ This project aims to take you from basic trading bot functionality to a robust s
 trading_bot/
 ├── bot/
 │   ├── __init__.py
-│   ├── config.py           # Configuration loader (API keys, endpoints, etc.)
-│   ├── binance_api.py      # Binance API wrapper (using python-binance)
-│   ├── strategy.py         # Abstract trading strategy and sample strategy implementation
-│   ├── llm_manager.py      # LLM orchestration placeholder (for decision support)
-│   ├── order_manager.py    # Module for order execution and logging
-│   ├── database.py         # Database management for storing trading data and analytics
-│   ├── db_integration.py   # Integration layer between trading system and database
-│   ├── backtesting.py      # Advanced backtesting engine for strategy development
-│   └── main.py             # Main entry point for running the bot
+│   ├── config.py              # Configuration loader (API keys, endpoints, etc.)
+│   ├── binance_api.py         # Binance API wrapper (using python-binance)
+│   ├── strategy.py            # Abstract trading strategy and sample strategy implementation
+│   ├── llm_manager.py         # LLM orchestration placeholder (for decision support)
+│   ├── order_manager.py       # Module for order execution and logging
+│   ├── database.py            # Database management for storing trading data and analytics
+│   ├── db_integration.py      # Integration layer between trading system and database
+│   ├── backtesting.py         # Legacy backtesting engine (deprecated, for backward compatibility)
+│   ├── backtesting/           # New modular backtesting system
+│   │   ├── __init__.py        # Public API for backtesting 
+│   │   ├── config/            # Configuration settings
+│   │   ├── core/              # Core backtesting engine
+│   │   ├── data/              # Market data management
+│   │   ├── exceptions/        # Custom exceptions for better error handling
+│   │   ├── models/            # Data models (using dataclasses)
+│   │   ├── reporting/         # Report generation with Jinja2
+│   │   ├── utils/             # Utility functions for calculations 
+│   │   ├── visualization/     # Charting and plotting functionality
+│   │   └── strategies/        # Strategy implementations
+│   └── main.py                # Main entry point for running the bot
 ├── api/
 │   ├── __init__.py
-│   ├── main.py             # FastAPI backend for bot control and data access
-│   └── requirements.txt    # API-specific dependencies
-├── tests/                  # Comprehensive tests (pytest)
-│   ├── test_binance_api.py # Tests for Binance API wrapper with >80% coverage
-│   ├── test_main.py        # Tests for the main trading loop with proper mocks
-│   ├── test_order_manager.py # Tests for order execution and management
-│   ├── test_strategy.py    # Tests for trading strategies
-│   ├── test_llm_manager.py # Tests for LLM integration
-│   ├── test_backtesting.py # Tests for backtesting capabilities
-│   ├── test_database.py    # Tests for database operations
+│   ├── main.py                # FastAPI backend for bot control and data access
+│   └── requirements.txt       # API-specific dependencies
+├── tests/                     # Comprehensive tests (pytest)
+│   ├── test_binance_api.py    # Tests for Binance API wrapper with >80% coverage
+│   ├── test_main.py           # Tests for the main trading loop with proper mocks
+│   ├── test_order_manager.py  # Tests for order execution and management
+│   ├── test_strategy.py       # Tests for trading strategies
+│   ├── test_llm_manager.py    # Tests for LLM integration
+│   ├── test_backtesting/      # Tests for the new backtesting modules
+│   ├── test_database.py       # Tests for database operations
 │   ├── test_db_integration.py # Tests for database integration layer
 │   ├── test_main_db_integration.py # Integration tests for main and database
-│   ├── conftests.py        # Pytest configuration and fixtures
-│   └── __init__.py         # Test package initialization
-├── examples/               # Example scripts
-│   ├── simple_backtest.py      # Simple SMA crossover strategy example
-│   ├── rsi_backtest.py         # RSI strategy implementation example
-│   └── compare_strategies.py   # Tool for comparing strategy performance
-├── data/                   # Directory for storing market data
-├── logs/                   # Trading and backtesting logs
-├── order_logs/             # Logs of executed orders
-├── requirements.txt        # List of dependencies
-├── .env                    # Environment variables (API keys, etc.)
-└── README.md               # Project documentation (this file)
+│   ├── conftests.py           # Pytest configuration and fixtures
+│   └── __init__.py            # Test package initialization
+├── examples/                  # Example scripts
+│   ├── simple_backtest.py     # Simple SMA crossover strategy example
+│   ├── rsi_backtest.py        # RSI strategy implementation example
+│   ├── compare_strategies.py  # Tool for comparing strategy performance
+│   └── backtest_example.py    # Demo of the refactored backtesting engine
+├── data/                      # Directory for storing market data
+├── logs/                      # Trading and backtesting logs
+├── order_logs/                # Logs of executed orders
+├── output/                    # Directory for backtesting outputs
+│   ├── charts/                # Generated charts from backtests
+│   └── reports/               # HTML and other report formats
+├── requirements.txt           # List of dependencies
+├── .env                       # Environment variables (API keys, etc.)
+└── README.md                  # Project documentation (this file)
 ```
 
 ## Installation
@@ -147,97 +166,126 @@ The API will be available at http://localhost:8000 with automatic API documentat
 
 ### Backtesting Strategies
 
-The backtesting module allows you to test and optimize trading strategies using historical data:
+#### Using the New Backtesting Module
+
+The refactored backtesting module provides a clean API for running backtests:
 
 ```python
-from bot.backtesting import BacktestEngine
+from bot.backtesting import run_backtest, generate_report, generate_test_data
 
-# Create a backtest engine
-engine = BacktestEngine(
-    symbol='BTCUSDT',
-    timeframes=['1h', '4h'],  # Multiple timeframes for analysis
-    start_date='2023-01-01',
-    end_date='2023-03-31',
-    initial_capital=10000,
-    commission=0.001  # 0.1% commission
+# Generate test data if needed
+test_data = generate_test_data(
+    symbol="BTCTEST",
+    timeframe="1h",
+    start_date="2023-01-01",
+    end_date="2023-06-30",
+    trend="random",  # 'up', 'down', 'sideways', or 'random'
+    volatility=0.02,
+    seed=42  # For reproducibility
 )
 
-# Run the backtest with your strategy
-results = engine.run_backtest(your_strategy_function)
+# Define a strategy function
+def my_strategy(data_dict, symbol):
+    """Simple moving average crossover strategy."""
+    # Get data for primary timeframe
+    primary_tf = list(data_dict.keys())[0]
+    df = data_dict[primary_tf]
+    
+    # Calculate indicators
+    df['sma_short'] = df['close'].rolling(window=10).mean()
+    df['sma_long'] = df['close'].rolling(window=30).mean()
+    
+    # Get latest values
+    latest = df.iloc[-1]
+    previous = df.iloc[-2]
+    
+    # Generate signals
+    if previous['sma_short'] < previous['sma_long'] and latest['sma_short'] > latest['sma_long']:
+        return "BUY"  # Bullish crossover
+    elif previous['sma_short'] > previous['sma_long'] and latest['sma_short'] < latest['sma_long']:
+        return "SELL"  # Bearish crossover
+    else:
+        return "HOLD"  # No crossover
 
-# Generate a trade log
-engine.generate_trade_log(results, filename="trade_log.csv")
+# Run backtest
+result = run_backtest(
+    symbol="BTCTEST",
+    timeframes=["1h", "4h"],  # Primary and secondary timeframes
+    start_date="2023-01-01",
+    end_date="2023-06-30",
+    strategy_func=my_strategy,
+    initial_capital=10000.0
+)
 
-# Plot the results
-engine.plot_results(results, filename="backtest_plot.png")
+# Generate reports and charts
+report_paths = generate_report(result)
+print(f"HTML report: {report_paths['HTML Report']}")
+print(f"Equity chart: {report_paths['Equity Chart']}")
 ```
 
-#### Multi-Timeframe Analysis
-
-Analyze trading data across multiple timeframes:
-
-```python
-# Prepare data with indicators
-engine.prepare_data()
-
-# Run multi-timeframe analysis
-analysis = engine.multi_timeframe_analysis(engine.market_data)
-
-# Access the consolidated view
-bullish_timeframes = analysis['consolidated']['bullish_timeframes']
-bearish_timeframes = analysis['consolidated']['bearish_timeframes']
-```
-
-#### Strategy Optimization
+#### Parameter Optimization
 
 Find the optimal parameters for your trading strategy:
 
 ```python
+from bot.backtesting import optimize_strategy
+
+# Create a strategy factory function
+def strategy_factory(params):
+    def strategy(data_dict, symbol):
+        # Extract parameters
+        short_window = params['short_window']
+        long_window = params['long_window']
+        
+        # Rest of the strategy using these parameters
+        primary_tf = list(data_dict.keys())[0]
+        df = data_dict[primary_tf]
+        # ... strategy implementation ...
+    
+    return strategy
+
 # Define parameter grid
 param_grid = {
-    'short_period': [5, 10, 15, 20],
-    'long_period': [20, 30, 40, 50]
+    'short_window': [5, 10, 15, 20],
+    'long_window': [30, 50, 100]
 }
 
 # Run optimization
-optimization_results = engine.optimize_parameters(
-    strategy_factory=strategy_factory_function,
-    param_grid=param_grid
+result = optimize_strategy(
+    symbol='BTCUSDT',
+    timeframes=['1h'],
+    start_date='2023-01-01',
+    end_date='2023-06-30',
+    strategy_factory=strategy_factory,
+    param_grid=param_grid,
+    metric='sharpe_ratio'  # Optimize for Sharpe ratio
 )
 
-# Access the best parameters
-best_params = optimization_results['params']
-best_sharpe = optimization_results['sharpe_ratio']
+# Get best parameters
+print(f"Best parameters: {result.best_parameters}")
+print(f"Sharpe ratio: {result.best_backtest.metrics.sharpe_ratio:.2f}")
+print(f"Return: {result.best_backtest.metrics.total_return_pct:.2f}%")
 ```
 
-#### Running Multiple Backtests
+#### Multi-Symbol Testing
 
-Compare different strategies across multiple symbols:
+Run the same strategy across multiple symbols:
 
 ```python
-from bot.backtesting import BacktestRunner
+from bot.backtesting import run_multi_symbol
 
-# Create a backtest runner
-runner = BacktestRunner()
-
-# Run multiple backtests
-results = runner.run_multiple_backtests(
-    symbols=['BTCUSDT', 'ETHUSDT'],
-    timeframes=['1h', '4h'],
-    strategies={
-        'SMA_Crossover': sma_strategy,
-        'RSI': rsi_strategy,
-        'Bollinger_Bands': bb_strategy
-    },
+results = run_multi_symbol(
+    symbols=['BTCUSDT', 'ETHUSDT', 'SOLUSDT'],
+    timeframes=['1h'],
     start_date='2023-01-01',
-    end_date='2023-03-31'
+    end_date='2023-06-30',
+    strategy_func=my_strategy,
+    use_parallel=True  # Run in parallel for speed
 )
 
-# Compare strategies
-comparison = runner.compare_strategies()
-
-# Generate a summary report
-report = runner.generate_summary_report(output_file='backtest_report.txt')
+# Check results for each symbol
+for symbol, result in results.items():
+    print(f"{symbol}: {result.metrics.total_return_pct:.2f}% return, Sharpe: {result.metrics.sharpe_ratio:.2f}")
 ```
 
 See the example scripts in the `examples/` directory for comprehensive demonstrations of the backtesting system.
@@ -256,14 +304,14 @@ python -m pytest -v
 # Run tests in a specific file
 python -m pytest tests/test_strategy.py
 
-# Run a specific test
-python -m pytest tests/test_llm_manager.py::test_make_rule_based_decision
+# Run tests for the backtesting module
+python -m pytest tests/test_backtesting/
 
 # Generate test coverage report
 python -m pytest --cov=bot tests/
 
 # Generate coverage for a specific module
-python -m pytest tests/test_binance_api.py --cov=bot.binance_api
+python -m pytest tests/test_backtesting/ --cov=bot.backtesting
 ```
 
 Test categories:
@@ -279,11 +327,27 @@ Test categories:
 
 ## Examples
 
-### Simple Backtesting
+### Backtesting Examples
 
 The project includes several example scripts to demonstrate backtesting capabilities:
 
-#### 1. Simple Moving Average Crossover (`examples/simple_backtest.py`)
+#### 1. Basic Backtesting Example (`examples/backtest_example.py`)
+
+A simple example demonstrating the refactored backtesting module:
+
+```bash
+# Run the example
+python examples/backtest_example.py
+```
+
+This script:
+- Generates synthetic test data with configurable parameters
+- Implements a simple moving average crossover strategy
+- Runs a backtest with the refactored engine
+- Generates HTML reports and charts
+- Displays key performance metrics
+
+#### 2. Simple Moving Average Crossover (`examples/simple_backtest.py`)
 
 A basic example of backtesting a Simple Moving Average (SMA) crossover strategy:
 
@@ -292,14 +356,7 @@ A basic example of backtesting a Simple Moving Average (SMA) crossover strategy:
 python examples/simple_backtest.py
 ```
 
-This script:
-- Downloads historical data from Binance for the configured symbol
-- Implements a basic SMA crossover strategy (buy when short SMA crosses above long SMA, sell when it crosses below)
-- Runs a full backtest with position sizing and commission calculation
-- Generates trade logs and performance visualization
-- Calculates and displays performance metrics
-
-#### 2. RSI Strategy Backtest (`examples/rsi_backtest.py`)
+#### 3. RSI Strategy Backtest (`examples/rsi_backtest.py`)
 
 A more advanced example using the Relative Strength Index (RSI) indicator:
 
@@ -314,7 +371,7 @@ This script:
 - Visualizes RSI values alongside price and equity curves
 - Shows how to use a different timeframe (4h) for testing
 
-#### 3. Strategy Comparison (`examples/compare_strategies.py`)
+#### 4. Strategy Comparison (`examples/compare_strategies.py`)
 
 Compare and analyze different trading strategies:
 
@@ -323,23 +380,26 @@ Compare and analyze different trading strategies:
 python examples/compare_strategies.py
 ```
 
-This script:
-- Loads trade logs from previous backtest runs
-- Analyzes and compares performance metrics across strategies
-- Generates side-by-side visual comparisons
-- Provides educational insights about each strategy type
-- Explains market conditions best suited for different strategies
-
 ### Running Your Own Backtest
 
-You can create your own backtesting script by following the pattern in these examples:
+You can create your own backtesting script by following these steps:
 
-1. Download historical data from Binance
-2. Implement your strategy logic
-3. Run the backtest with appropriate parameters
-4. Analyze the results using metrics and visualizations
+1. Import the necessary functions from the refactored module:
+   ```python
+   from bot.backtesting import run_backtest, generate_report, generate_test_data
+   ```
 
-Remember that backtesting results are not guarantees of future performance - they are meant to be educational and help refine your trading approach.
+2. Define your strategy function that takes data and returns 'BUY', 'SELL', or 'HOLD'
+
+3. Run a backtest with appropriate parameters:
+   ```python
+   result = run_backtest(symbol, timeframes, start_date, end_date, strategy_func)
+   ```
+
+4. Generate reports and visualizations:
+   ```python
+   report_paths = generate_report(result)
+   ```
 
 ## Future Improvements
 

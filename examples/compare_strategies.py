@@ -18,7 +18,7 @@ import sqlite3
 # Add parent directory to path to import bot modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from bot.backtesting import BacktestEngine, BacktestRunner
+from bot.backtesting import BacktestEngine, MultiSymbolBacktester
 from bot.binance_api import client
 from bot.config import API_KEY, API_SECRET, TESTNET, SYMBOL
 from bot.strategy import calculate_rsi, calculate_bollinger_bands
@@ -177,8 +177,13 @@ def run_strategy_comparison():
         client.ping()
         print("Successfully connected to Binance API")
         
-        # Create a backtest runner
-        runner = BacktestRunner()
+        # Create a backtest runner (using MultiSymbolBacktester instead of BacktestRunner)
+        runner = MultiSymbolBacktester(
+            symbols=[symbol],
+            timeframes=timeframes,
+            start_date=start_date,
+            end_date=end_date
+        )
         
         # First, let's ensure we have data available
         print("Checking if historical data is available...")
@@ -256,6 +261,9 @@ def run_strategy_comparison():
             print("Could not download all required historical data. Cannot proceed with comparison.")
             return None, None, None
 
+        # Run multiple backtests
+        results = {}
+        
         # Define strategies to test
         strategies = {
             'SMA_Crossover': sma_crossover_strategy,
@@ -265,21 +273,51 @@ def run_strategy_comparison():
         
         print(f"\nTesting {len(strategies)} strategies: {', '.join(strategies.keys())}")
         
-        # Run multiple backtests
-        results = runner.run_multiple_backtests(
-            symbols=[symbol],
-            timeframes=timeframes,
-            strategies=strategies,
-            start_date=start_date,
-            end_date=end_date,
-            initial_capital=10000
-        )
+        # Run each strategy one by one
+        for strategy_name, strategy_func in strategies.items():
+            print(f"Running {strategy_name} strategy...")
+            # Run the backtest for the single symbol
+            strategy_results = runner.run_for_all_symbols(strategy_func, use_parallel=False)
+            if strategy_results:
+                results[strategy_name] = strategy_results[symbol]  # Store the result for the symbol
+        
+        # Store all results in runner for comparison
+        runner.results = {symbol: results}
         
         # Compare strategies
-        comparison = runner.compare_strategies()
+        comparison = pd.DataFrame([
+            {
+                'strategy': strategy_name,
+                'total_return_pct': result.metrics.total_return_pct,
+                'sharpe_ratio': result.metrics.sharpe_ratio,
+                'max_drawdown_pct': result.metrics.max_drawdown_pct,
+                'win_rate': result.metrics.win_rate,
+                'total_trades': result.total_trades
+            }
+            for strategy_name, result in results.items()
+        ])
+        
+        # Sort by Sharpe ratio
+        comparison = comparison.sort_values('sharpe_ratio', ascending=False)
         
         # Generate summary report
-        report = runner.generate_summary_report(output_file='logs/strategy_comparison_report.txt')
+        report = f"Strategy Comparison Report\n"
+        report += f"{'=' * 50}\n"
+        report += f"Symbol: {symbol}\n"
+        report += f"Period: {start_date} to {end_date}\n"
+        report += f"{'=' * 50}\n\n"
+        
+        for _, row in comparison.iterrows():
+            report += f"Strategy: {row['strategy']}\n"
+            report += f"  Return: {row['total_return_pct']:.2f}%\n"
+            report += f"  Sharpe: {row['sharpe_ratio']:.2f}\n"
+            report += f"  Max DD: {row['max_drawdown_pct']:.2f}%\n"
+            report += f"  Win Rate: {row['win_rate']:.2f}%\n"
+            report += f"  Trades: {row['total_trades']}\n\n"
+        
+        # Save report to file
+        with open('logs/strategy_comparison_report.txt', 'w') as f:
+            f.write(report)
         
         # Print the report
         print("\n=== Strategy Comparison Results ===")
@@ -382,7 +420,7 @@ def print_educational_insights():
     print("1. SMA CROSSOVER STRATEGY")
     print("   ------------------------------")
     print("   ✓ Description: The Simple Moving Average (SMA) crossover strategy buys when a shorter-period")
-    print("     moving average crosses above a longer-period moving average, and sells when it crosses below.")
+    print("     moving average crosses above a longer-term moving average, and sells when it crosses below.")
     print("   ✓ Theory: This strategy aims to capture trends. The short-term SMA represents recent price")
     print("     action, while the long-term SMA represents the longer-term trend.")
     print("   ✓ Advantages:")

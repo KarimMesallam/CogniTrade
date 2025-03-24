@@ -1,0 +1,263 @@
+2025-03-24 12:55:35,901 - backtest_example - INFO - Starting backtest example
+2025-03-24 12:55:36,500 - backtest_example - ERROR - Error running backtest example: name 'pd' is not defined
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/backtest_example.py", line 32, in main
+    from bot.backtesting import (
+  File "/var/www/trading_bot/bot/backtesting/__init__.py", line 218, in <module>
+    ) -> pd.DataFrame:
+         ^^
+NameError: name 'pd' is not defined
+2025-03-24 12:56:16,423 - backtest_example - INFO - Starting backtest example
+2025-03-24 12:56:16,748 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 12:56:16,753 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:56:16,758 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 12:56:16,772 - trading_bot - INFO - Stored 1441 market data points for TEST_BTC 1h
+2025-03-24 12:56:16,773 - trading_bot.data - INFO - Stored synthetic data in database
+2025-03-24 12:56:16,773 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 12:56:16,773 - backtest_example - INFO - Running backtest
+2025-03-24 12:56:16,774 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:56:16,780 - trading_bot.data - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 12:56:16,780 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 12:56:18,411 - trading_bot - INFO - Time offset with Binance server: -502ms
+2025-03-24 12:56:18,411 - trading_bot.backtest - ERROR - Error preparing data: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 172, in prepare_data
+    self.market_data[timeframe] = self.data_manager.add_indicators(self.market_data[timeframe])
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/data/market_data.py", line 593, in add_indicators
+    from bot.strategy import (
+ImportError: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+2025-03-24 12:56:18,412 - trading_bot.backtest - ERROR - Error running backtest: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 172, in prepare_data
+    self.market_data[timeframe] = self.data_manager.add_indicators(self.market_data[timeframe])
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/data/market_data.py", line 593, in add_indicators
+    from bot.strategy import (
+ImportError: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 202, in run_backtest
+    self.prepare_data()
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 176, in prepare_data
+    raise DataError(f"Failed to prepare data with indicators: {str(e)}")
+bot.backtesting.exceptions.base.DataError: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+2025-03-24 12:56:18,412 - backtest_example - ERROR - Error running backtest example: Failed to run backtest: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 172, in prepare_data
+    self.market_data[timeframe] = self.data_manager.add_indicators(self.market_data[timeframe])
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/data/market_data.py", line 593, in add_indicators
+    from bot.strategy import (
+ImportError: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 202, in run_backtest
+    self.prepare_data()
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 176, in prepare_data
+    raise DataError(f"Failed to prepare data with indicators: {str(e)}")
+bot.backtesting.exceptions.base.DataError: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/backtest_example.py", line 90, in main
+    result = run_backtest(
+             ^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/__init__.py", line 61, in run_backtest
+    return engine.run_backtest(strategy_func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 250, in run_backtest
+    raise BacktestError(f"Failed to run backtest: {str(e)}")
+bot.backtesting.exceptions.base.BacktestError: Failed to run backtest: Failed to prepare data with indicators: cannot import name 'calculate_ema' from 'bot.strategy' (/var/www/trading_bot/bot/strategy.py)
+2025-03-24 12:57:45,364 - backtest_example - INFO - Starting backtest example
+2025-03-24 12:57:45,980 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 12:57:45,983 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:57:45,987 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 12:57:45,992 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 12:57:45,992 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 12:57:45,992 - backtest_example - INFO - Running backtest
+2025-03-24 12:57:45,993 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:57:45,993 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 12:57:46,025 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 12:57:46,630 - trading_bot.backtest - ERROR - Error running backtest: '>' not supported between instances of 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 243, in run_backtest
+    result = self._create_backtest_result(strategy_func)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 571, in _create_backtest_result
+    result.calculate_metrics()
+  File "/var/www/trading_bot/bot/backtesting/models/results.py", line 162, in calculate_metrics
+    profits = [t.get('profit_loss', 0) for t in self.trades if t.get('profit_loss', 0) > 0]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/models/results.py", line 162, in <listcomp>
+    profits = [t.get('profit_loss', 0) for t in self.trades if t.get('profit_loss', 0) > 0]
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: '>' not supported between instances of 'NoneType' and 'int'
+2025-03-24 12:57:46,632 - backtest_example - ERROR - Error running backtest example: Failed to run backtest: '>' not supported between instances of 'NoneType' and 'int'
+Traceback (most recent call last):
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 243, in run_backtest
+    result = self._create_backtest_result(strategy_func)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 571, in _create_backtest_result
+    result.calculate_metrics()
+  File "/var/www/trading_bot/bot/backtesting/models/results.py", line 162, in calculate_metrics
+    profits = [t.get('profit_loss', 0) for t in self.trades if t.get('profit_loss', 0) > 0]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/models/results.py", line 162, in <listcomp>
+    profits = [t.get('profit_loss', 0) for t in self.trades if t.get('profit_loss', 0) > 0]
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: '>' not supported between instances of 'NoneType' and 'int'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/www/trading_bot/examples/backtest_example.py", line 90, in main
+    result = run_backtest(
+             ^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/__init__.py", line 61, in run_backtest
+    return engine.run_backtest(strategy_func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/trading_bot/bot/backtesting/core/engine.py", line 250, in run_backtest
+    raise BacktestError(f"Failed to run backtest: {str(e)}")
+bot.backtesting.exceptions.base.BacktestError: Failed to run backtest: '>' not supported between instances of 'NoneType' and 'int'
+2025-03-24 12:58:29,975 - backtest_example - INFO - Starting backtest example
+2025-03-24 12:58:30,299 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 12:58:30,299 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:58:30,302 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 12:58:30,305 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 12:58:30,306 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 12:58:30,306 - backtest_example - INFO - Running backtest
+2025-03-24 12:58:30,306 - trading_bot - INFO - Database initialized successfully
+2025-03-24 12:58:30,307 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 12:58:30,339 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 12:58:30,950 - trading_bot.backtest - INFO - Backtest completed in 0.63 seconds with 10 trades
+2025-03-24 12:58:30,950 - backtest_example - INFO - Generating reports
+2025-03-24 12:58:30,951 - backtest_example - ERROR - Import error: No module named 'bot.backtesting.reporting.html_report'
+2025-03-24 12:58:30,951 - backtest_example - ERROR - The refactored backtesting module may not be available.
+2025-03-24 13:00:23,076 - backtest_example - INFO - Starting backtest example
+2025-03-24 13:00:23,674 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 13:00:23,677 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:00:23,682 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 13:00:23,687 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 13:00:23,687 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 13:00:23,687 - backtest_example - INFO - Running backtest
+2025-03-24 13:00:23,688 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:00:23,688 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 13:00:23,720 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:00:24,351 - trading_bot.backtest - INFO - Backtest completed in 0.65 seconds with 10 trades
+2025-03-24 13:00:24,351 - backtest_example - INFO - Generating reports
+2025-03-24 13:00:24,370 - trading_bot.reporting - INFO - Created default HTML report template at /var/www/trading_bot/bot/backtesting/reporting/templates/backtest_report.html
+2025-03-24 13:00:24,379 - trading_bot.reporting - INFO - Generated HTML report: output/reports/TEST_BTC_simple_strategy_20250324_130024_report.html
+2025-03-24 13:00:24,379 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:00:24,686 - trading_bot.visualization - INFO - Saved equity curve chart to output/charts/TEST_BTC_simple_strategy_20250324_130024_equity.png
+2025-03-24 13:00:24,875 - trading_bot.visualization - INFO - Saved drawdown chart to output/charts/TEST_BTC_simple_strategy_20250324_130024_drawdown.png
+2025-03-24 13:00:25,062 - trading_bot.visualization - INFO - Saved trades chart to output/charts/TEST_BTC_simple_strategy_20250324_130024_trades.png
+2025-03-24 13:00:25,514 - trading_bot.visualization - INFO - Saved complete analysis chart to output/charts/TEST_BTC_simple_strategy_20250324_130025_analysis.png
+2025-03-24 13:00:25,518 - backtest_example - INFO - Total trades: 5
+2025-03-24 13:00:25,518 - backtest_example - INFO - Win rate: 40.00%
+2025-03-24 13:00:25,519 - backtest_example - INFO - Return: 3973665781645604.00%
+2025-03-24 13:00:25,519 - backtest_example - INFO - Sharpe ratio: 7.88
+2025-03-24 13:00:25,519 - backtest_example - INFO - HTML report generated at: output/reports/TEST_BTC_simple_strategy_20250324_130024_report.html
+2025-03-24 13:00:25,519 - backtest_example - INFO - HTML Report: output/reports/TEST_BTC_simple_strategy_20250324_130024_report.html
+2025-03-24 13:00:25,519 - backtest_example - INFO - Equity Chart: output/charts/TEST_BTC_simple_strategy_20250324_130024_equity.png
+2025-03-24 13:00:25,519 - backtest_example - INFO - Drawdown Chart: output/charts/TEST_BTC_simple_strategy_20250324_130024_drawdown.png
+2025-03-24 13:00:25,519 - backtest_example - INFO - Trades Chart: output/charts/TEST_BTC_simple_strategy_20250324_130024_trades.png
+2025-03-24 13:00:25,519 - backtest_example - INFO - Complete Analysis: output/charts/TEST_BTC_simple_strategy_20250324_130025_analysis.png
+2025-03-24 13:00:25,519 - backtest_example - INFO - Backtest example completed successfully
+2025-03-24 13:52:41,303 - backtest_example - INFO - Starting backtest example
+2025-03-24 13:52:41,630 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 13:52:41,631 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:52:41,633 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 13:52:41,637 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 13:52:41,637 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 13:52:41,637 - backtest_example - INFO - Running backtest
+2025-03-24 13:52:41,638 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:52:41,639 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 13:52:41,672 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:52:42,279 - trading_bot.backtest - INFO - Backtest completed in 0.63 seconds with 10 trades
+2025-03-24 13:52:42,279 - backtest_example - INFO - Generating reports
+2025-03-24 13:52:42,304 - trading_bot.reporting - INFO - Generated HTML report: output/reports/TEST_BTC_simple_strategy_20250324_135242_report.html
+2025-03-24 13:52:42,304 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:52:42,584 - trading_bot.visualization - INFO - Saved equity curve chart to output/charts/TEST_BTC_simple_strategy_20250324_135242_equity.png
+2025-03-24 13:52:42,766 - trading_bot.visualization - INFO - Saved drawdown chart to output/charts/TEST_BTC_simple_strategy_20250324_135242_drawdown.png
+2025-03-24 13:52:42,953 - trading_bot.visualization - INFO - Saved trades chart to output/charts/TEST_BTC_simple_strategy_20250324_135242_trades.png
+2025-03-24 13:52:43,382 - trading_bot.visualization - INFO - Saved complete analysis chart to output/charts/TEST_BTC_simple_strategy_20250324_135243_analysis.png
+2025-03-24 13:52:43,386 - backtest_example - INFO - Total trades: 5
+2025-03-24 13:52:43,386 - backtest_example - INFO - Win rate: 40.00%
+2025-03-24 13:52:43,386 - backtest_example - INFO - Return: 3973665781645604.00%
+2025-03-24 13:52:43,386 - backtest_example - INFO - Sharpe ratio: 7.88
+2025-03-24 13:52:43,386 - backtest_example - INFO - HTML report generated at: output/reports/TEST_BTC_simple_strategy_20250324_135242_report.html
+2025-03-24 13:52:43,386 - backtest_example - INFO - HTML Report: output/reports/TEST_BTC_simple_strategy_20250324_135242_report.html
+2025-03-24 13:52:43,386 - backtest_example - INFO - Equity Chart: output/charts/TEST_BTC_simple_strategy_20250324_135242_equity.png
+2025-03-24 13:52:43,386 - backtest_example - INFO - Drawdown Chart: output/charts/TEST_BTC_simple_strategy_20250324_135242_drawdown.png
+2025-03-24 13:52:43,386 - backtest_example - INFO - Trades Chart: output/charts/TEST_BTC_simple_strategy_20250324_135242_trades.png
+2025-03-24 13:52:43,386 - backtest_example - INFO - Complete Analysis: output/charts/TEST_BTC_simple_strategy_20250324_135243_analysis.png
+2025-03-24 13:52:43,386 - backtest_example - INFO - Backtest example completed successfully
+2025-03-24 13:57:21,613 - backtest_example - INFO - Starting backtest example
+2025-03-24 13:57:22,285 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 13:57:22,288 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:57:22,293 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 13:57:22,298 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 13:57:22,298 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 13:57:22,298 - backtest_example - INFO - Running backtest
+2025-03-24 13:57:22,299 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:57:22,307 - trading_bot.data - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 13:57:22,307 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 13:57:22,339 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 13:57:22,956 - trading_bot.backtest - WARNING - Final equity 3.973665781645704e+17 exceeds reasonable limits, capping at 1000x initial capital
+2025-03-24 13:57:22,969 - trading_bot.backtest - INFO - Backtest completed in 0.65 seconds with 10 trades
+2025-03-24 13:57:22,969 - backtest_example - INFO - Generating reports
+2025-03-24 13:57:22,993 - trading_bot.reporting - INFO - Generated HTML report: output/reports/TEST_BTC_simple_strategy_20250324_135722_report.html
+2025-03-24 13:57:22,994 - trading_bot - INFO - Database initialized successfully
+2025-03-24 13:57:23,277 - trading_bot.visualization - INFO - Saved equity curve chart to output/charts/TEST_BTC_simple_strategy_20250324_135723_equity.png
+2025-03-24 13:57:23,455 - trading_bot.visualization - INFO - Saved drawdown chart to output/charts/TEST_BTC_simple_strategy_20250324_135723_drawdown.png
+2025-03-24 13:57:23,636 - trading_bot.visualization - INFO - Saved trades chart to output/charts/TEST_BTC_simple_strategy_20250324_135723_trades.png
+2025-03-24 13:57:24,056 - trading_bot.visualization - INFO - Saved complete analysis chart to output/charts/TEST_BTC_simple_strategy_20250324_135723_analysis.png
+2025-03-24 13:57:24,060 - backtest_example - INFO - Total trades: 5
+2025-03-24 13:57:24,060 - backtest_example - INFO - Win rate: 40.00%
+2025-03-24 13:57:24,060 - backtest_example - INFO - Return: 99900.00%
+2025-03-24 13:57:24,060 - backtest_example - INFO - Sharpe ratio: 7.88
+2025-03-24 13:57:24,060 - backtest_example - INFO - HTML report generated at: output/reports/TEST_BTC_simple_strategy_20250324_135722_report.html
+2025-03-24 13:57:24,060 - backtest_example - INFO - HTML Report: output/reports/TEST_BTC_simple_strategy_20250324_135722_report.html
+2025-03-24 13:57:24,060 - backtest_example - INFO - Equity Chart: output/charts/TEST_BTC_simple_strategy_20250324_135723_equity.png
+2025-03-24 13:57:24,060 - backtest_example - INFO - Drawdown Chart: output/charts/TEST_BTC_simple_strategy_20250324_135723_drawdown.png
+2025-03-24 13:57:24,060 - backtest_example - INFO - Trades Chart: output/charts/TEST_BTC_simple_strategy_20250324_135723_trades.png
+2025-03-24 13:57:24,060 - backtest_example - INFO - Complete Analysis: output/charts/TEST_BTC_simple_strategy_20250324_135723_analysis.png
+2025-03-24 13:57:24,061 - backtest_example - INFO - Backtest example completed successfully
+2025-03-24 14:21:30,972 - backtest_example - INFO - Starting backtest example
+2025-03-24 14:21:31,314 - backtest_example - INFO - Generating test data for TEST_BTC from 2025-01-23 to 2025-03-24
+2025-03-24 14:21:31,315 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:21:31,318 - trading_bot.data - INFO - Generated synthetic data for TEST_BTC (1441 candles)
+2025-03-24 14:21:31,321 - trading_bot - ERROR - Error storing market data: UNIQUE constraint failed: market_data.symbol, market_data.timeframe, market_data.timestamp
+2025-03-24 14:21:31,321 - backtest_example - INFO - Generated 1441 candles of test data
+2025-03-24 14:21:31,321 - backtest_example - INFO - Running backtest
+2025-03-24 14:21:31,322 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:21:31,323 - trading_bot.backtest - INFO - Loaded 1000 candles for TEST_BTC at 1h timeframe
+2025-03-24 14:21:31,355 - trading_bot.backtest - INFO - Added indicators to 1h data
+2025-03-24 14:21:31,675 - trading_bot.backtest - WARNING - Extreme ROI value detected: 3240172.5964769777%. Clamping to ±1000%.
+2025-03-24 14:21:31,968 - trading_bot.backtest - WARNING - Extreme ROI value detected: 294187451445.3193%. Clamping to ±1000%.
+2025-03-24 14:21:31,968 - trading_bot.backtest - WARNING - Final equity 3.973665781645704e+17 exceeds reasonable limits, capping at 1000x initial capital
+2025-03-24 14:21:31,978 - trading_bot.backtest - INFO - Backtest completed in 0.65 seconds with 10 trades
+2025-03-24 14:21:31,978 - backtest_example - INFO - Generating reports
+2025-03-24 14:21:32,003 - trading_bot.reporting - INFO - Generated HTML report: output/reports/TEST_BTC_simple_strategy_20250324_142132_report.html
+2025-03-24 14:21:32,003 - trading_bot - INFO - Database initialized successfully
+2025-03-24 14:21:32,298 - trading_bot.visualization - INFO - Saved equity curve chart to output/charts/TEST_BTC_simple_strategy_20250324_142132_equity.png
+2025-03-24 14:21:32,483 - trading_bot.visualization - INFO - Saved drawdown chart to output/charts/TEST_BTC_simple_strategy_20250324_142132_drawdown.png
+2025-03-24 14:21:32,674 - trading_bot.visualization - INFO - Saved trades chart to output/charts/TEST_BTC_simple_strategy_20250324_142132_trades.png
+2025-03-24 14:21:33,102 - trading_bot.visualization - INFO - Saved complete analysis chart to output/charts/TEST_BTC_simple_strategy_20250324_142132_analysis.png
+2025-03-24 14:21:33,105 - backtest_example - INFO - Total trades: 5
+2025-03-24 14:21:33,106 - backtest_example - INFO - Win rate: 40.00%
+2025-03-24 14:21:33,106 - backtest_example - INFO - Return: 99900.00%
+2025-03-24 14:21:33,106 - backtest_example - INFO - Sharpe ratio: 7.88
+2025-03-24 14:21:33,106 - backtest_example - INFO - HTML report generated at: output/reports/TEST_BTC_simple_strategy_20250324_142132_report.html
+2025-03-24 14:21:33,106 - backtest_example - INFO - HTML Report: output/reports/TEST_BTC_simple_strategy_20250324_142132_report.html
+2025-03-24 14:21:33,106 - backtest_example - INFO - Equity Chart: output/charts/TEST_BTC_simple_strategy_20250324_142132_equity.png
+2025-03-24 14:21:33,106 - backtest_example - INFO - Drawdown Chart: output/charts/TEST_BTC_simple_strategy_20250324_142132_drawdown.png
+2025-03-24 14:21:33,106 - backtest_example - INFO - Trades Chart: output/charts/TEST_BTC_simple_strategy_20250324_142132_trades.png
+2025-03-24 14:21:33,106 - backtest_example - INFO - Complete Analysis: output/charts/TEST_BTC_simple_strategy_20250324_142132_analysis.png
+2025-03-24 14:21:33,106 - backtest_example - INFO - Backtest example completed successfully
