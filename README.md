@@ -1,4 +1,4 @@
-# AI Trading Bot with Binance & LLM Integration
+# Trading Bot with Binance & LLM Integration
 
 A scalable Python project for automated trading that combines traditional trading strategies with modern AI/LLM orchestration for decision making. The bot connects to Binance (starting with paper trading via the Testnet) and is designed to easily integrate multiple LLMs to refine trade signals and manage order execution.
 
