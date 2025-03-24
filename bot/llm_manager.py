@@ -11,6 +11,119 @@ LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_API_ENDPOINT = os.getenv("LLM_API_ENDPOINT", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "")
 
+class LLMManager:
+    """
+    A class to manage LLM interactions for trading decisions.
+    """
+    def __init__(self):
+        self.api_key = LLM_API_KEY
+        self.api_endpoint = LLM_API_ENDPOINT
+        self.model = LLM_MODEL
+    
+    def make_llm_decision(self, market_data, symbol, timeframe, context, strategy_signals=None):
+        """
+        Make a trading decision using an LLM based on market data and context.
+        
+        Args:
+            market_data: Dictionary with market data
+            symbol: Trading pair symbol
+            timeframe: Timeframe for analysis
+            context: Additional context for the LLM
+            strategy_signals: Optional signals from traditional strategies
+            
+        Returns:
+            Dictionary with decision, confidence, and reasoning
+        """
+        # Prepare context string from input data
+        prompt = self._prepare_prompt(market_data, symbol, timeframe, context, strategy_signals)
+        
+        try:
+            if self.api_key and self.api_endpoint and self.model:
+                # Call real LLM API
+                decision = call_real_llm_api(prompt)
+                confidence = 0.8  # Placeholder confidence - would be derived from LLM response
+                reasoning = "Decision based on LLM analysis"  # Could be extracted from LLM response
+            else:
+                # Fall back to rule-based
+                decision = make_rule_based_decision(prompt)
+                confidence = 0.6  # Lower confidence for rule-based
+                reasoning = "Decision based on rule-based analysis (LLM unavailable)"
+                
+            return {
+                "decision": decision.lower(),
+                "confidence": confidence,
+                "reasoning": reasoning
+            }
+        except Exception as e:
+            logger.error(f"Error making LLM decision: {e}")
+            return {
+                "decision": "hold",
+                "confidence": 0.5,
+                "reasoning": f"Error in LLM decision process: {str(e)}"
+            }
+    
+    def make_rule_based_decision(self, market_data, strategy_signals=None):
+        """
+        Make a rule-based trading decision without using an LLM.
+        
+        Args:
+            market_data: Dictionary with market data
+            strategy_signals: Optional signals from traditional strategies
+            
+        Returns:
+            Dictionary with decision, confidence, and reasoning
+        """
+        # Create a simple prompt from the available data
+        prompt = "Market data: "
+        if "price" in market_data:
+            prompt += f"Price: {market_data['price']} "
+        
+        if "indicators" in market_data:
+            prompt += "Indicators: "
+            for indicator, value in market_data["indicators"].items():
+                prompt += f"{indicator}: {value} "
+        
+        if strategy_signals:
+            prompt += "Signals: "
+            for strategy, signal in strategy_signals.items():
+                prompt += f"simple signal: {signal} "
+        
+        # Get decision using rule-based method
+        decision = make_rule_based_decision(prompt)
+        
+        return {
+            "decision": decision.lower(),
+            "confidence": 0.6,  # Standard confidence for rule-based decisions
+            "reasoning": "Decision based on rule-based analysis of market indicators"
+        }
+    
+    def _prepare_prompt(self, market_data, symbol, timeframe, context, strategy_signals):
+        """
+        Prepare a prompt string from the input data for the LLM.
+        
+        Returns:
+            String prompt for the LLM
+        """
+        prompt = f"Trading analysis for {symbol} on {timeframe} timeframe.\n"
+        prompt += f"Context: {context}\n"
+        
+        if "price" in market_data:
+            prompt += f"Current price: {market_data['price']}\n"
+        
+        if "indicators" in market_data:
+            prompt += "Technical indicators:\n"
+            for indicator, value in market_data["indicators"].items():
+                prompt += f"- {indicator}: {value}\n"
+        
+        if strategy_signals:
+            prompt += "Strategy signals:\n"
+            for strategy, signal in strategy_signals.items():
+                prompt += f"- {strategy}: {signal}\n"
+        
+        prompt += "\nBased on this information, should I buy, sell, or hold?"
+        
+        return prompt
+
 def get_decision_from_llm(prompt):
     """
     This function interfaces with LLMs for trading decisions.

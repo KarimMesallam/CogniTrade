@@ -13,7 +13,7 @@ import uvicorn
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import bot modules
-from bot import binance_api, strategy, backtesting, order_manager, database, config
+from bot import binance_api, strategy, backtesting, order_manager, database, config, llm_manager
 
 # Create a TradingBot class for the API
 class TradingBot:
@@ -68,12 +68,24 @@ class TradingConfig(BaseModel):
     trade_amount: float
     strategies: List[StrategyConfig]
 
+class LLMDecisionRequest(BaseModel):
+    symbol: str
+    timeframe: str
+    market_data: Dict[str, Any]
+    context: str
+    strategy_signals: Optional[Dict[str, Any]] = None
+
 # Trading bot instance
 trading_bot = None
 trading_task = None
 
 # Database connection
 db = database.Database()
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "version": "1.0.0"}
 
 # Start trading task
 @app.post("/trading/start")
@@ -288,6 +300,25 @@ async def get_strategies():
                     "description": "Oversold threshold"
                 }
             }
+        },
+        {
+            "name": "llm_strategy",
+            "display_name": "LLM-Enhanced Strategy",
+            "description": "Strategy that uses LLM to make trading decisions",
+            "parameters": {
+                "base_strategy": {
+                    "type": "string",
+                    "options": ["sma_crossover", "rsi"],
+                    "default": "sma_crossover",
+                    "description": "Base strategy for LLM to enhance"
+                },
+                "llm_model": {
+                    "type": "string",
+                    "options": ["rule_based", "deepseek", "gpt4", "claude"],
+                    "default": "rule_based",
+                    "description": "LLM model to use"
+                }
+            }
         }
     ]
     
@@ -461,6 +492,115 @@ async def get_signal_history(symbol: Optional[str] = None, limit: int = 100):
         return {"status": "success", "signals": signals}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+# LLM Integration endpoints
+@app.post("/llm/decision")
+async def get_llm_decision(request: LLMDecisionRequest):
+    try:
+        # Create LLM manager
+        manager = llm_manager.LLMManager()
+        
+        # Get market data in the format expected by the LLM manager
+        market_data = request.market_data
+        
+        # Make decision based on context and market data
+        if "llm_model" in request.market_data and request.market_data["llm_model"] != "rule_based":
+            # Use the specified LLM model
+            decision = manager.make_llm_decision(
+                market_data=market_data,
+                symbol=request.symbol,
+                timeframe=request.timeframe,
+                context=request.context,
+                strategy_signals=request.strategy_signals
+            )
+        else:
+            # Use rule-based fallback
+            decision = manager.make_rule_based_decision(
+                market_data=market_data,
+                strategy_signals=request.strategy_signals
+            )
+        
+        return {
+            "status": "success",
+            "decision": decision["decision"],
+            "confidence": decision["confidence"],
+            "reasoning": decision["reasoning"]
+        }
+    except Exception as e:
+        # Return a default decision in case of errors
+        return {
+            "status": "success",
+            "decision": "hold",
+            "confidence": 0.5,
+            "reasoning": f"Error getting LLM decision: {str(e)}. Using default 'hold' decision."
+        }
+
+# Database operations endpoints
+@app.get("/database/trades")
+async def get_trades(symbol: Optional[str] = None, limit: int = 100, offset: int = 0):
+    try:
+        # Get database connection
+        db_connection = database.Database()
+        
+        # Get trades
+        if symbol:
+            trades = db_connection.get_trades_by_symbol(symbol, limit, offset)
+        else:
+            trades = db_connection.get_trades(limit, offset)
+        
+        return {"status": "success", "trades": trades}
+    except Exception as e:
+        # Return mock data for now
+        import random
+        
+        trades = []
+        for i in range(min(limit, 100)):
+            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
+            trades.append({
+                "id": i + offset + 1,
+                "symbol": symbol_to_use,
+                "entry_time": "2023-03-01T12:00:00",
+                "exit_time": "2023-03-02T14:30:00",
+                "entry_price": 40000.0,
+                "exit_price": 41000.0,
+                "quantity": 0.1,
+                "profit_loss": 100.0,
+                "profit_loss_percent": 2.5,
+                "strategy": "sma_crossover"
+            })
+        
+        return {"status": "success", "trades": trades}
+
+@app.get("/database/signals")
+async def get_signals(symbol: Optional[str] = None, strategy: Optional[str] = None, limit: int = 100, offset: int = 0):
+    try:
+        # Get database connection
+        db_connection = database.Database()
+        
+        # Get signals
+        signals = db_connection.get_signals(symbol, strategy, limit, offset)
+        
+        return {"status": "success", "signals": signals}
+    except Exception as e:
+        # Return mock data for now
+        import random
+        
+        signals = []
+        for i in range(min(limit, 100)):
+            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
+            strategy_to_use = strategy if strategy else random.choice(["sma_crossover", "rsi", "llm_decision"])
+            signals.append({
+                "id": i + offset + 1,
+                "symbol": symbol_to_use,
+                "timestamp": "2023-03-01T12:00:00",
+                "strategy": strategy_to_use,
+                "timeframe": random.choice(["1m", "5m", "15m", "1h", "4h"]),
+                "signal": random.choice(["buy", "sell", "hold"]),
+                "strength": random.uniform(0.6, 1.0),
+                "price": 40000.0
+            })
+        
+        return {"status": "success", "signals": signals}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 

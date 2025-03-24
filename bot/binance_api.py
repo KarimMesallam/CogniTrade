@@ -10,6 +10,13 @@ logger = logging.getLogger("trading_bot")
 # Set recvWindow to 60000 milliseconds when making API calls to allow for time differences
 client = Client(API_KEY, API_SECRET, testnet=TESTNET)
 
+# Function to get the client instance (for tests)
+def get_client():
+    """
+    Returns the Binance client instance
+    """
+    return client
+
 # Function to handle time synchronization
 def synchronize_time():
     """
