@@ -105,49 +105,110 @@ def technical_analysis_signal(symbol, interval='1h'):
         bollinger = calculate_bollinger_bands(df)
         macd = calculate_macd(df)
         
-        # Combine indicators
-        df = pd.concat([df, bollinger, macd], axis=1)
-        
-        # Get latest values
-        latest = df.iloc[-1]
-        
-        # Initialize signal strength counters
-        buy_signals = 0
-        sell_signals = 0
-        
-        # RSI signals
-        if latest['rsi'] < 30:  # Oversold
-            buy_signals += 1
-            logger.info(f"RSI indicates oversold condition: {latest['rsi']:.2f}")
-        elif latest['rsi'] > 70:  # Overbought
-            sell_signals += 1
-            logger.info(f"RSI indicates overbought condition: {latest['rsi']:.2f}")
-        
-        # Bollinger Band signals
-        if latest['close'] > latest['upper_band']:  # Price above upper band
-            sell_signals += 1
-            logger.info("Price above upper Bollinger Band")
-        elif latest['close'] < latest['lower_band']:  # Price below lower band
-            buy_signals += 1
-            logger.info("Price below lower Bollinger Band")
-        
-        # MACD signals
-        prev = df.iloc[-2]
-        # MACD line crosses above signal line
-        if prev['macd_line'] < prev['signal_line'] and latest['macd_line'] > latest['signal_line']:
-            buy_signals += 1
-            logger.info("MACD line crossed above signal line")
-        # MACD line crosses below signal line
-        elif prev['macd_line'] > prev['signal_line'] and latest['macd_line'] < latest['signal_line']:
-            sell_signals += 1
-            logger.info("MACD line crossed below signal line")
-        
-        # Determine overall signal
-        if buy_signals > sell_signals:
-            return "BUY"
-        elif sell_signals > buy_signals:
-            return "SELL"
-        else:
+        # Combine dataframes safely
+        try:
+            # Ensure indices are aligned
+            df = df.copy()
+            
+            # Merge the dataframes on their indices
+            for col in bollinger.columns:
+                if col not in df.columns:
+                    df[col] = bollinger[col]
+            
+            for col in macd.columns:
+                if col not in df.columns:
+                    df[col] = macd[col]
+            
+            # Ensure we have at least two rows
+            if len(df) < 2:
+                logger.warning("Not enough data points after indicator calculation")
+                return "HOLD"
+            
+            # Get latest values and previous values
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+            
+            # Check for required fields before proceeding
+            required_fields = ['rsi', 'close', 'upper_band', 'lower_band', 'macd_line', 'signal_line']
+            for field in required_fields:
+                if field not in df.columns or pd.isna(latest[field]) or pd.isna(prev[field]):
+                    logger.warning(f"Missing or invalid field: {field}")
+                    return "HOLD"
+            
+            # Initialize signal strength counters
+            buy_signals = 0
+            sell_signals = 0
+            
+            # Safe extraction of scalar values
+            try:
+                # RSI signals - use item() for Series scalar extraction
+                rsi_value = latest['rsi']
+                if isinstance(rsi_value, pd.Series):
+                    rsi_value = rsi_value.iloc[0]
+                    
+                if rsi_value < 30:  # Oversold
+                    buy_signals += 1
+                    logger.info(f"RSI indicates oversold condition: {rsi_value:.2f}")
+                elif rsi_value > 70:  # Overbought
+                    sell_signals += 1
+                    logger.info(f"RSI indicates overbought condition: {rsi_value:.2f}")
+                
+                # Bollinger Band signals
+                close_price = latest['close']
+                upper_band = latest['upper_band']
+                lower_band = latest['lower_band']
+                
+                if isinstance(close_price, pd.Series):
+                    close_price = close_price.iloc[0]
+                if isinstance(upper_band, pd.Series):
+                    upper_band = upper_band.iloc[0]
+                if isinstance(lower_band, pd.Series):
+                    lower_band = lower_band.iloc[0]
+                
+                if close_price > upper_band:  # Price above upper band
+                    sell_signals += 1
+                    logger.info("Price above upper Bollinger Band")
+                elif close_price < lower_band:  # Price below lower band
+                    buy_signals += 1
+                    logger.info("Price below lower Bollinger Band")
+                
+                # MACD signals
+                prev_macd = prev['macd_line']
+                prev_signal = prev['signal_line']
+                latest_macd = latest['macd_line']
+                latest_signal = latest['signal_line']
+                
+                if isinstance(prev_macd, pd.Series):
+                    prev_macd = prev_macd.iloc[0]
+                if isinstance(prev_signal, pd.Series):
+                    prev_signal = prev_signal.iloc[0]
+                if isinstance(latest_macd, pd.Series):
+                    latest_macd = latest_macd.iloc[0]
+                if isinstance(latest_signal, pd.Series):
+                    latest_signal = latest_signal.iloc[0]
+                
+                # MACD line crosses above signal line
+                if prev_macd < prev_signal and latest_macd > latest_signal:
+                    buy_signals += 1
+                    logger.info("MACD line crossed above signal line")
+                # MACD line crosses below signal line
+                elif prev_macd > prev_signal and latest_macd < latest_signal:
+                    sell_signals += 1
+                    logger.info("MACD line crossed below signal line")
+            except (ValueError, TypeError) as e:
+                logger.error(f"Error extracting scalar values: {e}")
+                return "HOLD"
+            
+            # Determine overall signal
+            if buy_signals > sell_signals:
+                return "BUY"
+            elif sell_signals > buy_signals:
+                return "SELL"
+            else:
+                return "HOLD"
+                
+        except (ValueError, TypeError, KeyError) as e:
+            logger.error(f"Error processing indicator data: {e}")
             return "HOLD"
             
     except Exception as e:

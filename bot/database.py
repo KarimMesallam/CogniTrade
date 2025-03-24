@@ -5,6 +5,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Union
+import time
 
 logger = logging.getLogger("trading_bot")
 
@@ -28,7 +29,7 @@ class Database:
         self._initialize_database()
     
     def _initialize_database(self):
-        """Create database tables if they don't exist"""
+        """Initialize database tables if they don't exist."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -42,15 +43,12 @@ class Database:
                     quantity REAL NOT NULL,
                     price REAL NOT NULL,
                     timestamp TEXT NOT NULL,
-                    order_id TEXT,
                     status TEXT NOT NULL,
                     strategy TEXT,
-                    timeframe TEXT,
                     profit_loss REAL,
-                    execution_time REAL,
-                    fees REAL,
-                    notes TEXT,
-                    raw_data TEXT
+                    roi_pct REAL,
+                    commission REAL,
+                    notes TEXT
                 )
                 ''')
                 
@@ -63,37 +61,13 @@ class Database:
                     strategy TEXT NOT NULL,
                     signal TEXT NOT NULL,
                     timestamp TEXT NOT NULL,
-                    price REAL,
                     indicators TEXT,
                     llm_decision TEXT,
-                    executed BOOLEAN DEFAULT 0,
-                    trade_id TEXT,
-                    FOREIGN KEY (trade_id) REFERENCES trades (trade_id)
+                    executed INTEGER DEFAULT 0
                 )
                 ''')
                 
-                # Create performance metrics table
-                cursor.execute('''
-                CREATE TABLE IF NOT EXISTS performance (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    symbol TEXT NOT NULL,
-                    strategy TEXT NOT NULL,
-                    timeframe TEXT NOT NULL,
-                    start_date TEXT NOT NULL,
-                    end_date TEXT NOT NULL,
-                    total_trades INTEGER,
-                    win_count INTEGER,
-                    loss_count INTEGER,
-                    win_rate REAL,
-                    profit_loss REAL,
-                    max_drawdown REAL,
-                    sharpe_ratio REAL,
-                    volatility REAL,
-                    metrics_data TEXT
-                )
-                ''')
-                
-                # Create market data table for backtesting
+                # Create market_data table
                 cursor.execute('''
                 CREATE TABLE IF NOT EXISTS market_data (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,24 +83,55 @@ class Database:
                 )
                 ''')
                 
+                # Create performance_metrics table
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS performance_metrics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    strategy TEXT NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    start_date TEXT NOT NULL,
+                    end_date TEXT NOT NULL,
+                    total_trades INTEGER,
+                    win_rate REAL,
+                    profit_factor REAL,
+                    sharpe_ratio REAL,
+                    max_drawdown_pct REAL,
+                    total_return_pct REAL,
+                    timestamp TEXT NOT NULL
+                )
+                ''')
+                
                 # Create alerts table
                 cursor.execute('''
                 CREATE TABLE IF NOT EXISTS alerts (
                     alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type TEXT NOT NULL,
+                    alert_type TEXT NOT NULL,
                     severity TEXT NOT NULL,
                     message TEXT NOT NULL,
+                    acknowledged INTEGER DEFAULT 0,
                     timestamp TEXT NOT NULL,
-                    acknowledged BOOLEAN DEFAULT 0,
                     related_data TEXT
+                )
+                ''')
+                
+                # Create trade_signal_link table for many-to-many relationship
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS trade_signal_link (
+                    trade_id TEXT NOT NULL,
+                    signal_id INTEGER NOT NULL,
+                    PRIMARY KEY (trade_id, signal_id),
+                    FOREIGN KEY (trade_id) REFERENCES trades (trade_id),
+                    FOREIGN KEY (signal_id) REFERENCES signals (signal_id)
                 )
                 ''')
                 
                 conn.commit()
                 logger.info("Database initialized successfully")
+                return True
         except Exception as e:
             logger.error(f"Error initializing database: {e}")
-            raise
+            return False
     
     def insert_trade(self, trade_data: Dict[str, Any]) -> bool:
         """
@@ -344,7 +349,7 @@ class Database:
     
     def store_market_data(self, market_data: pd.DataFrame, symbol: str, timeframe: str) -> bool:
         """
-        Store market data for backtesting
+        Store market data in the database.
         
         Args:
             market_data: DataFrame containing OHLCV data
@@ -365,13 +370,29 @@ class Database:
             market_data['symbol'] = symbol
             market_data['timeframe'] = timeframe
             
+            # Make sure volume is present (added with 0 as default if missing)
+            if 'volume' not in market_data.columns:
+                market_data['volume'] = 0.0
+            
             # Ensure timestamp is in the correct format
             if not isinstance(market_data['timestamp'].iloc[0], str):
                 market_data['timestamp'] = market_data['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
             
             with sqlite3.connect(self.db_path) as conn:
-                # Insert data, replacing any existing entries with the same symbol/timeframe/timestamp
-                market_data.to_sql('market_data', conn, if_exists='append', index=False)
+                # First, create a temporary table for the new data
+                temp_table = f"temp_market_data_{int(time.time())}"
+                market_data.to_sql(temp_table, conn, if_exists='replace', index=False)
+                
+                # Insert or replace data in the main table using column names explicitly
+                conn.execute(f"""
+                    INSERT OR REPLACE INTO market_data 
+                    (symbol, timeframe, timestamp, open, high, low, close, volume)
+                    SELECT symbol, timeframe, timestamp, open, high, low, close, volume 
+                    FROM {temp_table}
+                """)
+                
+                # Drop the temporary table
+                conn.execute(f"DROP TABLE {temp_table}")
                 conn.commit()
                 
                 logger.info(f"Stored {len(market_data)} market data points for {symbol} {timeframe}")
@@ -452,7 +473,7 @@ class Database:
                 placeholders = ', '.join(['?' for _ in metrics])
                 values = list(metrics.values())
                 
-                query = f"INSERT INTO performance ({fields}) VALUES ({placeholders})"
+                query = f"INSERT INTO performance_metrics ({fields}) VALUES ({placeholders})"
                 cursor.execute(query, values)
                 conn.commit()
                 

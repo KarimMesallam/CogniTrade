@@ -122,13 +122,24 @@ class OrderManager:
                     "symbol": self.symbol,
                     "side": order.get("side"),
                     "quantity": float(order.get("origQty", 0)),
-                    "price": float(order.get("price", 0)) if order.get("price") and order.get("price") != "0.00000000" else None,
                     "timestamp": timestamp,
                     "order_id": str(order.get("orderId")),
                     "status": status,
                     "strategy": "manual" if not action else action.lower(),
                     "raw_data": order
                 }
+                
+                # Extract price from order
+                # For market orders, calculate the average price from fills
+                price = order.get("price")
+                if (not price or price == "0.00000000") and order.get("fills"):
+                    total_cost = sum(float(fill["price"]) * float(fill["qty"]) for fill in order["fills"])
+                    total_qty = sum(float(fill["qty"]) for fill in order["fills"])
+                    if total_qty > 0:
+                        avg_price = total_cost / total_qty
+                        db_trade_data["price"] = avg_price
+                else:
+                    db_trade_data["price"] = float(price) if price else 0.0
                 
                 # Calculate profit/loss if possible
                 if order.get("fills"):
