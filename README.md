@@ -457,26 +457,6 @@ You can create your own backtesting script by following these steps:
    report_paths = generate_report(result)
    ```
 
-## Future Improvements
-
-- **Advanced Trading Strategies:** Implement additional strategies beyond the basic examples.
-- **LLM Integration:** Expand `bot/llm_manager.py` to interface with models like DeepSeek R1, GPT-4, etc., for real-time decision support.
-- **Live Trading:** After thorough paper trading, switch to live mode (with caution) by toggling configuration parameters.
-- **Multi-Exchange Support:** Add wrappers for additional exchanges (e.g., using CCXT) for more diversified trading.
-- **Enhanced Logging & Monitoring:** Integrate more robust logging and alerting for operational insights.
-- **Reinforcement Learning:** Implement RL-based strategies that can learn and adapt to changing market conditions.
-- **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters (after core backend functionality is stable).
-- **Parallel Processing:** Further optimize performance with multi-threaded and multi-process operations.
-- **Custom Indicators:** Expand the library of technical indicators and custom signal generators.
-
-## Contributing
-
-Contributions are welcome! Feel free to fork the repository and submit pull requests. Please follow the standard GitHub flow and include tests for any new functionality.
-
-## License
-
-This project is licensed under the MIT License.
-
 ## LLM Integration
 
 The trading bot integrates state-of-the-art LLMs to enhance trading decisions:
@@ -574,3 +554,22 @@ export OPENAI_API_KEY=your-openai-key
 export OPENAI_MODEL=gpt-4o
 export USE_REAL_API=1
 ```
+
+## Future Improvements
+
+- **Advanced Trading Strategies:** Implement additional strategies beyond the basic examples.
+- **Live Trading:** After thorough paper trading, switch to live mode (with caution) by toggling configuration parameters.
+- **Multi-Exchange Support:** Add wrappers for additional exchanges (e.g., using CCXT) for more diversified trading.
+- **Enhanced Logging & Monitoring:** Integrate more robust logging and alerting for operational insights.
+- **Reinforcement Learning:** Implement RL-based strategies that can learn and adapt to changing market conditions.
+- **Web Interface:** Create a dashboard for monitoring trades, backtesting results, and adjusting bot parameters (after core backend functionality is stable).
+- **Parallel Processing:** Further optimize performance with multi-threaded and multi-process operations.
+- **Custom Indicators:** Expand the library of technical indicators and custom signal generators.
+
+## Contributing
+
+Contributions are welcome! Feel free to fork the repository and submit pull requests. Please follow the standard GitHub flow and include tests for any new functionality.
+
+## License
+
+This project is licensed under the MIT License.
