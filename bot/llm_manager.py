@@ -5,33 +5,57 @@ import os
 import re
 from datetime import datetime
 from typing import Dict, Any, Optional
+from bot.config import TRADING_CONFIG, is_llm_enabled, get_required_llm_confidence
 
 logger = logging.getLogger("trading_bot")
 
-# DeepSeek R1 API configuration (would come from .env in production)
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_API_ENDPOINT = os.getenv("LLM_API_ENDPOINT", "https://api.deepseek.com/v1/chat/completions")
-LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-reasoner")  # deepseek-reasoner is the R1 model
+# Get LLM configuration from the new config system
+def get_llm_config():
+    """
+    Get the LLM configuration from the trading config.
+    """
+    llm_config = TRADING_CONFIG.get("decision_making", {}).get("llm", {})
+    return llm_config
 
-# OpenAI GPT-4o configuration for structured output processing
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")  # Default to GPT-4o
+def get_primary_model_config():
+    """
+    Get the primary LLM model configuration.
+    """
+    llm_config = get_llm_config()
+    return llm_config.get("models", {}).get("primary", {})
+
+def get_secondary_model_config():
+    """
+    Get the secondary LLM model configuration.
+    """
+    llm_config = get_llm_config()
+    return llm_config.get("models", {}).get("secondary", {})
 
 class LLMManager:
     """
-    A class to manage LLM interactions for trading decisions using DeepSeek R1
-    with GPT-4o structured output processing.
+    A class to manage LLM interactions for trading decisions using configured models.
     """
     def __init__(self):
-        self.api_key = LLM_API_KEY
-        self.api_endpoint = LLM_API_ENDPOINT
-        self.model = LLM_MODEL
-        self.openai_api_key = OPENAI_API_KEY
+        # Get primary model config
+        primary_config = get_primary_model_config()
+        self.api_key = primary_config.get("api_key", "")
+        self.api_endpoint = primary_config.get("api_endpoint", "")
+        self.model = primary_config.get("model", "")
+        self.temperature = primary_config.get("temperature", 0.3)
+        
+        # Get secondary model config
+        secondary_config = get_secondary_model_config()
+        self.secondary_api_key = secondary_config.get("api_key", "")
+        self.secondary_api_endpoint = secondary_config.get("api_endpoint", "")
+        self.secondary_model = secondary_config.get("model", "")
+        self.secondary_temperature = secondary_config.get("temperature", 0.1)
+        
+        # Read required confidence from config
+        self.required_confidence = get_required_llm_confidence()
     
     def make_llm_decision(self, market_data, symbol, timeframe, context, strategy_signals=None):
         """
-        Make a trading decision using DeepSeek R1 based on market data and context,
-        then process the response with GPT-4o for structured output.
+        Make a trading decision using LLMs based on market data and context.
         
         Args:
             market_data: Dictionary with market data
@@ -43,76 +67,120 @@ class LLMManager:
         Returns:
             Dictionary with decision, confidence, and reasoning
         """
+        # Check if LLM decisions are enabled in config
+        if not is_llm_enabled():
+            logger.info("LLM-based decisions are disabled in config. Using rule-based decision.")
+            return self._make_rule_based_decision(market_data, strategy_signals)
+        
         # Prepare context string from input data
         prompt = self._prepare_prompt(market_data, symbol, timeframe, context, strategy_signals)
         
         try:
-            if self.api_key and self.api_endpoint and self.model:
-                # If OpenAI API key is available, use DeepSeek + GPT-4o pipeline
-                if self.openai_api_key:
-                    # Call DeepSeek R1 API first
-                    deepseek_response = self._call_deepseek_api_raw(prompt)
-                    
-                    # Process the response with GPT-4o for structured output
-                    decision_result = self._process_with_gpt4o(deepseek_response, symbol)
-                    
-                    decision = decision_result.get("decision", "HOLD")
-                    confidence = decision_result.get("confidence", 0.5)
-                    reasoning = decision_result.get("reasoning", "Decision processed with GPT-4o")
-                else:
-                    # Fall back to DeepSeek R1 only if OpenAI API key is not available
-                    logger.warning("OpenAI API key not available, falling back to DeepSeek R1 only")
-                    decision_result = self._call_deepseek_api(prompt)
-                    decision = decision_result["decision"]
-                    confidence = decision_result["confidence"]
-                    reasoning = decision_result["reasoning"]
+            # Full pipeline (primary + secondary model)
+            if self.api_key and self.api_endpoint and self.model and self.secondary_api_key:
+                # Call primary LLM API first
+                primary_response = self._call_primary_model(prompt)
+                
+                # Process the response with secondary model for structured output
+                decision_result = self._process_with_secondary_model(primary_response, symbol)
+                
+                decision = decision_result.get("decision", "HOLD")
+                confidence = decision_result.get("confidence", 0.5)
+                reasoning = decision_result.get("reasoning", "Decision processed with secondary model")
+                
+                # Apply confidence threshold
+                if confidence < self.required_confidence:
+                    logger.info(f"LLM decision confidence {confidence} below required threshold {self.required_confidence}. Defaulting to HOLD.")
+                    decision = "HOLD"
+            
+            # Primary model only
+            elif self.api_key and self.api_endpoint and self.model:
+                # Fall back to primary model only if secondary API key is not available
+                logger.warning("Secondary model API key not available, falling back to primary model only")
+                decision_result = self._call_primary_model_for_decision(prompt)
+                decision = decision_result["decision"]
+                confidence = decision_result["confidence"]
+                reasoning = decision_result["reasoning"]
+                
+                # Apply confidence threshold
+                if confidence < self.required_confidence:
+                    logger.info(f"LLM decision confidence {confidence} below required threshold {self.required_confidence}. Defaulting to HOLD.")
+                    decision = "HOLD"
+            
+            # Rule-based fallback
             else:
-                # Fall back to rule-based if no DeepSeek API credentials
-                decision = make_rule_based_decision(prompt)
-                confidence = 0.6  # Lower confidence for rule-based
-                reasoning = "Decision based on rule-based analysis (LLM unavailable)"
+                return self._make_rule_based_decision(market_data, strategy_signals)
                 
             return {
-                "decision": decision.lower(),
+                "decision": decision.upper(),
                 "confidence": confidence,
                 "reasoning": reasoning
             }
         except Exception as e:
             logger.error(f"Error making LLM decision: {e}")
             return {
-                "decision": "hold",
+                "decision": "HOLD",
                 "confidence": 0.5,
                 "reasoning": f"Error in LLM decision process: {str(e)}"
             }
     
-    def _call_deepseek_api_raw(self, prompt):
+    def _call_primary_model(self, prompt):
         """
-        Call the DeepSeek R1 API and return the raw response content.
-        This is used as input for GPT-4o processing.
+        Call the primary LLM model API and return the raw response content.
         
         Args:
             prompt: String with context about signals and market data
             
         Returns:
-            String: Raw response content from DeepSeek R1
+            String: Raw response content from the primary model
         """
         try:
-            # DeepSeek R1 specific request structure
-            payload = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": """
-                        You are a trading assistant that helps make decisions based on technical indicators and market data.
-                        Analyze the provided market data, indicators, and signals to make a trading decision.
-                        Consider technical indicators carefully and be conservative with your recommendations.
-                        First explain your reasoning and analysis process in detail.
-                        Then conclude with ONLY ONE of these terms: "BUY", "SELL", or "HOLD".
-                    """},
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": 1000,
-                "temperature": 0.3
-            }
+            # Get provider-specific settings
+            provider = get_primary_model_config().get("provider", "").lower()
+            
+            # Prepare the request payload based on the provider
+            if provider == "deepseek":
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": """
+                            You are a trading assistant that helps make decisions based on technical indicators and market data.
+                            Analyze the provided market data, indicators, and signals to make a trading decision.
+                            Consider technical indicators carefully and be conservative with your recommendations.
+                            First explain your reasoning and analysis process in detail.
+                            Then conclude with ONLY ONE of these terms: "BUY", "SELL", or "HOLD".
+                        """},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "max_tokens": 1000,
+                    "temperature": self.temperature
+                }
+            elif provider == "openai":
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": """
+                            You are a trading assistant that helps make decisions based on technical indicators and market data.
+                            Analyze the provided market data, indicators, and signals to make a trading decision.
+                            Consider technical indicators carefully and be conservative with your recommendations.
+                            First explain your reasoning and analysis process in detail.
+                            Then conclude with ONLY ONE of these terms: "BUY", "SELL", or "HOLD".
+                        """},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": self.temperature,
+                    "max_tokens": 1000
+                }
+            else:
+                # Generic payload format as fallback
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": "You are a trading assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": self.temperature
+                }
             
             headers = {
                 "Content-Type": "application/json",
@@ -128,45 +196,50 @@ class LLMManager:
             if response.status_code == 200:
                 # Extract just the raw content from the response
                 response_data = response.json()
-                content = response_data["choices"][0]["message"]["content"]
+                
+                # Handle different response formats from different providers
+                if provider == "deepseek" or provider == "openai":
+                    content = response_data["choices"][0]["message"]["content"]
+                else:
+                    # Generic fallback
+                    content = response_data.get("output", response_data.get("content", str(response_data)))
                 
                 # Log the raw response for debugging
-                logger.debug(f"Raw DeepSeek response: {content}")
+                logger.debug(f"Raw {provider} response: {content}")
                 
                 return content
             else:
-                logger.error(f"DeepSeek API error: {response.status_code}, {response.text}")
-                return "Error calling DeepSeek API"
+                logger.error(f"LLM API error: {response.status_code}, {response.text}")
+                return f"Error calling {provider} API: {response.status_code}"
                 
         except Exception as e:
-            logger.error(f"Exception calling DeepSeek API raw: {e}")
+            logger.error(f"Exception calling primary LLM API: {e}")
             return f"Error: {str(e)}"
     
-    def _process_with_gpt4o(self, deepseek_response, symbol):
+    def _process_with_secondary_model(self, primary_response, symbol):
         """
-        Process the DeepSeek R1 response with GPT-4o to get structured output.
+        Process the primary model response with the secondary model to get structured output.
         
         Args:
-            deepseek_response: Raw response from DeepSeek R1
+            primary_response: Raw response from the primary model
             symbol: Trading pair symbol for context
             
         Returns:
             Dictionary with structured decision data
         """
-        if not self.openai_api_key:
-            logger.error("OpenAI API key not available for GPT-4o processing")
+        if not self.secondary_api_key:
+            logger.error("Secondary model API key not available for processing")
             return {
                 "decision": "HOLD",
                 "confidence": 0.5,
-                "reasoning": "GPT-4o processing unavailable"
+                "reasoning": "Secondary model processing unavailable"
             }
         
         try:
-            # Remove <think>...</think> tags if they exist in the DeepSeek response
-            # DeepSeek R1 often wraps its reasoning in these tags
-            clean_response = self._clean_deepseek_response(deepseek_response)
+            # Remove <think>...</think> tags if they exist in the primary response
+            clean_response = self._clean_primary_response(primary_response)
             
-            # Structure for GPT-4o to extract decision data
+            # Structure for secondary model to extract decision data
             prompt = f"""
             Analyze this trading analysis for {symbol} and extract the key information:
 
@@ -178,87 +251,118 @@ class LLMManager:
             3. A summary of the reasoning behind this decision
             """
             
-            # Define the response structure we want GPT-4o to follow
-            response_format = {
-                "type": "json_object"
-            }
+            # Get provider-specific settings
+            provider = get_secondary_model_config().get("provider", "").lower()
             
-            # Define the system message with schema information
-            system_message = """
-            You are a financial analysis assistant that extracts key trading insights from detailed analyses.
-            
-            Extract the following from the user's input:
-            - trading decision (BUY, SELL, or HOLD)
-            - confidence level (a number between 0.5 and 1.0)
-            - reasoning behind the decision (brief summary)
-            
-            Return your response as a JSON object with the following structure:
-            {
-                "decision": "BUY" or "SELL" or "HOLD",
-                "confidence": <number between 0.5 and 1.0>,
-                "reasoning": "<brief summary of the reasoning>"
-            }
-            """
+            # Different handling for different providers
+            if provider == "openai":
+                # Define the response structure we want the model to follow
+                response_format = {
+                    "type": "json_object"
+                }
+                
+                # Define the system message with schema information
+                system_message = """
+                You are a financial analysis assistant that extracts key trading insights from detailed analyses.
+                
+                Extract the following from the user's input:
+                - trading decision (BUY, SELL, or HOLD)
+                - confidence level (a number between 0.5 and 1.0)
+                - reasoning behind the decision (brief summary)
+                
+                Return your response as a JSON object with the following structure:
+                {
+                    "decision": "BUY" or "SELL" or "HOLD",
+                    "confidence": <number between 0.5 and 1.0>,
+                    "reasoning": "<brief summary of the reasoning>"
+                }
+                """
+                
+                payload = {
+                    "model": self.secondary_model,
+                    "messages": [
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "response_format": response_format,
+                    "temperature": self.secondary_temperature,
+                    "max_tokens": 500
+                }
+            else:
+                # Generic payload for other providers
+                payload = {
+                    "model": self.secondary_model,
+                    "messages": [
+                        {"role": "system", "content": "Extract a trading decision from this analysis."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": self.secondary_temperature
+                }
             
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.openai_api_key}"
-            }
-            
-            payload = {
-                "model": OPENAI_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
-                ],
-                "response_format": response_format,
-                "temperature": 0.1,  # Low temperature for more deterministic results
-                "max_tokens": 500
+                "Authorization": f"Bearer {self.secondary_api_key}"
             }
             
             response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
+                self.secondary_api_endpoint,
                 headers=headers,
                 data=json.dumps(payload)
             )
             
             if response.status_code == 200:
                 response_data = response.json()
-                content = response_data["choices"][0]["message"]["content"]
                 
-                # Parse the JSON response
-                structured_result = json.loads(content)
-                logger.info(f"GPT-4o structured output: {structured_result}")
+                # Handle different response formats from different providers
+                if provider == "openai":
+                    content = response_data["choices"][0]["message"]["content"]
+                else:
+                    # Generic fallback
+                    content = response_data.get("output", response_data.get("content", str(response_data)))
+                
+                # Parse the response
+                if provider == "openai":
+                    try:
+                        # Try to parse as JSON if it's OpenAI with structured output
+                        structured_result = json.loads(content)
+                    except json.JSONDecodeError:
+                        # Fall back to extraction if it's not valid JSON
+                        structured_result = self._extract_decision_from_text(content)
+                else:
+                    # For other providers, attempt extraction
+                    structured_result = self._extract_decision_from_text(content)
+                    
+                logger.info(f"Secondary model structured output: {structured_result}")
                 
                 return structured_result
             else:
-                logger.error(f"OpenAI API error: {response.status_code}, {response.text}")
+                logger.error(f"Secondary model API error: {response.status_code}, {response.text}")
                 return {
                     "decision": "HOLD",
                     "confidence": 0.5,
-                    "reasoning": f"Error processing with GPT-4o: API error {response.status_code}"
+                    "reasoning": f"Error processing with secondary model: API error {response.status_code}"
                 }
                 
         except Exception as e:
-            logger.error(f"Exception processing with GPT-4o: {e}")
+            logger.error(f"Exception processing with secondary model: {e}")
             return {
                 "decision": "HOLD",
                 "confidence": 0.5,
-                "reasoning": f"Error processing with GPT-4o: {str(e)}"
+                "reasoning": f"Error processing with secondary model: {str(e)}"
             }
     
-    def _clean_deepseek_response(self, response):
+    def _clean_primary_response(self, response):
         """
-        Clean the DeepSeek R1 response by removing think tags and other formatting.
+        Clean the response from the primary model.
+        Removes special tags like <think>...</think> if present.
         
         Args:
-            response: Raw response from DeepSeek R1
+            response: The raw response text
             
         Returns:
-            String: Cleaned response content
+            Cleaned response text
         """
         # Remove <think>...</think> tags if present
-        # DeepSeek R1 often wraps reasoning in these tags
         cleaned = re.sub(r'<think>\s*(.*?)\s*</think>', r'\1', response, flags=re.DOTALL)
         
         # If the response has become too short after cleaning, use the original
@@ -267,9 +371,9 @@ class LLMManager:
             
         return cleaned
     
-    def _call_deepseek_api(self, prompt):
+    def _call_primary_model_for_decision(self, prompt):
         """
-        Call the DeepSeek R1 API to get a trading decision.
+        Call the primary LLM model API to get a trading decision.
         
         Args:
             prompt: String with context about signals and market data
@@ -329,7 +433,7 @@ class LLMManager:
                 }
                 
         except Exception as e:
-            logger.error(f"Exception calling DeepSeek API: {e}")
+            logger.error(f"Exception calling primary LLM API for decision: {e}")
             return {
                 "decision": "HOLD",
                 "confidence": 0.5,
@@ -425,7 +529,7 @@ class LLMManager:
         else:
             return 0.7  # Default moderate confidence
     
-    def make_rule_based_decision(self, market_data, strategy_signals=None):
+    def _make_rule_based_decision(self, market_data, strategy_signals=None):
         """
         Make a rule-based trading decision without using an LLM.
         
@@ -489,29 +593,43 @@ class LLMManager:
 
 def get_decision_from_llm(prompt):
     """
-    This function interfaces with DeepSeek R1 for trading decisions.
+    Get a trading decision from the LLM.
+    
+    This is a wrapper function for backward compatibility with older code.
+    New code should directly use the LLMManager class.
     
     Args:
-        prompt: String with context about signals and market data
+        prompt: A string with market data and context for the LLM
         
     Returns:
-        String: "BUY", "SELL", or "HOLD" decision
+        String: "BUY", "SELL", or "HOLD"
     """
-    # Log the prompt for debugging
-    logger.info(f"LLM received prompt: {prompt}")
-    
-    # Check if we have real LLM API credentials configured
-    if LLM_API_KEY and LLM_API_ENDPOINT and LLM_MODEL:
-        try:
-            return call_real_llm_api(prompt)
-        except Exception as e:
-            logger.error(f"Error calling LLM API: {e}")
-            # Fall back to rule-based decision
-            return make_rule_based_decision(prompt)
-    else:
-        # Use rule-based decision logic when no LLM API is configured
-        logger.info("No LLM API configured, using rule-based decision logic")
-        return make_rule_based_decision(prompt)
+    try:
+        # Check if LLM is enabled
+        if not is_llm_enabled():
+            logger.info("LLM decision making is disabled in configuration")
+            return "HOLD"
+            
+        # Create the LLM manager instance
+        llm_manager = LLMManager()
+        
+        # Call the LLM using the manager with placeholder data
+        # Since the old API only provides the prompt, we need to create dummy context
+        result = llm_manager.make_llm_decision(
+            market_data={},  # Empty market data
+            symbol="",       # No symbol specified
+            timeframe="",    # No timeframe
+            context=prompt,  # Use the prompt as context
+            strategy_signals=None  # No strategy signals
+        )
+        
+        # Extract the decision from the result
+        decision = result.get("decision", "HOLD").upper()
+        
+        return decision
+    except Exception as e:
+        logger.error(f"Error getting decision from LLM: {e}")
+        return "HOLD"
 
 def call_real_llm_api(prompt):
     """

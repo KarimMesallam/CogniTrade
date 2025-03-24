@@ -2,10 +2,14 @@ import time
 import logging
 from datetime import datetime
 from binance.exceptions import BinanceAPIException, BinanceRequestException
-from bot.config import SYMBOL, TESTNET
-from bot.strategy import simple_signal, technical_analysis_signal
+from bot.config import (
+    SYMBOL, TESTNET, TRADING_CONFIG, 
+    get_trading_parameter, get_loop_interval, 
+    get_consensus_method, is_llm_agreement_required
+)
+from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
-from bot.llm_manager import get_decision_from_llm, log_decision_with_context
+from bot.llm_manager import get_decision_from_llm, log_decision_with_context, LLMManager
 from bot.order_manager import OrderManager
 from bot.db_integration import DatabaseIntegration
 
@@ -139,6 +143,80 @@ def get_market_data(symbol, interval='1m'):
         logger.error(f"Unexpected error fetching market data: {e}")
         return None
 
+def get_signal_consensus(signals):
+    """
+    Determine a consensus signal from multiple strategies.
+    
+    Args:
+        signals: Dictionary of strategy name -> signal value
+        
+    Returns:
+        String: 'BUY', 'SELL', or 'HOLD'
+    """
+    # Get consensus method from config
+    consensus_method = get_consensus_method()
+    
+    if consensus_method == "simple_majority":
+        # Simple majority vote
+        buy_count = sum(1 for signal in signals.values() if signal == "BUY")
+        sell_count = sum(1 for signal in signals.values() if signal == "SELL")
+        
+        # Simple majority rule with bias toward HOLD if tied
+        if buy_count > sell_count:
+            return "BUY"
+        elif sell_count > buy_count:
+            return "SELL"
+        else:
+            return "HOLD"
+            
+    elif consensus_method == "weighted_majority":
+        # Weighted voting based on strategy weights
+        buy_weight = 0
+        sell_weight = 0
+        hold_weight = 0
+        
+        for strategy_name, signal in signals.items():
+            # Get the weight for this strategy from config
+            strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
+            weight = strategy_config.get("weight", 1.0)
+            
+            if signal == "BUY":
+                buy_weight += weight
+            elif signal == "SELL":
+                sell_weight += weight
+            else:
+                hold_weight += weight
+        
+        # Determine the consensus based on weighted votes
+        if buy_weight > sell_weight and buy_weight > hold_weight:
+            return "BUY"
+        elif sell_weight > buy_weight and sell_weight > hold_weight:
+            return "SELL"
+        else:
+            return "HOLD"
+            
+    elif consensus_method == "unanimous":
+        # All signals must agree for action
+        if all(signal == "BUY" for signal in signals.values()):
+            return "BUY"
+        elif all(signal == "SELL" for signal in signals.values()):
+            return "SELL"
+        else:
+            return "HOLD"
+    
+    else:
+        # Default to simple majority if method is not recognized
+        logger.warning(f"Unrecognized consensus method '{consensus_method}', using simple majority")
+        buy_count = sum(1 for signal in signals.values() if signal == "BUY")
+        sell_count = sum(1 for signal in signals.values() if signal == "SELL")
+        
+        if buy_count > sell_count:
+            return "BUY"
+        elif sell_count > buy_count:
+            return "SELL"
+        else:
+            return "HOLD"
+
 def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_integration=None):
     """Execute a trade based on signals and decisions."""
     try:
@@ -153,7 +231,10 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
         signal_ids = {}
         if db_integration:
             for strategy_name, signal_value in signals.items():
-                timeframe = '1m' if strategy_name == 'simple' else '1h'
+                # Get timeframe from the strategy configuration
+                strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
+                timeframe = strategy_config.get("timeframe", "1m")
+                
                 signal_ids[strategy_name] = db_integration.save_signal(
                     symbol=symbol,
                     timeframe=timeframe,
@@ -162,11 +243,20 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
                     llm_decision=llm_decision
                 )
         
-        # Only execute if both signals agree
-        if signal_consensus == "BUY" and llm_decision == "BUY":
+        # Check if LLM agreement is required from config
+        llm_required = is_llm_agreement_required()
+        
+        # Determine if we should execute a trade
+        execute_buy = signal_consensus == "BUY" and (not llm_required or llm_decision == "BUY")
+        execute_sell = signal_consensus == "SELL" and (not llm_required or llm_decision == "SELL")
+        
+        # Get the default order amount from config
+        default_order_amount = get_trading_parameter("default_order_amount_usd", 10.0)
+        
+        if execute_buy:
             logger.info(f"Executing BUY for {symbol}")
-            # Use the order manager to execute the buy with a fixed USDT amount (adjust as needed)
-            order = order_manager.execute_market_buy(quote_amount=10.0)  # 10 USDT for example
+            # Use the order manager to execute the buy with the configured USDT amount
+            order = order_manager.execute_market_buy(quote_amount=default_order_amount)
             if order:
                 logger.info(f"Buy order executed successfully: {order['orderId']}")
                 
@@ -180,7 +270,7 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
             else:
                 logger.warning("Buy order execution failed")
                 
-        elif signal_consensus == "SELL" and llm_decision == "SELL":
+        elif execute_sell:
             # For sell, we should check our current position and sell an appropriate amount
             logger.info(f"Executing SELL for {symbol}")
             balance = get_account_balance(symbol.replace('USDT', ''))  # Get BTC balance for BTCUSDT
@@ -214,27 +304,6 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
         logger.error(f"Unexpected error during trade execution: {e}")
         return None
 
-def get_signal_consensus(signals):
-    """
-    Determine a consensus signal from multiple strategies.
-    
-    Args:
-        signals: Dictionary of strategy name -> signal value
-        
-    Returns:
-        String: 'BUY', 'SELL', or 'HOLD'
-    """
-    buy_count = sum(1 for signal in signals.values() if signal == "BUY")
-    sell_count = sum(1 for signal in signals.values() if signal == "SELL")
-    
-    # Simple majority rule with bias toward HOLD if tied
-    if buy_count > sell_count:
-        return "BUY"
-    elif sell_count > buy_count:
-        return "SELL"
-    else:
-        return "HOLD"
-
 def trading_loop():
     """Main trading loop."""
     logger.info("Starting trading loop...")
@@ -256,12 +325,21 @@ def trading_loop():
         logger.error(f"Failed to initialize database integration: {e}")
         logger.warning("Continuing without database support")
     
-    # Initialize order manager
-    order_manager = OrderManager(SYMBOL, risk_percentage=1.0, use_database=db_integration is not None)
-    logger.info(f"Order manager initialized for {SYMBOL}")
+    # Initialize order manager with risk percentage from config
+    risk_percentage = get_trading_parameter("risk_percentage", 1.0)
+    order_manager = OrderManager(SYMBOL, risk_percentage=risk_percentage, use_database=db_integration is not None)
+    logger.info(f"Order manager initialized for {SYMBOL} with risk percentage {risk_percentage}%")
+    
+    # Initialize LLM manager
+    llm_manager = LLMManager()
     
     # Track consecutive errors to implement exponential backoff
     consecutive_errors = 0
+    max_consecutive_errors = TRADING_CONFIG["operation"].get("max_consecutive_errors", 5)
+    max_backoff_seconds = TRADING_CONFIG["operation"].get("max_backoff_seconds", 3600)
+    
+    # Get loop interval from config
+    loop_interval = get_loop_interval()
     
     while True:
         try:
@@ -271,33 +349,47 @@ def trading_loop():
                 logger.info(f"Updated {len(updated_orders)} order statuses")
             
             # Get current market data
-            market_data = get_market_data(SYMBOL)
+            primary_timeframe = TRADING_CONFIG["timeframes"].get("primary", "1m")
+            market_data = get_market_data(SYMBOL, primary_timeframe)
             if not market_data:
                 raise Exception("Failed to get market data")
             
             # Save market data to database if available
             if db_integration:
-                db_integration.save_market_data(market_data, SYMBOL, '1m')
+                db_integration.save_market_data(market_data, SYMBOL, primary_timeframe)
             
-            # Generate trading signals from different strategies
-            signals = {
-                "simple": simple_signal(SYMBOL, '1m'),
-                "technical": technical_analysis_signal(SYMBOL, '1h')
-            }
+            # Get signals from all enabled strategies
+            signals = get_all_strategy_signals(SYMBOL)
+            logger.info(f"Strategy signals: {signals}")
             
-            logger.info(f"Signals: {signals}")
-            
-            # Create a detailed prompt for the LLM with more market context
+            # Create a detailed prompt for the LLM with market context
             prompt = (
                 f"Current signals for {SYMBOL}: {signals}.\n"
-                f"Simple signal (1m timeframe): {signals['simple']}\n"
-                f"Technical analysis signal (1h timeframe): {signals['technical']}\n"
-                f"Given these signals and the latest market data, should we BUY, SELL, or HOLD?"
             )
             
-            # Use LLM for decision support
-            llm_decision = get_decision_from_llm(prompt)
-            logger.info(f"LLM decision: {llm_decision}")
+            # Add each strategy's signal and timeframe
+            for strategy_name, signal in signals.items():
+                strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
+                timeframe = strategy_config.get("timeframe", "1m")
+                prompt += f"{strategy_name.capitalize()} strategy signal ({timeframe} timeframe): {signal}\n"
+            
+            prompt += f"Given these signals and the latest market data, should we BUY, SELL, or HOLD?"
+            
+            # Use LLM for decision support (with detailed market data and context)
+            llm_result = llm_manager.make_llm_decision(
+                market_data=market_data,
+                symbol=SYMBOL,
+                timeframe=primary_timeframe,
+                context=f"Trading {SYMBOL} with {len(signals)} active strategies",
+                strategy_signals=signals
+            )
+            
+            llm_decision = llm_result.get("decision", "HOLD")
+            llm_confidence = llm_result.get("confidence", 0.5)
+            llm_reasoning = llm_result.get("reasoning", "No reasoning provided")
+            
+            logger.info(f"LLM decision: {llm_decision} (confidence: {llm_confidence:.2f})")
+            logger.info(f"LLM reasoning: {llm_reasoning}")
             
             # Execute trade if appropriate
             order = execute_trade(signals, llm_decision, SYMBOL, market_data, order_manager, db_integration)
@@ -306,12 +398,12 @@ def trading_loop():
             consecutive_errors = 0
             
             # Wait before next iteration
-            logger.debug("Waiting for next iteration...")
-            time.sleep(60)  # 1 minute between iterations
+            logger.debug(f"Waiting {loop_interval} seconds for next iteration...")
+            time.sleep(loop_interval)
             
         except (BinanceAPIException, BinanceRequestException) as e:
             consecutive_errors += 1
-            backoff_time = min(60 * 2 ** consecutive_errors, 3600)  # Exponential backoff, max 1 hour
+            backoff_time = min(loop_interval * 2 ** min(consecutive_errors, max_consecutive_errors), max_backoff_seconds)
             logger.error(f"Binance API error: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
             
@@ -328,7 +420,7 @@ def trading_loop():
             
         except Exception as e:
             consecutive_errors += 1
-            backoff_time = min(60 * 2 ** consecutive_errors, 3600)
+            backoff_time = min(loop_interval * 2 ** min(consecutive_errors, max_consecutive_errors), max_backoff_seconds)
             logger.error(f"Unexpected error in trading loop: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
             

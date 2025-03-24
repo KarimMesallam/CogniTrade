@@ -9,6 +9,8 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
 - **Scalable Architecture:** Modular design to support multiple strategies and future integration with various LLMs.
 - **AI Orchestration:** A dedicated module to incorporate LLMs (e.g., DeepSeek R1, GPT-4o, o3-mini, Claude 3.7 Sonnet) for enhanced decision making.
 - **Extensible:** Easily add new exchanges, trading strategies, and real-time data streams.
+- **Custom Strategies:** Plug-and-play system for adding your own trading strategies without modifying core code.
+- **Comprehensive Configuration:** Highly configurable through environment variables or JSON configuration files.
 - **Advanced Backtesting:** Completely refactored backtesting engine with modular architecture, better error handling, and improved performance.
 - **Comprehensive Testing:** High-coverage test suite for all components with mocks for external dependencies.
 - **Vectorized Backtesting:** Optimized performance with vectorized operations for high-speed strategy testing.
@@ -19,10 +21,22 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
 - **Binance API Integration:** Uses the official Binance API (via python-binance) for fetching market data, placing orders, and managing accounts.
 - **Paper Trading Mode:** Safely test strategies on Binance Testnet before going live.
 - **Strategy Module:** Contains logic for trading signals (e.g., based on technical indicators) with an abstract layer for future enhancements.
+- **Custom Strategy Support:** Create your own strategies that can be dynamically loaded and configured without changing core code.
+- **Enhanced Configuration System:**
+  - Multiple configuration sources (environment variables and JSON files)
+  - Structured configuration with sensible defaults
+  - Direct access to configuration values through helper functions
+  - Type-safe parameter retrieval
 - **Advanced LLM Integration:** 
   - DeepSeek R1 integration for reasoning-based trading decisions
   - GPT-4o structured output processing for improved confidence estimation and reasoning
+  - Support for multiple LLM providers with configurable parameters
   - Fallback to rule-based decisions when LLM services are unavailable
+  - Detailed confidence scores for decision making
+- **Flexible Decision Making:**
+  - Multiple consensus methods (simple majority, weighted majority, unanimous)
+  - Configurable strategy weights and confidence thresholds
+  - LLM agreement requirements for trade execution
 - **Order Management:** Robust order execution system with proper error handling and logging.
 - **Database System:** Comprehensive data storage solution with database integration layer for saving signals, trades, market data, and system alerts.
 - **Robust Project Structure:** Clean separation of concerns with modules for configuration, API calls, strategy logic, order management, and service orchestration.
@@ -43,16 +57,19 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
   - Precise arithmetic validation for profit/loss calculations
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 
-## CogniTrade Project Structure (Backend-Only Version)
+## CogniTrade Project Structure
 
 ```
 trading_bot/
 ├── bot/
 │   ├── __init__.py
-│   ├── config.py              # Configuration loader (API keys, endpoints, etc.)
+│   ├── config.py              # Enhanced configuration loader with multiple sources
 │   ├── binance_api.py         # Binance API wrapper (using python-binance)
-│   ├── strategy.py            # Abstract trading strategy and sample strategy implementation
-│   ├── llm_manager.py         # LLM orchestration placeholder (for decision support)
+│   ├── strategy.py            # Trading strategy interface and built-in strategies
+│   ├── custom_strategies/     # Directory for user-defined custom strategies
+│   │   ├── __init__.py        # Package initialization
+│   │   └── my_strategy.py     # Example custom strategy implementation
+│   ├── llm_manager.py         # Enhanced LLM orchestration with multiple model support
 │   ├── order_manager.py       # Module for order execution and logging
 │   ├── database.py            # Database management for storing trading data and analytics
 │   ├── db_integration.py      # Integration layer between trading system and database
@@ -98,7 +115,9 @@ trading_bot/
 ├── output/                    # Directory for backtesting outputs
 │   ├── charts/                # Generated charts from backtests
 │   └── reports/               # HTML and other report formats
+├── config.sample.json         # Sample JSON configuration file
 ├── requirements.txt           # List of dependencies
+├── .env.example               # Example environment variables file
 ├── .env                       # Environment variables (API keys, etc.)
 └── README.md                  # Project documentation (this file)
 ```
@@ -127,12 +146,24 @@ trading_bot/
 
 4. **Configure Environment Variables:**
 
-   Create a `.env` file in the root folder with your API credentials:
+   Create a `.env` file in the root folder based on the provided `.env.example`:
    ```ini
+   # Basic configuration
    API_KEY=your_binance_testnet_api_key
    API_SECRET=your_binance_testnet_api_secret
    TESTNET=True
    SYMBOL=BTCUSDT
+   
+   # Strategy Configuration
+   ENABLE_SIMPLE_STRATEGY=True
+   SIMPLE_STRATEGY_TIMEFRAME=1m
+   SIMPLE_STRATEGY_WEIGHT=1.0
+   
+   ENABLE_TECHNICAL_STRATEGY=True
+   TECHNICAL_STRATEGY_TIMEFRAME=1h
+   TECHNICAL_STRATEGY_WEIGHT=2.0
+   
+   # Additional configuration options...
    ```
 
 ## Usage
@@ -154,12 +185,195 @@ CogniTrade will:
 2. Check account balances and verify that the configured symbol can be traded
 3. Enter a continuous trading loop that:
    - Retrieves current market data
-   - Generates signals from both simple and technical analysis strategies
+   - Generates signals from enabled strategies (simple, technical, and custom)
    - Uses LLM (or rule-based fallback) for decision support
-   - Executes trades when signals and LLM decisions align
+   - Applies the configured consensus method to determine final trading action
+   - Executes trades based on the consensus and configured parameters
    - Implements exponential backoff for error handling
 
 All activity is logged to both the console and a file named `trading_bot.log`.
+
+### Configuration Options
+
+CogniTrade offers two ways to configure the system:
+
+1. **Environment Variables**: Set configuration in the `.env` file
+2. **JSON Configuration**: Use a JSON file for more structured configuration 
+
+#### Using a JSON Configuration File
+
+To use a JSON configuration file:
+
+1. Copy the `config.sample.json` file to create your own config:
+   ```bash
+   cp config.sample.json config.json
+   ```
+
+2. Set the `CONFIG_FILE` environment variable in your `.env` file:
+   ```
+   CONFIG_FILE=config.json
+   ```
+
+3. Edit the JSON file to customize your configuration:
+   ```json
+   {
+     "strategies": {
+       "simple": {
+         "enabled": true,
+         "timeframe": "1m",
+         "weight": 1.0
+       },
+       "technical": {
+         "enabled": true,
+         "timeframe": "1h",
+         "weight": 2.0,
+         "parameters": {
+           "rsi_period": 14,
+           "rsi_oversold": 30,
+           "rsi_overbought": 70
+         }
+       },
+       "custom": {
+         "enabled": false,
+         "timeframe": "4h",
+         "weight": 1.0,
+         "module_path": "bot.custom_strategies.my_strategy"
+       }
+     },
+     "decision_making": {
+       "llm": {
+         "enabled": true,
+         "required_confidence": 0.6
+       },
+       "consensus_method": "weighted_majority",
+       "min_strategies": 2
+     }
+   }
+   ```
+
+### Custom Trading Strategies
+
+CogniTrade allows you to create your own custom trading strategies that can be loaded dynamically without modifying the core codebase.
+
+#### Creating a Custom Strategy
+
+1. Create a new Python file in the `bot/custom_strategies/` directory:
+
+```python
+"""
+My custom trading strategy.
+"""
+import pandas as pd
+import talib
+from typing import Dict, Any
+
+def initialize() -> Dict[str, Any]:
+    """
+    Initialize strategy parameters.
+    """
+    return {
+        "name": "My Custom Strategy",
+        "description": "A strategy combining EMA trend and RSI momentum",
+        "parameters": {
+            "ema_period": 20,
+            "rsi_period": 14,
+            "rsi_threshold_high": 70,
+            "rsi_threshold_low": 30
+        }
+    }
+
+def generate_signal(symbol, interval, client, parameters=None):
+    """
+    Generate a trading signal.
+    
+    This is the main entry point called by the bot.
+    
+    Args:
+        symbol: Trading pair symbol (e.g., "BTCUSDT")
+        interval: Timeframe (e.g., "1h", "4h")
+        client: Binance API client instance
+        parameters: Optional parameters from config
+        
+    Returns:
+        Signal string: "BUY", "SELL", or "HOLD"
+    """
+    # Get parameters (use provided or defaults)
+    params = parameters if parameters else initialize()["parameters"]
+    
+    # Fetch market data
+    candles = client.get_klines(symbol=symbol, interval=interval, limit=100)
+    df = pd.DataFrame(candles, columns=[
+        'timestamp', 'open', 'high', 'low', 'close', 'volume',
+        'close_time', 'quote_asset_volume', 'number_of_trades',
+        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+    ])
+    
+    # Convert numeric columns
+    numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+    df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric)
+    
+    # Calculate indicators
+    df['ema'] = talib.EMA(df['close'], timeperiod=params['ema_period'])
+    df['rsi'] = talib.RSI(df['close'], timeperiod=params['rsi_period'])
+    
+    # Generate signal based on conditions
+    if len(df) < 2:
+        return "HOLD"  # Not enough data
+    
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+    
+    # BUY if price is above EMA and RSI is rising from oversold
+    if (current['close'] > current['ema'] and 
+        previous['rsi'] < params['rsi_threshold_low'] and 
+        current['rsi'] > previous['rsi']):
+        return "BUY"
+    
+    # SELL if price is below EMA and RSI is falling from overbought
+    elif (current['close'] < current['ema'] and 
+          previous['rsi'] > params['rsi_threshold_high'] and 
+          current['rsi'] < previous['rsi']):
+        return "SELL"
+    
+    return "HOLD"
+```
+
+2. Update your configuration:
+
+In your `.env` file:
+```
+ENABLE_CUSTOM_STRATEGY=True
+CUSTOM_STRATEGY_TIMEFRAME=4h
+CUSTOM_STRATEGY_WEIGHT=1.0
+CUSTOM_STRATEGY_MODULE=bot.custom_strategies.my_strategy
+```
+
+Or in your JSON config file:
+```json
+"custom": {
+  "enabled": true,
+  "timeframe": "4h",
+  "weight": 1.0,
+  "module_path": "bot.custom_strategies.my_strategy"
+}
+```
+
+3. Optional: Add strategy-specific parameters:
+
+```json
+"custom": {
+  "enabled": true,
+  "timeframe": "4h",
+  "weight": 1.0,
+  "module_path": "bot.custom_strategies.my_strategy",
+  "parameters": {
+    "ema_period": 25,
+    "rsi_period": 21,
+    "rsi_threshold_high": 75,
+    "rsi_threshold_low": 25
+  }
+}
+```
 
 ### Using the API
 
@@ -381,179 +595,107 @@ Test categories:
 - **Database Integration tests:** Tests for the database integration layer that connects trading functions with data storage
 - **Integration tests:** Tests for the integration between main trading functions and the database system
 
-## Examples
+## Enhanced Configuration System
 
-### Backtesting Examples
+CogniTrade now features a comprehensive configuration system that supports:
 
-The project includes several example scripts to demonstrate backtesting capabilities:
+1. **Multiple Configuration Sources:**
+   - Environment variables (highest priority)
+   - JSON configuration files (for more structured configuration)
+   - Default values (fallback when nothing is specified)
 
-#### 1. Basic Backtesting Example (`examples/backtest_example.py`)
-
-A simple example demonstrating the refactored backtesting module:
-
-```bash
-# Run the example
-python examples/backtest_example.py
-```
-
-This script:
-- Generates synthetic test data with configurable parameters
-- Implements a simple moving average crossover strategy
-- Runs a backtest with the refactored engine
-- Generates HTML reports and charts
-- Displays key performance metrics
-
-#### 2. Simple Moving Average Crossover (`examples/simple_backtest.py`)
-
-A basic example of backtesting a Simple Moving Average (SMA) crossover strategy:
-
-```bash
-# Run the simple SMA crossover backtest
-python examples/simple_backtest.py
-```
-
-#### 3. RSI Strategy Backtest (`examples/rsi_backtest.py`)
-
-A more advanced example using the Relative Strength Index (RSI) indicator:
-
-```bash
-# Run the RSI strategy backtest
-python examples/rsi_backtest.py
-```
-
-This script:
-- Implements an RSI-based mean reversion strategy
-- Uses overbought/oversold conditions for trading signals
-- Visualizes RSI values alongside price and equity curves
-- Shows how to use a different timeframe (4h) for testing
-
-#### 4. Strategy Comparison (`examples/compare_strategies.py`)
-
-Compare and analyze different trading strategies:
-
-```bash
-# Compare multiple strategy backtest results
-python examples/compare_strategies.py
-```
-
-### Running Your Own Backtest
-
-You can create your own backtesting script by following these steps:
-
-1. Import the necessary functions from the refactored module:
+2. **Configuration Access:**
    ```python
-   from bot.backtesting import run_backtest, generate_report, generate_test_data
+   # Get a specific configuration value
+   from bot.config import get_config
+   
+   api_key = get_config("API_KEY")
+   is_testnet = get_config("TESTNET", default=True, data_type=bool)
+   
+   # Get strategy configuration
+   from bot.config import get_strategy_config, get_strategy_parameter
+   
+   technical_config = get_strategy_config("technical")
+   rsi_period = get_strategy_parameter("technical", "rsi_period", default=14)
+   
+   # Check if a strategy is enabled
+   from bot.config import is_strategy_enabled
+   
+   if is_strategy_enabled("custom"):
+       # Execute custom strategy logic
    ```
 
-2. Define your strategy function that takes data and returns 'BUY', 'SELL', or 'HOLD'
-
-3. Run a backtest with appropriate parameters:
+3. **Structured Trading Configuration:**
    ```python
-   result = run_backtest(symbol, timeframes, start_date, end_date, strategy_func)
+   from bot.config import TRADING_CONFIG
+   
+   # Access structured configuration
+   llm_enabled = TRADING_CONFIG["decision_making"]["llm"]["enabled"]
+   consensus_method = TRADING_CONFIG["decision_making"]["consensus_method"]
    ```
 
-4. Generate reports and visualizations:
-   ```python
-   report_paths = generate_report(result)
-   ```
+4. **Direct Integration:** All components of the system now use the configuration system for parameters, making them fully configurable without code modifications.
 
 ## LLM Integration
 
-CogniTrade integrates state-of-the-art LLMs to enhance trading decisions:
+CogniTrade's enhanced LLM integration now supports multiple language models for sophisticated trading analysis:
 
-### DeepSeek R1 and GPT-4o Integration
+### Multi-Model LLM Manager
 
-The LLM Manager integrates two powerful language models to provide sophisticated trading analysis:
+The LLM Manager integrates multiple language models with a configurable setup:
 
-1. **DeepSeek R1** - Used as the primary reasoning engine to analyze market data and trading signals. DeepSeek R1 processes market indicators, historical data, and technical signals to provide a detailed analysis and initial trading recommendation.
+1. **Primary Model** (e.g., DeepSeek R1) - Used for in-depth market analysis and initial trading recommendations.
 
-2. **GPT-4o Structured Output** - Processes DeepSeek R1's output to produce a consistent, structured JSON response with:
+2. **Secondary Model** (e.g., GPT-4o) - Processes the primary model's output to produce structured responses with:
    - A decisive trading action (BUY, SELL, or HOLD)
    - A confidence score (0.5-1.0) indicating certainty level
    - A concise reasoning summary
 
-This dual-LLM approach leverages DeepSeek R1's reasoning capabilities while using GPT-4o's structured output feature to ensure consistent decision formats.
+3. **Configurable Providers** - Support for different LLM providers with customizable:
+   - Models
+   - API endpoints
+   - Temperature
+   - Other parameters
 
-### Configuration
+### Advanced Configuration
 
-To use the LLM integration, set the following environment variables in your `.env` file:
+Configure the LLM integration through your `.env` file or JSON configuration:
 
 ```ini
-# DeepSeek R1 API Configuration
+# LLM Configuration
+ENABLE_LLM_DECISIONS=True
+LLM_REQUIRED_CONFIDENCE=0.6
+
+# Primary LLM (DeepSeek R1)
+LLM_PRIMARY_PROVIDER=deepseek
+LLM_PRIMARY_MODEL=deepseek-reasoner
 LLM_API_KEY=your_deepseek_api_key
 LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
-LLM_MODEL=deepseek-reasoner
+LLM_TEMPERATURE=0.3
 
-# OpenAI GPT-4o API Configuration
+# Secondary LLM (OpenAI GPT-4o)
+LLM_SECONDARY_PROVIDER=openai
+LLM_SECONDARY_MODEL=gpt-4o
 OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4o
+OPENAI_API_ENDPOINT=https://api.openai.com/v1/chat/completions
+OPENAI_TEMPERATURE=0.1
+
+# Decision Making Configuration
+CONSENSUS_METHOD=weighted_majority  # Options: simple_majority, weighted_majority, unanimous
+MIN_STRATEGIES_FOR_DECISION=2
+LLM_AGREEMENT_REQUIRED=True
 ```
 
-If either API key is missing, the system will gracefully fall back to simpler decision methods.
+### Enhanced Decision Process
 
-### How It Works
+The improved decision-making process now includes:
 
-1. Market data and technical indicators are collected and prepared
-2. DeepSeek R1 analyzes the data with its reasoning capabilities
-3. The response is cleaned (removing <think>...</think> tags if present)
-4. GPT-4o processes the cleaned analysis to extract a structured decision
-5. The decision is used to execute trades or provide recommendations
-
-This approach combines the strengths of both models:
-- DeepSeek R1's deep reasoning and trading analysis capabilities
-- GPT-4o's ability to produce consistent, structured outputs
-
-## Testing the LLM Integration
-
-To test the integration with DeepSeek R1 and GPT-4o, you can use the following approaches:
-
-### 1. Direct API Testing
-
-Test the direct API connection to both models:
-
-```bash
-# Test the DeepSeek R1 API
-python tests/test_api_direct.py
-
-# Test the complete workflow with both APIs
-python tests/test_llm_workflow.py
-```
-
-### 2. Running Unit Tests with Real APIs
-
-The unit tests are designed to work with both mock data and real API calls. To run the tests with real APIs:
-
-```bash
-# Using the helper script
-python tests/run_api_tests.py
-
-# Or directly with pytest
-USE_REAL_API=1 python -m pytest tests/test_llm_manager.py::test_real_api_integration -v
-```
-
-### 3. Environment Setup
-
-The tests require API keys to be set in the environment. You can:
-
-1. Create a `.env` file in the project root with:
-```
-LLM_API_KEY=your-deepseek-key
-LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
-LLM_MODEL=deepseek-reasoner
-OPENAI_API_KEY=your-openai-key
-OPENAI_MODEL=gpt-4o
-USE_REAL_API=1
-```
-
-2. Or set the environment variables directly:
-```bash
-export LLM_API_KEY=your-deepseek-key
-export LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
-export LLM_MODEL=deepseek-reasoner
-export OPENAI_API_KEY=your-openai-key
-export OPENAI_MODEL=gpt-4o
-export USE_REAL_API=1
-```
+1. **Strategy Signal Generation** - Get signals from all enabled strategies (simple, technical, custom)
+2. **Signal Aggregation** - Apply configurable weights to different strategy signals
+3. **LLM Analysis** - Process market data and signals with the primary and secondary LLMs
+4. **Confidence Estimation** - Get a confidence score for the LLM decision
+5. **Consensus Determination** - Apply the selected consensus method to reach a final decision
+6. **Order Execution** - Execute trades based on the consensus decision and configuration parameters
 
 ## Future Improvements
 

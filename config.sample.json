@@ -1,0 +1,78 @@
+{
+    "strategies": {
+        "simple": {
+            "enabled": true,
+            "timeframe": "1m",
+            "weight": 1.0,
+            "parameters": {}
+        },
+        "technical": {
+            "enabled": true,
+            "timeframe": "1h",
+            "weight": 2.0,
+            "parameters": {
+                "rsi_period": 14,
+                "rsi_oversold": 30,
+                "rsi_overbought": 70,
+                "bb_period": 20,
+                "bb_std_dev": 2.0,
+                "macd_fast_period": 12,
+                "macd_slow_period": 26,
+                "macd_signal_period": 9
+            }
+        },
+        "custom": {
+            "enabled": false,
+            "timeframe": "4h",
+            "weight": 1.0,
+            "parameters": {},
+            "module_path": "bot.custom_strategies.my_strategy"
+        }
+    },
+    "decision_making": {
+        "llm": {
+            "enabled": true,
+            "required_confidence": 0.6,
+            "models": {
+                "primary": {
+                    "provider": "deepseek",
+                    "model": "deepseek-reasoner",
+                    "api_key": "",
+                    "api_endpoint": "https://api.deepseek.com/v1/chat/completions",
+                    "temperature": 0.3
+                },
+                "secondary": {
+                    "provider": "openai",
+                    "model": "gpt-4o",
+                    "api_key": "",
+                    "api_endpoint": "https://api.openai.com/v1/chat/completions",
+                    "temperature": 0.1
+                }
+            }
+        },
+        "consensus": {
+            "method": "weighted_majority",
+            "min_strategies": 2,
+            "llm_agreement_required": true
+        }
+    },
+    "trading": {
+        "default_order_amount_usd": 10.0,
+        "max_order_amount_usd": 100.0,
+        "risk_percentage": 1.0,
+        "profit_target_percentage": 3.0,
+        "stop_loss_percentage": 2.0,
+        "enable_stop_loss": true,
+        "enable_take_profit": true
+    },
+    "timeframes": {
+        "primary": "1m",
+        "secondary": "1h",
+        "candle_limit": 100
+    },
+    "operation": {
+        "loop_interval_seconds": 60,
+        "max_consecutive_errors": 5,
+        "max_backoff_seconds": 3600
+    }
+} 
