@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import uuid
+import json
+import os
 from typing import Dict, List, Any, Optional, Union, Callable
 from datetime import datetime
 from bot.database import Database
@@ -454,21 +456,36 @@ class BacktestEngine:
             
             # Save trades if requested
             for trade in results['trades']:
+                # Create a copy to avoid modifying the original
+                trade_copy = trade.copy()
+                
+                # Handle timestamp serialization
+                if 'timestamp' in trade_copy and isinstance(trade_copy['timestamp'], (pd.Timestamp, datetime)):
+                    trade_copy['timestamp'] = trade_copy['timestamp'].isoformat()
+                
+                # Convert any nested datetime objects in raw_data for JSON serialization
+                raw_data = {}
+                for key, value in trade_copy.items():
+                    if isinstance(value, (pd.Timestamp, datetime)):
+                        raw_data[key] = value.isoformat()
+                    else:
+                        raw_data[key] = value
+                
                 # Format trade data for database
                 trade_data = {
-                    'trade_id': trade['trade_id'],
+                    'trade_id': trade_copy.get('trade_id', str(uuid.uuid4())),
                     'symbol': self.symbol,
-                    'side': trade['side'],
-                    'quantity': trade['quantity'],
-                    'price': trade['price'],
-                    'timestamp': trade['timestamp'].isoformat() if isinstance(trade['timestamp'], datetime) else trade['timestamp'],
+                    'side': trade_copy['side'],
+                    'quantity': trade_copy['quantity'],
+                    'price': trade_copy['price'],
+                    'timestamp': trade_copy['timestamp'],
                     'status': 'FILLED',
                     'strategy': strategy_name,
                     'timeframe': ','.join(self.timeframes),
-                    'profit_loss': trade.get('profit_loss', 0),
-                    'fees': trade.get('commission', 0),
+                    'profit_loss': trade_copy.get('profit_loss', 0),
+                    'fees': trade_copy.get('commission', 0),
                     'notes': f"Backtest trade for {strategy_name}",
-                    'raw_data': trade
+                    'raw_data': json.dumps(raw_data)
                 }
                 
                 self.db.insert_trade(trade_data)
@@ -478,94 +495,269 @@ class BacktestEngine:
             logger.error(f"Error saving backtest results: {e}")
             return False
     
-    def plot_results(self, results: Dict[str, Any], filename: Optional[str] = None):
+    def plot_results(self, results: Dict[str, Any], filename: Optional[str] = None, 
+                     show_indicators: bool = True, custom_indicators: List[str] = None):
         """
-        Plot backtest results
+        Plot backtest results with enhanced visualization
         
         Args:
             results: Backtest results dictionary
             filename: Optional filename to save the plot
+            show_indicators: Whether to show technical indicators used in the strategy
+            custom_indicators: List of specific indicators to show (e.g., ['rsi', 'macd'])
         """
         try:
             # Convert equity curve to DataFrame
             equity_df = pd.DataFrame(results['equity_curve'])
             equity_df['timestamp'] = pd.to_datetime(equity_df['timestamp'])
             
-            # Create figure with multiple subplots
-            fig = plt.figure(figsize=(12, 10))
-            gs = fig.add_gridspec(3, 1, height_ratios=[3, 1, 1])
-            ax1 = fig.add_subplot(gs[0])
-            ax2 = fig.add_subplot(gs[1])
-            ax3 = fig.add_subplot(gs[2])
+            # Get price data for the main timeframe
+            primary_tf = self.timeframes[0]
+            if primary_tf not in self.market_data:
+                logger.warning(f"Primary timeframe {primary_tf} data not available for visualization")
+                return
             
-            # Plot equity curve
-            ax1.plot(equity_df['timestamp'], equity_df['equity'], label='Equity')
-            ax1.set_title(f"Backtest Results: {results['symbol']} ({results['start_date']} to {results['end_date']})")
-            ax1.set_ylabel('Equity')
-            ax1.grid(True)
-            ax1.legend()
+            price_df = self.market_data[primary_tf].copy()
             
-            # Mark trades on the equity curve
-            buy_trades = [t for t in results['trades'] if t['side'] == 'BUY']
-            sell_trades = [t for t in results['trades'] if t['side'] == 'SELL']
+            # Determine how many subplots we need
+            # 1. Equity curve is always shown
+            # 2. Price chart with buy/sell markers is always shown
+            # 3. Drawdown is always shown
+            # 4. Add additional plots for indicators if requested
+            num_subplots = 3  # Equity, Price, Drawdown
             
-            if buy_trades and sell_trades:
-                buy_times = [t['timestamp'] for t in buy_trades]
-                buy_prices = [t['price'] * results['initial_capital'] / buy_trades[0]['price'] for t in buy_trades]  # Scale for visibility
+            # Identify available indicators in the data
+            indicator_panels = []
+            
+            if show_indicators:
+                # Check for common indicators
+                if custom_indicators is None:
+                    custom_indicators = []
                 
-                sell_times = [t['timestamp'] for t in sell_trades]
-                sell_prices = [t['price'] * results['initial_capital'] / sell_trades[0]['price'] for t in sell_trades]  # Scale for visibility
+                # RSI gets its own panel
+                if 'rsi' in price_df.columns or 'RSI' in price_df.columns:
+                    indicator_panels.append('rsi')
+                    num_subplots += 1
                 
-                ax1.scatter(buy_times, buy_prices, color='green', marker='^', s=100, label='Buy')
-                ax1.scatter(sell_times, sell_prices, color='red', marker='v', s=100, label='Sell')
+                # MACD gets its own panel
+                if all(x in price_df.columns for x in ['macd_line', 'signal_line', 'macd_histogram']):
+                    indicator_panels.append('macd')
+                    num_subplots += 1
+                
+                # Bollinger Bands are shown on the price chart
+                has_bb = all(x in price_df.columns for x in ['upper_band', 'middle_band', 'lower_band'])
+                
+                # Add custom indicators to appropriate panels
+                for ind in custom_indicators:
+                    if ind not in indicator_panels and ind in price_df.columns:
+                        indicator_panels.append(ind)
+                        num_subplots += 1
             
-            # Plot drawdown
-            equity_df['equity_peak'] = equity_df['equity'].cummax()
-            equity_df['drawdown'] = (equity_df['equity'] - equity_df['equity_peak']) / equity_df['equity_peak'] * 100
+            # Create figure with subplots
+            fig = plt.figure(figsize=(14, num_subplots * 3))
+            gs = fig.add_gridspec(num_subplots, 1, height_ratios=[3] + [2] * (num_subplots - 1))
             
-            ax2.fill_between(equity_df['timestamp'], equity_df['drawdown'], 0, color='red', alpha=0.3)
-            ax2.plot(equity_df['timestamp'], equity_df['drawdown'], color='red', label='Drawdown')
-            ax2.set_ylabel('Drawdown %')
-            ax2.grid(True)
-            ax2.legend()
+            # 1. Plot equity curve
+            ax_equity = fig.add_subplot(gs[0])
+            ax_equity.plot(equity_df['timestamp'], equity_df['equity'], label='Equity', color='blue', linewidth=2)
             
-            # Plot trade returns
-            trade_returns = [t.get('roi_pct', 0) for t in results['trades'] if 'roi_pct' in t]
-            trade_indices = range(len(trade_returns))
+            # Add initial and final equity annotations
+            ax_equity.axhline(y=results['initial_capital'], color='gray', linestyle='--', alpha=0.5)
+            ax_equity.text(equity_df['timestamp'].iloc[0], results['initial_capital'], 
+                            f"Initial: ${results['initial_capital']:,.2f}", 
+                            verticalalignment='bottom')
             
-            if trade_returns:
-                colors = ['green' if ret > 0 else 'red' for ret in trade_returns]
-                ax3.bar(trade_indices, trade_returns, color=colors)
-                ax3.set_ylabel('Trade ROI %')
-                ax3.set_xlabel('Trade Number')
-                ax3.set_xlim(-0.5, len(trade_returns) - 0.5)
-                ax3.grid(True)
+            ax_equity.text(equity_df['timestamp'].iloc[-1], results['final_equity'], 
+                            f"Final: ${results['final_equity']:,.2f} ({results['total_return_pct']:+.2f}%)", 
+                            verticalalignment='bottom')
             
-            # Add text summary of results
+            ax_equity.set_title(f"Backtest Results: {results['symbol']} ({results['start_date']} to {results['end_date']})")
+            ax_equity.set_ylabel('Equity ($)')
+            ax_equity.grid(True)
+            
+            # Add summary box
             summary_text = (
-                f"Initial Capital: ${results['initial_capital']:.2f}\n"
-                f"Final Equity: ${results['final_equity']:.2f}\n"
-                f"Total Return: {results['total_return_pct']:.2f}%\n"
-                f"Trades: {results['total_trades']}\n"
+                f"Initial Capital: ${results['initial_capital']:,.2f}\n"
+                f"Final Equity: ${results['final_equity']:,.2f}\n"
+                f"Total Return: {results['total_return_pct']:+.2f}%\n"
+                f"Total Trades: {results['total_trades']}\n"
                 f"Win Rate: {results['win_rate']:.2f}%\n"
                 f"Max Drawdown: {results['max_drawdown']:.2f}%\n"
                 f"Sharpe Ratio: {results['sharpe_ratio']:.2f}"
             )
             
-            # Position the text in the upper left of the equity chart
-            ax1.text(0.02, 0.95, summary_text, transform=ax1.transAxes,
-                    bbox=dict(facecolor='white', alpha=0.7), verticalalignment='top')
+            # Get current axes coordinates to position the text box
+            ax_equity.text(0.02, 0.97, summary_text, transform=ax_equity.transAxes,
+                           bbox=dict(facecolor='white', alpha=0.7), verticalalignment='top',
+                           fontsize=9)
             
+            # 2. Plot price chart with trades
+            ax_price = fig.add_subplot(gs[1], sharex=ax_equity)
+            ax_price.plot(price_df['timestamp'], price_df['close'], label='Price', color='black')
+            
+            # Add moving averages if present
+            for col in price_df.columns:
+                if col.lower().startswith('sma') or col.lower().startswith('ema'):
+                    ax_price.plot(price_df['timestamp'], price_df[col], label=col.upper(), alpha=0.7)
+            
+            # Add Bollinger Bands if present
+            if has_bb:
+                ax_price.plot(price_df['timestamp'], price_df['upper_band'], label='Upper BB', color='red', alpha=0.3)
+                ax_price.plot(price_df['timestamp'], price_df['middle_band'], label='Middle BB', color='orange', alpha=0.3)
+                ax_price.plot(price_df['timestamp'], price_df['lower_band'], label='Lower BB', color='green', alpha=0.3)
+                ax_price.fill_between(price_df['timestamp'], price_df['upper_band'], price_df['lower_band'], 
+                                      color='gray', alpha=0.1)
+            
+            # Mark trades on the price chart
+            buy_trades = [t for t in results['trades'] if t['side'] == 'BUY']
+            sell_trades = [t for t in results['trades'] if t['side'] == 'SELL']
+            
+            if buy_trades:
+                buy_times = [pd.to_datetime(t['timestamp']) if isinstance(t['timestamp'], str) 
+                             else t['timestamp'] for t in buy_trades]
+                buy_prices = [t['price'] for t in buy_trades]
+                ax_price.scatter(buy_times, buy_prices, marker='^', color='green', s=100, label='Buy', zorder=5)
+                
+                # Add profit/loss annotations to buy points
+                for i, trade in enumerate(buy_trades):
+                    if i < len(sell_trades):
+                        profit = sell_trades[i].get('profit_loss', 0)
+                        if profit > 0:
+                            color = 'green'
+                        else:
+                            color = 'red'
+                        ax_price.annotate(f"{profit:+.2f}", 
+                                         (buy_times[i], buy_prices[i]), 
+                                         textcoords="offset points",
+                                         xytext=(0, 10), 
+                                         ha='center',
+                                         fontsize=8,
+                                         color=color)
+            
+            if sell_trades:
+                sell_times = [pd.to_datetime(t['timestamp']) if isinstance(t['timestamp'], str) 
+                              else t['timestamp'] for t in sell_trades]
+                sell_prices = [t['price'] for t in sell_trades]
+                ax_price.scatter(sell_times, sell_prices, marker='v', color='red', s=100, label='Sell', zorder=5)
+            
+            ax_price.set_ylabel('Price')
+            ax_price.grid(True)
+            ax_price.legend(loc='upper left')
+            
+            # 3. Plot drawdown
+            ax_dd = fig.add_subplot(gs[2], sharex=ax_equity)
+            
+            # Calculate drawdown if not already in equity_df
+            if 'drawdown' not in equity_df.columns:
+                equity_df['equity_peak'] = equity_df['equity'].cummax()
+                equity_df['drawdown'] = (equity_df['equity'] - equity_df['equity_peak']) / equity_df['equity_peak'] * 100
+            
+            ax_dd.fill_between(equity_df['timestamp'], equity_df['drawdown'], 0, 
+                              where=(equity_df['drawdown'] < 0), color='red', alpha=0.3)
+            ax_dd.plot(equity_df['timestamp'], equity_df['drawdown'], color='red', label='Drawdown')
+            
+            # Annotate max drawdown
+            max_dd_idx = equity_df['drawdown'].idxmin()
+            max_dd_time = equity_df['timestamp'].iloc[max_dd_idx]
+            max_dd_value = equity_df['drawdown'].iloc[max_dd_idx]
+            
+            ax_dd.annotate(f"Max DD: {max_dd_value:.2f}%", 
+                           (max_dd_time, max_dd_value),
+                           textcoords="offset points",
+                           xytext=(0, -20), 
+                           ha='center',
+                           fontsize=9,
+                           color='darkred',
+                           arrowprops=dict(arrowstyle="->", color='darkred'))
+            
+            ax_dd.set_ylabel('Drawdown (%)')
+            ax_dd.set_ylim(min(equity_df['drawdown'].min() * 1.5, -1), 1)  # Set ylim to show drawdowns clearly
+            ax_dd.grid(True)
+            
+            # Add indicator subplots
+            curr_subplot = 3
+            
+            # 4. RSI Plot (if available)
+            if 'rsi' in indicator_panels:
+                rsi_col = 'rsi' if 'rsi' in price_df.columns else 'RSI'
+                ax_rsi = fig.add_subplot(gs[curr_subplot], sharex=ax_equity)
+                ax_rsi.plot(price_df['timestamp'], price_df[rsi_col], color='purple', label='RSI')
+                
+                # Add overbought/oversold lines
+                ax_rsi.axhline(y=70, color='red', linestyle='--', alpha=0.5, label='Overbought')
+                ax_rsi.axhline(y=30, color='green', linestyle='--', alpha=0.5, label='Oversold')
+                ax_rsi.axhline(y=50, color='gray', linestyle='-', alpha=0.2)
+                
+                # Fill overbought/oversold regions
+                ax_rsi.fill_between(price_df['timestamp'], 70, price_df[rsi_col], 
+                                   where=(price_df[rsi_col] > 70), color='red', alpha=0.2)
+                ax_rsi.fill_between(price_df['timestamp'], 30, price_df[rsi_col], 
+                                   where=(price_df[rsi_col] < 30), color='green', alpha=0.2)
+                
+                ax_rsi.set_ylabel('RSI')
+                ax_rsi.set_ylim(0, 100)
+                ax_rsi.grid(True)
+                ax_rsi.legend(loc='upper left')
+                
+                curr_subplot += 1
+            
+            # 5. MACD Plot (if available)
+            if 'macd' in indicator_panels:
+                ax_macd = fig.add_subplot(gs[curr_subplot], sharex=ax_equity)
+                
+                # Plot MACD components
+                ax_macd.plot(price_df['timestamp'], price_df['macd_line'], label='MACD', color='blue')
+                ax_macd.plot(price_df['timestamp'], price_df['signal_line'], label='Signal', color='red')
+                
+                # Plot histogram
+                positive_hist = price_df[price_df['macd_histogram'] >= 0]['macd_histogram']
+                negative_hist = price_df[price_df['macd_histogram'] < 0]['macd_histogram']
+                
+                ax_macd.bar(price_df[price_df['macd_histogram'] >= 0]['timestamp'], 
+                           positive_hist, color='green', alpha=0.5, width=0.7)
+                ax_macd.bar(price_df[price_df['macd_histogram'] < 0]['timestamp'], 
+                           negative_hist, color='red', alpha=0.5, width=0.7)
+                
+                ax_macd.axhline(y=0, color='gray', linestyle='-', alpha=0.2)
+                ax_macd.set_ylabel('MACD')
+                ax_macd.grid(True)
+                ax_macd.legend(loc='upper left')
+                
+                curr_subplot += 1
+            
+            # 6. Custom indicators
+            for ind in custom_indicators:
+                if ind in price_df.columns and ind not in ['rsi', 'RSI', 'macd_line', 'signal_line', 'macd_histogram']:
+                    ax_ind = fig.add_subplot(gs[curr_subplot], sharex=ax_equity)
+                    ax_ind.plot(price_df['timestamp'], price_df[ind], label=ind.upper())
+                    ax_ind.set_ylabel(ind.upper())
+                    ax_ind.grid(True)
+                    ax_ind.legend(loc='upper left')
+                    
+                    curr_subplot += 1
+            
+            # Add a common x-label
+            fig.text(0.5, 0.01, 'Date', ha='center', va='center')
+            
+            # Adjust layout
             plt.tight_layout()
+            plt.subplots_adjust(bottom=0.05)
             
+            # Format x-axis with dates
+            for ax in fig.axes:
+                ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d'))
+                ax.xaxis.set_major_locator(plt.matplotlib.dates.DayLocator(interval=5))
+                plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+            
+            # Save or show the plot
             if filename:
-                plt.savefig(filename)
+                plt.savefig(filename, bbox_inches='tight', dpi=100)
                 logger.info(f"Saved backtest plot to {filename}")
             else:
                 plt.show()
             
         except Exception as e:
-            logger.error(f"Error plotting backtest results: {e}")
+            logger.error(f"Error plotting backtest results: {e}", exc_info=True)
     
     def optimize_parameters(self, strategy_factory: Callable, param_grid: Dict[str, List[Any]]):
         """
@@ -788,7 +980,247 @@ class BacktestEngine:
             
         return trades_df
             
+    def generate_report(self, results: Dict[str, Any], output_dir: str = 'logs', 
+                       report_name: Optional[str] = None) -> str:
+        """
+        Generate a comprehensive backtest report with visualizations and statistics
+        
+        Args:
+            results: Backtest results dictionary
+            output_dir: Directory to save the report files
+            report_name: Optional custom name for the report files
+        
+        Returns:
+            Path to the generated report files
+        """
+        try:
+            # Create output directory if it doesn't exist
+            os.makedirs(output_dir, exist_ok=True)
             
+            # Generate report filename based on symbol, timeframe and date if not specified
+            if not report_name:
+                timeframe_str = '_'.join(self.timeframes)
+                date_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+                report_name = f"{self.symbol}_{timeframe_str}_{date_str}"
+            
+            # Base path for report files
+            base_path = os.path.join(output_dir, report_name)
+            
+            # 1. Generate trade log CSV
+            trade_log_path = f"{base_path}_trades.csv"
+            self.generate_trade_log(results, filename=trade_log_path)
+            
+            # 2. Generate performance chart
+            chart_path = f"{base_path}_chart.png"
+            self.plot_results(results, filename=chart_path, show_indicators=True)
+            
+            # 3. Generate detailed statistics HTML report
+            html_path = f"{base_path}_report.html"
+            
+            # Calculate additional performance metrics
+            equity_df = pd.DataFrame(results['equity_curve'])
+            
+            # If there are trades, calculate additional metrics
+            if results['total_trades'] > 0:
+                trades_df = pd.DataFrame(results['trades'])
+                
+                # Trade metrics
+                win_trades = trades_df[trades_df.get('profit_loss', 0) > 0]
+                loss_trades = trades_df[trades_df.get('profit_loss', 0) <= 0]
+                
+                avg_win = win_trades['profit_loss'].mean() if len(win_trades) > 0 else 0
+                avg_loss = loss_trades['profit_loss'].mean() if len(loss_trades) > 0 else 0
+                
+                # Calculate profit factor
+                gross_profit = win_trades['profit_loss'].sum() if len(win_trades) > 0 else 0
+                gross_loss = abs(loss_trades['profit_loss'].sum()) if len(loss_trades) > 0 else 0
+                profit_factor = gross_profit / gross_loss if gross_loss > 0 else float('inf')
+                
+                # Calculate expectancy
+                win_rate = results['win_rate'] / 100
+                expectancy = (win_rate * avg_win) - ((1 - win_rate) * abs(avg_loss))
+            else:
+                avg_win = 0
+                avg_loss = 0
+                profit_factor = 0
+                expectancy = 0
+            
+            # Calculate additional equity curve metrics
+            if len(equity_df) > 1:
+                equity_df['daily_return'] = equity_df['equity'].pct_change()
+                returns = equity_df['daily_return'].dropna()
+                
+                if len(returns) > 0:
+                    volatility = returns.std() * (252 ** 0.5)  # Annualized volatility
+                    sortino_ratio = returns[returns > 0].mean() / returns[returns < 0].std() * (252 ** 0.5) if len(returns[returns < 0]) > 0 else 0
+                    calmar_ratio = results['total_return_pct'] / abs(results['max_drawdown']) if results['max_drawdown'] != 0 else 0
+                else:
+                    volatility = 0
+                    sortino_ratio = 0
+                    calmar_ratio = 0
+            else:
+                volatility = 0
+                sortino_ratio = 0
+                calmar_ratio = 0
+            
+            # Generate HTML content
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Backtest Report: {self.symbol}</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; color: #333; }}
+                    h1, h2, h3 {{ color: #2c3e50; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                    th, td {{ text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }}
+                    th {{ background-color: #f2f2f2; }}
+                    tr:hover {{ background-color: #f5f5f5; }}
+                    .positive {{ color: green; }}
+                    .negative {{ color: red; }}
+                    .chart-container {{ margin: 20px 0; }}
+                    .metrics-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }}
+                    .metric-card {{ background-color: #f9f9f9; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+                    .metric-value {{ font-size: 24px; font-weight: bold; margin: 10px 0; }}
+                    .section {{ margin-bottom: 30px; }}
+                </style>
+            </head>
+            <body>
+                <h1>Backtest Report: {self.symbol}</h1>
+                <p>
+                    <strong>Strategy:</strong> {results.get('strategy_name', 'Custom Strategy')}<br>
+                    <strong>Period:</strong> {results['start_date']} to {results['end_date']}<br>
+                    <strong>Timeframes:</strong> {', '.join(results['timeframes'])}<br>
+                    <strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                </p>
+                
+                <div class="section">
+                    <h2>Performance Summary</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3>Total Return</h3>
+                            <div class="metric-value {'positive' if results['total_return_pct'] > 0 else 'negative'}">
+                                {results['total_return_pct']:.2f}%
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Initial Capital</h3>
+                            <div class="metric-value">${results['initial_capital']:,.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Final Equity</h3>
+                            <div class="metric-value">${results['final_equity']:,.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Win Rate</h3>
+                            <div class="metric-value">{results['win_rate']:.2f}%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Profit Factor</h3>
+                            <div class="metric-value">{profit_factor:.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Expectancy</h3>
+                            <div class="metric-value {'positive' if expectancy > 0 else 'negative'}">${expectancy:.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Total Trades</h3>
+                            <div class="metric-value">{results['total_trades']}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Max Drawdown</h3>
+                            <div class="metric-value negative">{results['max_drawdown']:.2f}%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Sharpe Ratio</h3>
+                            <div class="metric-value">{results['sharpe_ratio']:.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Sortino Ratio</h3>
+                            <div class="metric-value">{sortino_ratio:.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Calmar Ratio</h3>
+                            <div class="metric-value">{calmar_ratio:.2f}</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Volatility (Annualized)</h3>
+                            <div class="metric-value">{volatility:.2f}%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Performance Chart</h2>
+                    <div class="chart-container">
+                        <img src="{os.path.basename(chart_path)}" alt="Performance Chart" style="max-width:100%;">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Trade Analysis</h2>
+                    
+                    <h3>Trade Statistics</h3>
+                    <table>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Total Trades</td>
+                            <td>{results['total_trades']}</td>
+                        </tr>
+                        <tr>
+                            <td>Winning Trades</td>
+                            <td>{results['win_count']}</td>
+                        </tr>
+                        <tr>
+                            <td>Losing Trades</td>
+                            <td>{results['loss_count']}</td>
+                        </tr>
+                        <tr>
+                            <td>Win Rate</td>
+                            <td>{results['win_rate']:.2f}%</td>
+                        </tr>
+                        <tr>
+                            <td>Average Win</td>
+                            <td class="positive">${avg_win:.2f}</td>
+                        </tr>
+                        <tr>
+                            <td>Average Loss</td>
+                            <td class="negative">${avg_loss:.2f}</td>
+                        </tr>
+                        <tr>
+                            <td>Profit Factor</td>
+                            <td>{profit_factor:.2f}</td>
+                        </tr>
+                        <tr>
+                            <td>Expectancy</td>
+                            <td class="{'positive' if expectancy > 0 else 'negative'}">${expectancy:.2f}</td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Trade Log</h3>
+                    <p>Download the complete trade log: <a href="{os.path.basename(trade_log_path)}">Trade Log CSV</a></p>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Write HTML to file
+            with open(html_path, 'w') as f:
+                f.write(html_content)
+            
+            logger.info(f"Generated comprehensive backtest report: {html_path}")
+            return html_path
+            
+        except Exception as e:
+            logger.error(f"Error generating backtest report: {e}", exc_info=True)
+            return ""
+
+
 class BacktestRunner:
     """Utility class for running multiple backtests with different parameters"""
     

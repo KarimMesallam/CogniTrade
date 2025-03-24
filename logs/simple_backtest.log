@@ -3,3 +3,38 @@
 2025-03-24 10:39:41,526 - trading_bot - INFO - Downloading market data for BTCUSDT at 1h timeframe
 2025-03-24 10:39:42,398 - trading_bot - ERROR - Error storing market data: table market_data has no column named close_time
 2025-03-24 10:39:42,398 - trading_bot - ERROR - Failed to store downloaded market data
+2025-03-24 11:06:52,777 - trading_bot - INFO - Database initialized successfully
+2025-03-24 11:06:52,779 - trading_bot - WARNING - No historical data for BTCUSDT at 1h timeframe
+2025-03-24 11:06:54,132 - trading_bot - INFO - Added indicators to 1h data
+2025-03-24 11:06:54,134 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,134 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,134 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,135 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,135 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,135 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,136 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,136 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,136 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,136 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,137 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,137 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,137 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,138 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,138 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,138 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,139 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,139 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,139 - trading_bot - WARNING - Not enough data for SMA calculation
+2025-03-24 11:06:54,380 - trading_bot - INFO - Trade log saved to logs/BTCUSDT_sma_crossover_2025-01-23_2025-03-24.csv
+2025-03-24 11:06:54,670 - trading_bot - INFO - Saved backtest plot to logs/BTCUSDT_sma_crossover_2025-01-23_2025-03-24.png
+2025-03-24 11:06:54,675 - trading_bot - INFO - Performance metrics stored for SMA_Crossover on BTCUSDT
+2025-03-24 11:06:54,675 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,675 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,676 - trading_bot - ERROR - Error inserting trade: Object of type Timestamp is not JSON serializable
+2025-03-24 11:06:54,681 - trading_bot - INFO - Alert created with ID: 28
