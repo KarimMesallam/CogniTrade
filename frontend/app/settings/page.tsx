@@ -2,8 +2,58 @@
 
 import { useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Title, Card, Text, Button, NumberInput, Switch, Tab, TabGroup, TabList, TabPanels, TabPanel, TextInput } from '@tremor/react';
-import { FaSave, FaKey, FaCog, FaBell, FaExchangeAlt, FaRobot, FaDatabase } from 'react-icons/fa';
+import ClientWrapper from '../../components/ClientWrapper';
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Button,
+  TextField,
+  Switch,
+  Tabs,
+  Tab,
+  FormControlLabel,
+  Grid,
+  Divider,
+  Paper,
+  FormGroup,
+  Chip
+} from '@mui/material';
+
+// Icons
+import SaveIcon from '@mui/icons-material/Save';
+import KeyIcon from '@mui/icons-material/Key';
+import SettingsIcon from '@mui/icons-material/Settings';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import StorageIcon from '@mui/icons-material/Storage';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+
+// TabPanel component for handling tab content
+function TabPanel(props: {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`settings-tabpanel-${index}`}
+      aria-labelledby={`settings-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('18xo9p88s0plSSUIdtQ99n***********');
@@ -26,6 +76,11 @@ export default function SettingsPage() {
   const [telegramChatId, setTelegramChatId] = useState('');
 
   const [showSecrets, setShowSecrets] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   const saveSettings = async () => {
     // Here you would typically save the settings to the backend
@@ -33,314 +88,309 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <Title>Settings</Title>
-        <Button
-          size="md"
-          color="blue"
-          onClick={saveSettings}
-          icon={FaSave}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 shadow-md"
-        >
-          Save Settings
-        </Button>
-      </div>
+    <ClientWrapper>
+      <DashboardLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" component="h1">Settings</Typography>
+          <Button
+            variant="contained"
+            startIcon={<SaveIcon />}
+            onClick={saveSettings}
+          >
+            Save Settings
+          </Button>
+        </Box>
 
-      <div className="grid grid-cols-1 gap-6">
-        <TabGroup>
-          <TabList className="mb-4 bg-slate-800 border border-slate-700 rounded-lg p-1 flex overflow-x-auto">
-            <Tab icon={FaKey} className="flex items-center gap-2 p-2 text-sm font-medium">API Credentials</Tab>
-            <Tab icon={FaRobot} className="flex items-center gap-2 p-2 text-sm font-medium">LLM Settings</Tab>
-            <Tab icon={FaCog} className="flex items-center gap-2 p-2 text-sm font-medium">General</Tab>
-            <Tab icon={FaBell} className="flex items-center gap-2 p-2 text-sm font-medium">Notifications</Tab>
-            <Tab icon={FaDatabase} className="flex items-center gap-2 p-2 text-sm font-medium">Database</Tab>
-          </TabList>
+        <Card sx={{ bgcolor: 'background.paper' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="settings tabs"
+            >
+              <Tab icon={<KeyIcon />} label="API Credentials" iconPosition="start" />
+              <Tab icon={<SmartToyIcon />} label="LLM Settings" iconPosition="start" />
+              <Tab icon={<SettingsIcon />} label="General" iconPosition="start" />
+              <Tab icon={<NotificationsIcon />} label="Notifications" iconPosition="start" />
+              <Tab icon={<StorageIcon />} label="Database" iconPosition="start" />
+            </Tabs>
+          </Box>
           
-          <TabPanels>
-            <TabPanel>
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">Binance API Credentials</Title>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Text className="mb-2">API Key</Text>
-                    <div className="flex gap-2">
-                      <TextInput
-                        type={showSecrets ? "text" : "password"}
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        placeholder="Enter your Binance API key"
-                        className="flex-1 px-4"
+          {/* API Credentials Tab */}
+          <TabPanel value={activeTab} index={0}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="Binance API Credentials" />
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <TextField
+                    label="API Key"
+                    type={showSecrets ? "text" : "password"}
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your Binance API key"
+                    fullWidth
+                  />
+                  
+                  <TextField
+                    label="API Secret"
+                    type={showSecrets ? "text" : "password"}
+                    value={apiSecret}
+                    onChange={(e) => setApiSecret(e.target.value)}
+                    placeholder="Enter your Binance API secret"
+                    fullWidth
+                  />
+                  
+                  <Divider />
+                  
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={showSecrets}
+                        onChange={() => setShowSecrets(!showSecrets)}
+                        color="primary"
                       />
-                    </div>
-                  </div>
+                    }
+                    label="Show secrets"
+                  />
                   
-                  <div>
-                    <Text className="mb-2">API Secret</Text>
-                    <div className="flex gap-2">
-                      <TextInput
-                        type={showSecrets ? "text" : "password"}
-                        value={apiSecret}
-                        onChange={(e) => setApiSecret(e.target.value)}
-                        placeholder="Enter your Binance API secret"
-                        className="flex-1 px-4"
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isTestnet}
+                        onChange={() => setIsTestnet(!isTestnet)}
+                        color="primary"
                       />
-                    </div>
-                  </div>
+                    }
+                    label="Use Testnet (Paper Trading)"
+                  />
                   
-                  <div className="flex items-center justify-between py-2 border-t border-slate-700">
-                    <Text>Show secrets</Text>
-                    <Switch
-                      id="show-secrets"
-                      name="show-secrets"
-                      checked={showSecrets}
-                      onChange={() => setShowSecrets(!showSecrets)}
-                      color="blue"
-                      className="w-10 h-5"
-                    />
-                  </div>
+                  <TextField
+                    label="Default Symbol"
+                    value={defaultSymbol}
+                    onChange={(e) => setDefaultSymbol(e.target.value)}
+                    placeholder="BTCUSDT"
+                    fullWidth
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          {/* LLM Settings Tab */}
+          <TabPanel value={activeTab} index={1}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="LLM Integration Settings" />
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <TextField
+                    label="LLM API Key"
+                    type={showSecrets ? "text" : "password"}
+                    value={llmApiKey}
+                    onChange={(e) => setLlmApiKey(e.target.value)}
+                    placeholder="Enter your LLM provider API key"
+                    fullWidth
+                  />
                   
-                  <div className="flex items-center justify-between py-2 border-t border-slate-700">
-                    <Text>Use Testnet (Paper Trading)</Text>
-                    <Switch
-                      id="testnet"
-                      name="testnet"
-                      checked={isTestnet}
-                      onChange={() => setIsTestnet(!isTestnet)}
-                      color="blue"
-                      className="w-10 h-5"
-                    />
-                  </div>
+                  <TextField
+                    label="LLM API Endpoint"
+                    value={llmApiEndpoint}
+                    onChange={(e) => setLlmApiEndpoint(e.target.value)}
+                    placeholder="https://api.yourllmprovider.com/v1"
+                    fullWidth
+                  />
                   
-                  <div>
-                    <Text className="mb-2">Default Symbol</Text>
-                    <TextInput
-                      value={defaultSymbol}
-                      onChange={(e) => setDefaultSymbol(e.target.value)}
-                      placeholder="BTCUSDT"
-                      className="px-4"
-                    />
-                  </div>
-                </div>
-              </Card>
-            </TabPanel>
-            
-            <TabPanel>
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">LLM Integration Settings</Title>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Text className="mb-2">LLM API Key</Text>
-                    <TextInput
-                      type={showSecrets ? "text" : "password"}
-                      value={llmApiKey}
-                      onChange={(e) => setLlmApiKey(e.target.value)}
-                      placeholder="Enter your LLM provider API key"
-                      className="px-4"
-                    />
-                  </div>
+                  <TextField
+                    label="LLM Model"
+                    value={llmModel}
+                    onChange={(e) => setLlmModel(e.target.value)}
+                    placeholder="gpt-4o, claude-3-sonnet, etc."
+                    fullWidth
+                  />
                   
-                  <div>
-                    <Text className="mb-2">LLM API Endpoint</Text>
-                    <TextInput
-                      value={llmApiEndpoint}
-                      onChange={(e) => setLlmApiEndpoint(e.target.value)}
-                      placeholder="https://api.yourllmprovider.com/v1"
-                      className="px-4"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Text className="mb-2">LLM Model</Text>
-                    <TextInput
-                      value={llmModel}
-                      onChange={(e) => setLlmModel(e.target.value)}
-                      placeholder="gpt-4o, claude-3-sonnet, etc."
-                      className="px-4"
-                    />
-                  </div>
-                  
-                  <div className="p-3 bg-slate-700 rounded-md">
-                    <Text className="text-white mb-2">Note</Text>
-                    <Text className="text-gray-300 text-sm">
+                  <Paper sx={{ p: 2, bgcolor: 'action.selected', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom>Note</Typography>
+                    <Typography variant="body2">
                       LLM integration is optional. If provided, the trading bot will use the specified 
                       language model to enhance decision making. Without LLM credentials, the bot will 
                       fall back to rule-based decision making.
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-            </TabPanel>
-            
-            <TabPanel>
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">General Settings</Title>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Text className="mb-2">Data Refresh Interval (seconds)</Text>
-                    <NumberInput
-                      value={refreshInterval}
-                      onValueChange={setRefreshInterval}
-                      min={1}
-                      max={60}
-                      step={1}
-                      className="px-4"
-                    />
-                  </div>
+                    </Typography>
+                  </Paper>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          {/* General Settings Tab */}
+          <TabPanel value={activeTab} index={2}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="General Settings" />
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <TextField
+                    label="Data Refresh Interval (seconds)"
+                    type="number"
+                    value={refreshInterval}
+                    onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                    inputProps={{ min: 1, max: 60, step: 1 }}
+                    fullWidth
+                  />
                   
-                  <div className="p-3 bg-slate-700 rounded-md">
-                    <Text className="text-white mb-2">Trading Mode</Text>
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className={`h-3 w-3 rounded-full ${isTestnet ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                          <Text className={isTestnet ? 'text-white' : 'text-gray-400'}>Paper Trading</Text>
-                        </div>
-                        <Text className="text-gray-400 text-xs mt-1">
+                  <Paper sx={{ p: 2, bgcolor: 'action.selected', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom>Trading Mode</Typography>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              bgcolor: isTestnet ? 'success.main' : 'grey.500'
+                            }}
+                          />
+                          <Typography variant={isTestnet ? 'subtitle1' : 'body2'} color={isTestnet ? 'text.primary' : 'text.secondary'}>
+                            Paper Trading
+                          </Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
                           Safe mode using Binance Testnet
-                        </Text>
-                      </div>
+                        </Typography>
+                      </Grid>
                       
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className={`h-3 w-3 rounded-full ${!isTestnet ? 'bg-amber-500' : 'bg-gray-500'}`}></div>
-                          <Text className={!isTestnet ? 'text-white' : 'text-gray-400'}>Live Trading</Text>
-                        </div>
-                        <Text className="text-gray-400 text-xs mt-1">
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              bgcolor: !isTestnet ? 'warning.main' : 'grey.500'
+                            }}
+                          />
+                          <Typography variant={!isTestnet ? 'subtitle1' : 'body2'} color={!isTestnet ? 'text.primary' : 'text.secondary'}>
+                            Live Trading
+                          </Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
                           Real trading with actual funds
-                        </Text>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </TabPanel>
-            
-            <TabPanel>
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">Notification Settings</Title>
-                
-                <div className="space-y-4">
-                  <div className="bg-slate-700 p-3 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <Text className="text-white">Email Notifications</Text>
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          {/* Notifications Tab */}
+          <TabPanel value={activeTab} index={3}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="Notification Settings" />
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Paper sx={{ p: 2, bgcolor: 'action.selected', borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Typography variant="subtitle1">Email Notifications</Typography>
                       <Switch
-                        id="email-notifications"
-                        name="email-notifications"
                         checked={emailNotifications}
                         onChange={() => setEmailNotifications(!emailNotifications)}
-                        color="blue"
-                        className="w-10 h-5"
+                        color="primary"
                       />
-                    </div>
+                    </Box>
                     
                     {emailNotifications && (
-                      <div className="mt-2">
-                        <Text className="mb-1">Email Address</Text>
-                        <TextInput
-                          value={emailAddress}
-                          onChange={(e) => setEmailAddress(e.target.value)}
-                          placeholder="you@example.com"
-                          className="px-4"
-                        />
-                      </div>
+                      <TextField
+                        label="Email Address"
+                        value={emailAddress}
+                        onChange={(e) => setEmailAddress(e.target.value)}
+                        placeholder="you@example.com"
+                        fullWidth
+                        size="small"
+                        sx={{ mt: 2 }}
+                      />
                     )}
-                  </div>
+                  </Paper>
                   
-                  <div className="bg-slate-700 p-3 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <Text className="text-white">Telegram Notifications</Text>
+                  <Paper sx={{ p: 2, bgcolor: 'action.selected', borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Typography variant="subtitle1">Telegram Notifications</Typography>
                       <Switch
-                        id="telegram-notifications"
-                        name="telegram-notifications"
                         checked={telegramNotifications}
                         onChange={() => setTelegramNotifications(!telegramNotifications)}
-                        color="blue"
-                        className="w-10 h-5"
+                        color="primary"
                       />
-                    </div>
+                    </Box>
                     
                     {telegramNotifications && (
-                      <div className="space-y-2 mt-2">
-                        <div>
-                          <Text className="mb-1">Bot Token</Text>
-                          <TextInput
-                            type={showSecrets ? "text" : "password"}
-                            value={telegramBotToken}
-                            onChange={(e) => setTelegramBotToken(e.target.value)}
-                            placeholder="Telegram Bot Token"
-                            className="px-4"
-                          />
-                        </div>
-                        <div>
-                          <Text className="mb-1">Chat ID</Text>
-                          <TextInput
-                            value={telegramChatId}
-                            onChange={(e) => setTelegramChatId(e.target.value)}
-                            placeholder="Telegram Chat ID"
-                            className="px-4"
-                          />
-                        </div>
-                      </div>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        <TextField
+                          label="Bot Token"
+                          type={showSecrets ? "text" : "password"}
+                          value={telegramBotToken}
+                          onChange={(e) => setTelegramBotToken(e.target.value)}
+                          placeholder="Telegram Bot Token"
+                          fullWidth
+                          size="small"
+                        />
+                        <TextField
+                          label="Chat ID"
+                          value={telegramChatId}
+                          onChange={(e) => setTelegramChatId(e.target.value)}
+                          placeholder="Telegram Chat ID"
+                          fullWidth
+                          size="small"
+                        />
+                      </Box>
                     )}
-                  </div>
-                </div>
-              </Card>
-            </TabPanel>
-            
-            <TabPanel>
-              <Card className="bg-slate-800 border-slate-700">
-                <Title className="text-white mb-4">Database Settings</Title>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Text className="mb-2">Maximum Orders to Keep</Text>
-                    <NumberInput
-                      value={maxOrdersToKeep}
-                      onValueChange={setMaxOrdersToKeep}
-                      min={100}
-                      max={10000}
-                      step={100}
-                      className="px-4"
-                    />
-                    <Text className="text-gray-400 text-xs mt-1">
-                      Orders older than this limit will be pruned to save space
-                    </Text>
-                  </div>
+                  </Paper>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabPanel>
+          
+          {/* Database Tab */}
+          <TabPanel value={activeTab} index={4}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="Database Settings" />
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <TextField
+                    label="Maximum Orders to Keep"
+                    type="number"
+                    value={maxOrdersToKeep}
+                    onChange={(e) => setMaxOrdersToKeep(Number(e.target.value))}
+                    inputProps={{ min: 100, max: 10000, step: 100 }}
+                    fullWidth
+                    helperText="Orders older than this limit will be pruned to save space"
+                  />
                   
-                  <div>
-                    <Text className="mb-2">Maximum Signals to Keep</Text>
-                    <NumberInput
-                      value={maxSignalsToKeep}
-                      onValueChange={setMaxSignalsToKeep}
-                      min={100}
-                      max={10000}
-                      step={100}
-                      className="px-4"
-                    />
-                    <Text className="text-gray-400 text-xs mt-1">
-                      Signals older than this limit will be pruned to save space
-                    </Text>
-                  </div>
+                  <TextField
+                    label="Maximum Signals to Keep"
+                    type="number"
+                    value={maxSignalsToKeep}
+                    onChange={(e) => setMaxSignalsToKeep(Number(e.target.value))}
+                    inputProps={{ min: 100, max: 10000, step: 100 }}
+                    fullWidth
+                    helperText="Signals older than this limit will be pruned to save space"
+                  />
                   
-                  <div className="flex justify-end">
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button
-                      size="xs"
-                      color="red"
-                      className="mt-2"
+                      variant="contained"
+                      color="error"
+                      size="small"
                     >
                       Clear Database
                     </Button>
-                  </div>
-                </div>
-              </Card>
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
-      </div>
-    </DashboardLayout>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabPanel>
+        </Card>
+      </DashboardLayout>
+    </ClientWrapper>
   );
 } 

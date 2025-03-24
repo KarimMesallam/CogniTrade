@@ -3,9 +3,35 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ClientWrapper from '../../components/ClientWrapper';
-import { Title, Card, Text, Tab, TabGroup, TabList, TabPanels, TabPanel, Select, SelectItem, Button } from '@tremor/react';
-import { FaSearch, FaDownload } from 'react-icons/fa';
 import apiService from '../../lib/api-service';
+
+// MUI Components
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Button,
+  Tab,
+  Tabs,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  SelectChangeEvent
+} from '@mui/material';
+
+// Icons
+import SearchIcon from '@mui/icons-material/Search';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface Order {
   time: string;
@@ -25,6 +51,31 @@ interface Signal {
   confidence: number;
   price: number;
   action_taken: string;
+}
+
+// TabPanel component for handling tab content
+function TabPanel(props: {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 2 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
 }
 
 export default function HistoryPage() {
@@ -107,8 +158,8 @@ export default function HistoryPage() {
   }, [selectedSymbol, limit, activeTab]);
 
   // Handle tab change
-  const handleTabChange = (index: number) => {
-    setActiveTab(index);
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
   };
 
   // Handle exporting data
@@ -136,222 +187,235 @@ export default function HistoryPage() {
   return (
     <ClientWrapper>
       <DashboardLayout>
-        <div className="flex justify-between items-center mb-6">
-          <Title>Trading History</Title>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" component="h1">Trading History</Typography>
           <Button
-            size="sm"
-            color="slate"
-            icon={FaDownload}
+            variant="outlined"
+            size="medium"
+            startIcon={<DownloadIcon />}
             onClick={handleExportData}
             disabled={isLoading || (activeTab === 0 ? orders.length === 0 : signals.length === 0)}
           >
             Export Data
           </Button>
-        </div>
+        </Box>
 
-        <Card className="bg-slate-800 border-slate-700 mb-6">
-          <TabGroup onIndexChange={handleTabChange}>
-            <TabList className="mb-4">
-              <Tab>Orders</Tab>
-              <Tab>Signals</Tab>
-            </TabList>
-            
-            <TabPanels>
-              <TabPanel>
-                <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-                  <div className="flex gap-4 flex-wrap">
+        <Card sx={{ bgcolor: 'background.paper', mb: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={activeTab} onChange={handleTabChange} aria-label="history tabs">
+              <Tab label="Orders" />
+              <Tab label="Signals" />
+            </Tabs>
+          </Box>
+          
+          <CardContent>
+            <TabPanel value={activeTab} index={0}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <FormControl sx={{ minWidth: 150 }}>
+                    <InputLabel id="symbol-select-label">Symbol</InputLabel>
                     <Select
+                      labelId="symbol-select-label"
                       value={selectedSymbol}
-                      onValueChange={setSelectedSymbol}
-                      className="w-40"
+                      onChange={(e: SelectChangeEvent) => setSelectedSymbol(e.target.value)}
+                      label="Symbol"
                       disabled={isLoading}
                     >
                       {symbols.map((symbol) => (
-                        <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                        <MenuItem key={symbol.value} value={symbol.value}>
                           {symbol.name}
-                        </SelectItem>
+                        </MenuItem>
                       ))}
                     </Select>
-                    
-                    <Select
-                      value={String(limit)}
-                      onValueChange={(value) => setLimit(Number(value))}
-                      className="w-32"
-                      disabled={isLoading}
-                    >
-                      <SelectItem value="20" className="bg-slate-700 text-slate-200 hover:bg-blue-600">20 items</SelectItem>
-                      <SelectItem value="50" className="bg-slate-700 text-slate-200 hover:bg-blue-600">50 items</SelectItem>
-                      <SelectItem value="100" className="bg-slate-700 text-slate-200 hover:bg-blue-600">100 items</SelectItem>
-                      <SelectItem value="200" className="bg-slate-700 text-slate-200 hover:bg-blue-600">200 items</SelectItem>
-                    </Select>
-                  </div>
+                  </FormControl>
                   
-                  <div className="flex gap-2">
-                    <Button
-                      size="xs"
-                      color="blue"
-                      icon={FaSearch}
+                  <FormControl sx={{ minWidth: 100 }}>
+                    <InputLabel id="limit-select-label">Items</InputLabel>
+                    <Select
+                      labelId="limit-select-label"
+                      value={String(limit)}
+                      onChange={(e: SelectChangeEvent) => setLimit(Number(e.target.value))}
+                      label="Items"
                       disabled={isLoading}
                     >
-                      Filter
-                    </Button>
-                  </div>
-                </div>
+                      <MenuItem value="20">20 items</MenuItem>
+                      <MenuItem value="50">50 items</MenuItem>
+                      <MenuItem value="100">100 items</MenuItem>
+                      <MenuItem value="200">200 items</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-700">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbol</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Quantity</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Value</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-700">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                            Loading...
-                          </td>
-                        </tr>
-                      ) : orders.length > 0 ? (
-                        orders.map((order, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{order.time}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{order.symbol}</td>
-                            <td className={`px-4 py-3 whitespace-nowrap text-sm ${order.type === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
-                              {order.type}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                              ${typeof order.price === 'number' ? order.price.toFixed(2) : order.price}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{order.quantity}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                              ${typeof order.value === 'number' ? order.value.toFixed(2) : order.value}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs ${
-                                order.status === 'FILLED' ? 'bg-green-900 text-green-300' : 
-                                order.status === 'PARTIAL' ? 'bg-amber-900 text-amber-300' : 
-                                'bg-red-900 text-red-300'
-                              }`}>
-                                {order.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                            No orders found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </TabPanel>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<SearchIcon />}
+                  disabled={isLoading}
+                >
+                  Filter
+                </Button>
+              </Box>
               
-              <TabPanel>
-                <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-                  <div className="flex gap-4 flex-wrap">
+              <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 300px)', overflow: 'auto' }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Time</TableCell>
+                      <TableCell>Symbol</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Price</TableCell>
+                      <TableCell>Quantity</TableCell>
+                      <TableCell>Value</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center">
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : orders.length > 0 ? (
+                      orders.map((order, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{order.time}</TableCell>
+                          <TableCell>{order.symbol}</TableCell>
+                          <TableCell sx={{ color: order.type === 'BUY' ? 'success.main' : 'error.main' }}>
+                            {order.type}
+                          </TableCell>
+                          <TableCell>
+                            ${typeof order.price === 'number' ? order.price.toFixed(2) : order.price}
+                          </TableCell>
+                          <TableCell>{order.quantity}</TableCell>
+                          <TableCell>
+                            ${typeof order.value === 'number' ? order.value.toFixed(2) : order.value}
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={order.status}
+                              size="small"
+                              color={
+                                order.status === 'FILLED' ? 'success' : 
+                                order.status === 'PARTIAL' ? 'warning' : 
+                                'error'
+                              }
+                              variant="outlined"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center">
+                          No orders found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TabPanel>
+            
+            <TabPanel value={activeTab} index={1}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <FormControl sx={{ minWidth: 150 }}>
+                    <InputLabel id="symbol-select-label-signals">Symbol</InputLabel>
                     <Select
+                      labelId="symbol-select-label-signals"
                       value={selectedSymbol}
-                      onValueChange={setSelectedSymbol}
-                      className="w-40"
+                      onChange={(e: SelectChangeEvent) => setSelectedSymbol(e.target.value)}
+                      label="Symbol"
                       disabled={isLoading}
                     >
                       {symbols.map((symbol) => (
-                        <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
+                        <MenuItem key={symbol.value} value={symbol.value}>
                           {symbol.name}
-                        </SelectItem>
+                        </MenuItem>
                       ))}
                     </Select>
-                    
-                    <Select
-                      value={String(limit)}
-                      onValueChange={(value) => setLimit(Number(value))}
-                      className="w-32"
-                      disabled={isLoading}
-                    >
-                      <SelectItem value="20" className="bg-slate-700 text-slate-200 hover:bg-blue-600">20 items</SelectItem>
-                      <SelectItem value="50" className="bg-slate-700 text-slate-200 hover:bg-blue-600">50 items</SelectItem>
-                      <SelectItem value="100" className="bg-slate-700 text-slate-200 hover:bg-blue-600">100 items</SelectItem>
-                      <SelectItem value="200" className="bg-slate-700 text-slate-200 hover:bg-blue-600">200 items</SelectItem>
-                    </Select>
-                  </div>
+                  </FormControl>
                   
-                  <div className="flex gap-2">
-                    <Button
-                      size="xs"
-                      color="blue"
-                      icon={FaSearch}
+                  <FormControl sx={{ minWidth: 100 }}>
+                    <InputLabel id="limit-select-label-signals">Items</InputLabel>
+                    <Select
+                      labelId="limit-select-label-signals"
+                      value={String(limit)}
+                      onChange={(e: SelectChangeEvent) => setLimit(Number(e.target.value))}
+                      label="Items"
                       disabled={isLoading}
                     >
-                      Filter
-                    </Button>
-                  </div>
-                </div>
+                      <MenuItem value="20">20 items</MenuItem>
+                      <MenuItem value="50">50 items</MenuItem>
+                      <MenuItem value="100">100 items</MenuItem>
+                      <MenuItem value="200">200 items</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-700">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbol</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Strategy</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Signal</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Confidence</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action Taken</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-700">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                            Loading...
-                          </td>
-                        </tr>
-                      ) : signals.length > 0 ? (
-                        signals.map((signal, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.time}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.symbol}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.strategy}</td>
-                            <td className={`px-4 py-3 whitespace-nowrap text-sm ${signal.signal === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
-                              {signal.signal}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                              {typeof signal.confidence === 'number' ? signal.confidence.toFixed(2) : signal.confidence}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                              ${typeof signal.price === 'number' ? signal.price.toFixed(2) : signal.price}
-                            </td>
-                            <td className={`px-4 py-3 whitespace-nowrap text-sm ${
-                              signal.action_taken.includes('Order') ? 'text-green-400' : 'text-gray-400'
-                            }`}>
-                              {signal.action_taken}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                            No signals found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<SearchIcon />}
+                  disabled={isLoading}
+                >
+                  Filter
+                </Button>
+              </Box>
+              
+              <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 300px)', overflow: 'auto' }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Time</TableCell>
+                      <TableCell>Symbol</TableCell>
+                      <TableCell>Strategy</TableCell>
+                      <TableCell>Signal</TableCell>
+                      <TableCell>Confidence</TableCell>
+                      <TableCell>Price</TableCell>
+                      <TableCell>Action Taken</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center">
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : signals.length > 0 ? (
+                      signals.map((signal, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{signal.time}</TableCell>
+                          <TableCell>{signal.symbol}</TableCell>
+                          <TableCell>{signal.strategy}</TableCell>
+                          <TableCell sx={{ color: signal.signal === 'BUY' ? 'success.main' : 'error.main' }}>
+                            {signal.signal}
+                          </TableCell>
+                          <TableCell>
+                            {typeof signal.confidence === 'number' ? signal.confidence.toFixed(2) : signal.confidence}
+                          </TableCell>
+                          <TableCell>
+                            ${typeof signal.price === 'number' ? signal.price.toFixed(2) : signal.price}
+                          </TableCell>
+                          <TableCell sx={{ color: signal.action_taken.includes('Order') ? 'success.main' : 'text.secondary' }}>
+                            {signal.action_taken}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center">
+                          No signals found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TabPanel>
+          </CardContent>
         </Card>
       </DashboardLayout>
     </ClientWrapper>

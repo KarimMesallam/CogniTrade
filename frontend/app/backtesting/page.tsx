@@ -3,10 +3,47 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ClientWrapper from '../../components/ClientWrapper';
-import { Title, Card, Text, Select, SelectItem, Button, DateRangePicker, DateRangePickerValue, NumberInput, Tab, TabGroup, TabList, TabPanels, TabPanel, LineChart } from '@tremor/react';
-import { FaPlay, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 import apiService from '../../lib/api-service';
+
+// MUI Components
+import { 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Button, 
+  Select, 
+  MenuItem,
+  InputLabel,
+  FormControl,
+  TextField,
+  Box,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Divider,
+  Chip,
+  FormGroup,
+  ToggleButton,
+  ToggleButtonGroup,
+  SelectChangeEvent,
+  Grid
+} from '@mui/material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { LineChart } from '@mui/x-charts/LineChart';
+
+// Icons
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 // Import TradingChart dynamically with SSR disabled
 const TradingChartDynamic = dynamic(() => import('../../components/TradingChart'), {
@@ -44,16 +81,41 @@ interface BacktestResult {
   trades: any[];
 }
 
+// TabPanel component for handling tab content
+function TabPanel(props: {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 2 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 export default function BacktestingPage() {
   const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT');
   const [selectedTimeframes, setSelectedTimeframes] = useState(['1h']);
   const [selectedStrategy, setSelectedStrategy] = useState('');
   const [initialCapital, setInitialCapital] = useState(10000);
   const [commission, setCommission] = useState(0.1);
-  const [dateRange, setDateRange] = useState<DateRangePickerValue>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth() - 3, 1), // 3 months ago
-    to: new Date(),
-  });
+  const [startDate, setStartDate] = useState<Date | null>(
+    new Date(new Date().getFullYear(), new Date().getMonth() - 3, 1) // 3 months ago
+  );
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [isRunning, setIsRunning] = useState(false);
   const [hasResults, setHasResults] = useState(false);
   const [backtestResult, setBacktestResult] = useState<BacktestResult | null>(null);
@@ -73,11 +135,9 @@ export default function BacktestingPage() {
   ];
 
   // Handle timeframe selection (allow multiple)
-  const handleTimeframeChange = (timeframe: string) => {
-    if (selectedTimeframes.includes(timeframe)) {
-      setSelectedTimeframes(selectedTimeframes.filter(t => t !== timeframe));
-    } else {
-      setSelectedTimeframes([...selectedTimeframes, timeframe]);
+  const handleTimeframeChange = (_event: React.MouseEvent<HTMLElement>, newTimeframes: string[]) => {
+    if (newTimeframes.length > 0) {
+      setSelectedTimeframes(newTimeframes);
     }
   };
 
@@ -142,10 +202,10 @@ export default function BacktestingPage() {
     setHasResults(false);
     
     try {
-      const startDate = dateRange.from ? dateRange.from.toISOString().split('T')[0] : '';
-      const endDate = dateRange.to ? dateRange.to.toISOString().split('T')[0] : '';
+      const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : '';
+      const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : '';
       
-      if (!startDate || !endDate) {
+      if (!formattedStartDate || !formattedEndDate) {
         alert('Please select a valid date range');
         setIsRunning(false);
         return;
@@ -154,8 +214,8 @@ export default function BacktestingPage() {
       const backtestConfig = {
         symbol: selectedSymbol,
         timeframes: selectedTimeframes,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: formattedStartDate,
+        end_date: formattedEndDate,
         initial_capital: initialCapital,
         commission: commission,
         strategy_name: selectedStrategy,
@@ -237,354 +297,372 @@ export default function BacktestingPage() {
     }));
   };
 
+  // Handle tab change
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
   return (
     <ClientWrapper>
       <DashboardLayout>
-        <div className="flex justify-between items-center mb-6">
-          <Title>Backtesting</Title>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" component="h1">Backtesting</Typography>
           <Button
-            size="md"
-            color="blue"
+            variant="contained"
+            startIcon={<PlayArrowIcon />}
             onClick={runBacktest}
-            icon={FaPlay}
             disabled={isRunning || isLoading}
           >
             {isRunning ? "Running..." : "Run Backtest"}
           </Button>
-        </div>
+        </Box>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
-            <Card className="bg-slate-800 border-slate-700 mb-6 overflow-hidden">
-              <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
-                <Title className="text-white text-lg">Backtest Settings</Title>
-              </div>
+        <Grid container spacing={3}>
+          <Grid item xs={12} lg={3}>
+            <Card sx={{ bgcolor: 'background.paper', mb: 3 }}>
+              <CardHeader 
+                title="Backtest Settings" 
+                sx={{ bgcolor: 'action.selected', borderBottom: 1, borderColor: 'divider' }}
+              />
               
-              <div className="p-4 space-y-5">
-                <div>
-                  <Text className="text-white font-medium mb-2">Market Settings</Text>
-                  <div className="space-y-3">
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Symbol</Text>
-                      <Select
-                        value={selectedSymbol}
-                        onValueChange={setSelectedSymbol}
-                        disabled={isLoading}
-                        className="text-white border-slate-600 rounded-md px-3"
-                      >
-                        {symbols.map((symbol) => (
-                          <SelectItem key={symbol.value} value={symbol.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
-                            {symbol.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Timeframes</Text>
-                      <div className="flex flex-wrap gap-2">
-                        {timeframes.map((timeframe) => (
-                          <button
-                            key={timeframe.value}
-                            onClick={() => handleTimeframeChange(timeframe.value)}
-                            className={`px-3 py-1 text-sm rounded-md ${
-                              selectedTimeframes.includes(timeframe.value)
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                            } transition-colors duration-200`}
-                            disabled={isLoading}
-                          >
-                            {timeframe.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <CardContent>
+                <Box component="div" sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Market Settings</Typography>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="symbol-select-label">Symbol</InputLabel>
+                    <Select
+                      labelId="symbol-select-label"
+                      value={selectedSymbol}
+                      onChange={(e) => setSelectedSymbol(e.target.value)}
+                      disabled={isLoading}
+                      label="Symbol"
+                      sx={{ bgcolor: 'background.paper' }}
+                    >
+                      {symbols.map((symbol) => (
+                        <MenuItem key={symbol.value} value={symbol.value}>
+                          {symbol.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>Timeframes</Typography>
+                    <ToggleButtonGroup
+                      value={selectedTimeframes}
+                      onChange={handleTimeframeChange}
+                      aria-label="timeframes"
+                      disabled={isLoading}
+                      size="small"
+                      color="primary"
+                      sx={{ display: 'flex', flexWrap: 'wrap' }}
+                    >
+                      {timeframes.map((timeframe) => (
+                        <ToggleButton key={timeframe.value} value={timeframe.value}>
+                          {timeframe.name}
+                        </ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                  </Box>
+                </Box>
                 
-                <div className="border-t border-slate-700 pt-4">
-                  <Text className="text-white font-medium mb-2">Strategy Settings</Text>
-                  <div className="space-y-3">
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Strategy</Text>
-                      <Select
-                        value={selectedStrategy}
-                        onValueChange={setSelectedStrategy}
-                        disabled={isLoading}
-                        className="text-white border-slate-600 rounded-md px-3"
-                      >
-                        {strategies.map((strategy) => (
-                          <SelectItem key={strategy.id} value={strategy.id} className="bg-slate-700 text-slate-200 hover:bg-blue-600 w-full">
-                            {strategy.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                    </div>
-                    
-                    {/* Show strategy parameters if a strategy is selected */}
-                    {selectedStrategy && Object.keys(strategyParams).length > 0 && (
-                      <div className="bg-slate-700 p-3 rounded-md">
-                        <Text className="text-sm font-medium text-white mb-2">Strategy Parameters</Text>
-                        <div className="space-y-3">
-                          {Object.entries(strategyParams).map(([param, value]) => (
-                            <div key={param}>
-                              <Text className="text-xs mb-1 text-gray-300">{param}</Text>
-                              <NumberInput
-                                value={value}
-                                onValueChange={(val) => handleParamChange(param, val)}
-                                min={0}
-                                step={param.includes('period') ? 1 : 0.1}
-                                className="px-3"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <Divider sx={{ my: 2 }} />
                 
-                <div className="border-t border-slate-700 pt-4">
-                  <Text className="text-white font-medium mb-2">Backtest Period</Text>
-                  <div className="space-y-3">
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Date Range</Text>
-                      <div className="relative">
-                        <DateRangePicker
-                          value={dateRange}
-                          onValueChange={setDateRange}
-                          className="w-full z-10 bg-slate-700 border-slate-600 text-white"
-                          disabled={isLoading}
-                          color="blue"
+                <Box component="div" sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Strategy Settings</Typography>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="strategy-select-label">Strategy</InputLabel>
+                    <Select
+                      labelId="strategy-select-label"
+                      value={selectedStrategy}
+                      onChange={(e: SelectChangeEvent) => setSelectedStrategy(e.target.value)}
+                      disabled={isLoading}
+                      label="Strategy"
+                      sx={{ bgcolor: 'background.paper' }}
+                    >
+                      {strategies.map((strategy) => (
+                        <MenuItem key={strategy.id} value={strategy.id}>
+                          {strategy.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  {/* Show strategy parameters if a strategy is selected */}
+                  {selectedStrategy && Object.keys(strategyParams).length > 0 && (
+                    <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'background.default' }}>
+                      <Typography variant="subtitle2" sx={{ mb: 1 }}>Strategy Parameters</Typography>
+                      <FormGroup sx={{ gap: 2 }}>
+                        {Object.entries(strategyParams).map(([param, value]) => (
+                          <TextField
+                            key={param}
+                            label={param}
+                            value={value}
+                            onChange={(e) => handleParamChange(param, Number(e.target.value))}
+                            type="number"
+                            size="small"
+                            inputProps={{
+                              step: param.includes('period') ? 1 : 0.1,
+                              min: 0,
+                            }}
+                            fullWidth
+                          />
+                        ))}
+                      </FormGroup>
+                    </Paper>
+                  )}
+                </Box>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Box component="div" sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Backtest Period</Typography>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <DatePicker
+                          label="Start Date"
+                          value={startDate}
+                          onChange={(newValue) => setStartDate(newValue)}
+                          slotProps={{ textField: { fullWidth: true } }}
                         />
-                        <style jsx global>{`
-                          .tremor-DateRangePicker-root .tremor-DateRangePicker-calendarButton {
-                            font-size: 16px;
-                          }
-                          .tremor-DateRangePicker-root .tremor-DateRangePicker-calendarButtonIcon {
-                            width: 16px;
-                            height: 16px;
-                          }
-                          .tremor-DateRangePicker-calendarModal {
-                            z-index: 50;
-                          }
-                          .tremor-DateRangePicker-root .tremor-DateRangePicker-button {
-                            padding-left: 12px;
-                            padding-right: 12px;
-                          }
-                        `}</style>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <DatePicker
+                          label="End Date"
+                          value={endDate}
+                          onChange={(newValue) => setEndDate(newValue)}
+                          slotProps={{ textField: { fullWidth: true } }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </LocalizationProvider>
+                </Box>
                 
-                <div className="border-t border-slate-700 pt-4">
-                  <Text className="text-white font-medium mb-2">Account Settings</Text>
-                  <div className="space-y-3">
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Initial Capital (USDT)</Text>
-                      <NumberInput
-                        value={initialCapital}
-                        onValueChange={setInitialCapital}
-                        min={100}
-                        max={1000000}
-                        step={100}
-                        disabled={isLoading}
-                        className="px-3"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Text className="mb-1 text-sm text-gray-300">Commission (%)</Text>
-                      <NumberInput
-                        value={commission}
-                        onValueChange={setCommission}
-                        min={0}
-                        max={5}
-                        step={0.01}
-                        disabled={isLoading}
-                        className="px-3"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <Divider sx={{ my: 2 }} />
                 
-                <div className="border-t border-slate-700 pt-4">
-                  <Button
-                    size="lg"
-                    color="blue"
-                    onClick={runBacktest}
-                    icon={FaPlay}
-                    disabled={isRunning || isLoading}
-                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-md transition-colors duration-200"
-                  >
-                    {isRunning ? "Running..." : "Run Backtest"}
-                  </Button>
-                </div>
-              </div>
+                <Box component="div" sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Account Settings</Typography>
+                  <TextField
+                    label="Initial Capital (USDT)"
+                    value={initialCapital}
+                    onChange={(e) => setInitialCapital(Number(e.target.value))}
+                    type="number"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    inputProps={{
+                      min: 100,
+                      max: 1000000,
+                      step: 100,
+                    }}
+                    disabled={isLoading}
+                  />
+                  
+                  <TextField
+                    label="Commission (%)"
+                    value={commission}
+                    onChange={(e) => setCommission(Number(e.target.value))}
+                    type="number"
+                    fullWidth
+                    inputProps={{
+                      min: 0,
+                      max: 5,
+                      step: 0.01,
+                    }}
+                    disabled={isLoading}
+                  />
+                </Box>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Button
+                  variant="contained"
+                  startIcon={<PlayArrowIcon />}
+                  onClick={runBacktest}
+                  disabled={isRunning || isLoading}
+                  fullWidth
+                  size="large"
+                >
+                  {isRunning ? "Running..." : "Run Backtest"}
+                </Button>
+              </CardContent>
             </Card>
 
             {hasResults && backtestResult && (
-              <Card className="bg-slate-800 border-slate-700 overflow-hidden">
-                <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
-                  <Title className="text-white text-lg">Backtest Results</Title>
-                </div>
+              <Card sx={{ bgcolor: 'background.paper' }}>
+                <CardHeader 
+                  title="Backtest Results" 
+                  sx={{ bgcolor: 'action.selected', borderBottom: 1, borderColor: 'divider' }}
+                />
                 
-                <div className="p-4 space-y-3">
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Net Profit</Text>
-                    <Text className={`font-medium ${backtestResult.metrics.total_profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      ${backtestResult.metrics.total_profit.toFixed(2)}
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Return</Text>
-                    <Text className={`font-medium ${backtestResult.metrics.profit_percent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {backtestResult.metrics.profit_percent.toFixed(2)}%
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Max Drawdown</Text>
-                    <Text className="text-red-400 font-medium">
-                      {backtestResult.metrics.max_drawdown_percent.toFixed(2)}%
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Win Rate</Text>
-                    <Text className="text-white font-medium">
-                      {(backtestResult.metrics.win_rate * 100).toFixed(2)}%
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Total Trades</Text>
-                    <Text className="text-white font-medium">
-                      {backtestResult.metrics.total_trades}
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-700">
-                    <Text className="text-gray-400">Winning Trades</Text>
-                    <Text className="text-white font-medium">
-                      {backtestResult.metrics.winning_trades}
-                    </Text>
-                  </div>
-                  <div className="flex justify-between py-1.5">
-                    <Text className="text-gray-400">Sharpe Ratio</Text>
-                    <Text className="text-white font-medium">
-                      {backtestResult.metrics.sharpe_ratio.toFixed(2)}
-                    </Text>
-                  </div>
-                </div>
+                <CardContent>
+                  <Box sx={{ '& > div': { py: 1, display: 'flex', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Net Profit</Typography>
+                      <Typography variant="body2" color={backtestResult.metrics.total_profit >= 0 ? 'success.main' : 'error.main'} fontWeight="medium">
+                        ${backtestResult.metrics.total_profit.toFixed(2)}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Return</Typography>
+                      <Typography variant="body2" color={backtestResult.metrics.profit_percent >= 0 ? 'success.main' : 'error.main'} fontWeight="medium">
+                        {backtestResult.metrics.profit_percent.toFixed(2)}%
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Max Drawdown</Typography>
+                      <Typography variant="body2" color="error.main" fontWeight="medium">
+                        {backtestResult.metrics.max_drawdown_percent.toFixed(2)}%
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Win Rate</Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {(backtestResult.metrics.win_rate * 100).toFixed(2)}%
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Total Trades</Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {backtestResult.metrics.total_trades}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">Winning Trades</Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {backtestResult.metrics.winning_trades}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
+                      <Typography variant="body2" color="text.secondary">Sharpe Ratio</Typography>
+                      <Typography variant="body2" fontWeight="medium">
+                        {backtestResult.metrics.sharpe_ratio.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
               </Card>
             )}
-          </div>
+          </Grid>
 
-          {hasResults && backtestResult ? (
-            <div className="lg:col-span-3">
-              <Card className="bg-slate-800 border-slate-700 mb-6">
-                <TabGroup>
-                  <TabList className="mb-4">
-                    <Tab>Chart</Tab>
-                    <Tab>Equity Curve</Tab>
-                    <Tab>Trades</Tab>
-                  </TabList>
+          <Grid item xs={12} lg={9}>
+            {hasResults && backtestResult ? (
+              <Card sx={{ bgcolor: 'background.paper', height: '100%' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <Tabs value={activeTab} onChange={handleTabChange} aria-label="backtest results tabs">
+                    <Tab label="Chart" />
+                    <Tab label="Equity Curve" />
+                    <Tab label="Trades" />
+                  </Tabs>
+                </Box>
+                
+                <CardContent>
+                  <TabPanel value={activeTab} index={0}>
+                    <Box sx={{ height: 500 }}>
+                      {candleData.length > 0 ? (
+                        <TradingChartDynamic 
+                          candles={candleData}
+                          trades={tradeData}
+                          height={500}
+                        />
+                      ) : (
+                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography>No chart data available</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </TabPanel>
                   
-                  <TabPanels>
-                    <TabPanel>
-                      <div className="h-[500px]">
-                        {candleData.length > 0 ? (
-                          <TradingChartDynamic 
-                            candles={candleData}
-                            trades={tradeData}
-                            height={500}
-                          />
-                        ) : (
-                          <div className="h-full flex items-center justify-center">
-                            <Text>No chart data available</Text>
-                          </div>
-                        )}
-                      </div>
-                    </TabPanel>
-                    
-                    <TabPanel>
-                      <div className="h-[500px]">
-                        {backtestResult.equity_curve && backtestResult.equity_curve.length > 0 ? (
-                          <LineChart
-                            data={backtestResult.equity_curve}
-                            index="date"
-                            categories={["balance"]}
-                            colors={["blue"]}
-                            valueFormatter={(value) => `$${value.toFixed(2)}`}
-                            yAxisWidth={60}
-                            showAnimation
-                          />
-                        ) : (
-                          <div className="h-full flex items-center justify-center">
-                            <Text>No equity curve data available</Text>
-                          </div>
-                        )}
-                      </div>
-                    </TabPanel>
-                    
-                    <TabPanel>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-700">
-                          <thead>
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbol</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Side</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Entry Price</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Exit Price</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Quantity</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Profit/Loss</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-700">
-                            {backtestResult.trades && backtestResult.trades.length > 0 ? (
-                              backtestResult.trades.map((trade, index) => (
-                                <tr key={index}>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{trade.date}</td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{trade.symbol}</td>
-                                  <td className={`px-4 py-3 whitespace-nowrap text-sm ${trade.side === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
-                                    {trade.side}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${trade.entry_price.toFixed(2)}</td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${trade.exit_price.toFixed(2)}</td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{trade.quantity.toFixed(6)}</td>
-                                  <td className={`px-4 py-3 whitespace-nowrap text-sm ${trade.profit_loss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    ${trade.profit_loss.toFixed(2)}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                                  No trade data available
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </TabPanel>
-                  </TabPanels>
-                </TabGroup>
+                  <TabPanel value={activeTab} index={1}>
+                    <Box sx={{ height: 500 }}>
+                      {backtestResult.equity_curve && backtestResult.equity_curve.length > 0 ? (
+                        <LineChart
+                          xAxis={[{
+                            data: backtestResult.equity_curve.map(point => new Date(point.date)),
+                            scaleType: 'time',
+                          }]}
+                          series={[{
+                            data: backtestResult.equity_curve.map(point => point.balance),
+                            label: 'Balance',
+                            color: '#2196f3',
+                          }]}
+                          height={500}
+                        />
+                      ) : (
+                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography>No equity curve data available</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </TabPanel>
+                  
+                  <TabPanel value={activeTab} index={2}>
+                    <TableContainer component={Paper} sx={{ maxHeight: 500, overflow: 'auto' }}>
+                      <Table stickyHeader>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Date</TableCell>
+                            <TableCell>Symbol</TableCell>
+                            <TableCell>Side</TableCell>
+                            <TableCell>Entry Price</TableCell>
+                            <TableCell>Exit Price</TableCell>
+                            <TableCell>Quantity</TableCell>
+                            <TableCell>Profit/Loss</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {backtestResult.trades && backtestResult.trades.length > 0 ? (
+                            backtestResult.trades.map((trade, index) => (
+                              <TableRow key={index}>
+                                <TableCell>{trade.date}</TableCell>
+                                <TableCell>{trade.symbol}</TableCell>
+                                <TableCell sx={{ color: trade.side === 'BUY' ? 'success.main' : 'error.main' }}>
+                                  {trade.side}
+                                </TableCell>
+                                <TableCell>${trade.entry_price.toFixed(2)}</TableCell>
+                                <TableCell>${trade.exit_price.toFixed(2)}</TableCell>
+                                <TableCell>{trade.quantity.toFixed(6)}</TableCell>
+                                <TableCell sx={{ color: trade.profit_loss >= 0 ? 'success.main' : 'error.main' }}>
+                                  ${trade.profit_loss.toFixed(2)}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={7} align="center">
+                                No trade data available
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </TabPanel>
+                </CardContent>
               </Card>
-            </div>
-          ) : (
-            <div className="lg:col-span-3 flex items-center justify-center">
-              <Card className="bg-slate-800 border-slate-700 w-full h-full flex items-center justify-center p-8">
-                <div className="text-center">
-                  <FaChartLine className="text-5xl text-gray-500 mx-auto mb-4" />
-                  <Title className="text-gray-400 mb-2">Run a backtest to see results</Title>
-                  <Text className="text-gray-500">
-                    Configure your backtest settings on the left panel and click "Run Backtest"
-                  </Text>
-                </div>
+            ) : (
+              <Card sx={{ bgcolor: 'background.paper', height: '100%' }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 8 }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <ShowChartIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      Run a backtest to see results
+                    </Typography>
+                    <Typography variant="body2" color="text.disabled">
+                      Configure your backtest settings on the left panel and click "Run Backtest"
+                    </Typography>
+                  </Box>
+                </Box>
               </Card>
-            </div>
-          )}
-        </div>
+            )}
+          </Grid>
+        </Grid>
       </DashboardLayout>
     </ClientWrapper>
   );

@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import wsClient from '../lib/ws-client';
 
-// Import WebSocketProvider dynamically with SSR disabled
+// Import WebSocketProvider directly instead of using an intermediate component
 const WebSocketProvider = dynamic(
-  () => import("../lib/websocket-context").then((mod) => mod.WebSocketProvider),
+  () => import("../lib/websocket-context").then(mod => mod.WebSocketProvider),
   { ssr: false }
 );
 
@@ -15,22 +14,24 @@ interface ClientWrapperProps {
 }
 
 export default function ClientWrapper({ children }: ClientWrapperProps) {
-  // Initialize WebSocket connection when component mounts
+  const [isClientMounted, setIsClientMounted] = useState(false);
+
+  // Handle client-side mounting first
   useEffect(() => {
-    if (typeof window !== 'undefined' && wsClient) {
-      wsClient.connect();
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined' && wsClient) {
-        wsClient.disconnect();
-      }
-    };
+    setIsClientMounted(true);
   }, []);
 
+  // Don't render any WebSocket related components during SSR
+  if (!isClientMounted) {
+    return <>{children}</>;
+  }
+
+  // Only render the WebSocketProvider on the client
   return (
-    <WebSocketProvider>
-      {children}
-    </WebSocketProvider>
+    <Suspense fallback={<>{children}</>}>
+      <WebSocketProvider>
+        {children}
+      </WebSocketProvider>
+    </Suspense>
   );
 } 

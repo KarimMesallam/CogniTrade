@@ -3,11 +3,37 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ClientWrapper from '../../components/ClientWrapper';
-import { Title, Card, Text, Select, SelectItem, Button } from '@tremor/react';
-import { FaPowerOff, FaPlay } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 import apiService from '../../lib/api-service';
 import { useWebSocket } from '../../lib/websocket-context';
+
+// MUI Components
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Button,
+  Select,
+  MenuItem,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+  CircularProgress
+} from '@mui/material';
+
+// Icons
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 // Import TradingChart dynamically with SSR disabled
 const TradingChart = dynamic(() => import('../../components/TradingChart'), {
@@ -55,6 +81,10 @@ const timeframes = [
 ];
 
 export default function TradingPage() {
+  // Add a clientSide flag to prevent hydration issues
+  const [clientSide, setClientSide] = useState(false);
+  
+  // Initialize with empty state values to prevent hydration mismatches
   const [symbol, setSymbol] = useState('BTCUSDT');
   const [timeframe, setTimeframe] = useState('1h');
   const [strategy, setStrategy] = useState('sma_crossover');
@@ -65,11 +95,24 @@ export default function TradingPage() {
   const [strategies, setStrategies] = useState<{value: string, name: string}[]>([]);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   
   const { isConnected, lastMessage, messages } = useWebSocket();
 
+  // Set clientSide flag on mount - this happens before any other effects
+  useEffect(() => {
+    setClientSide(true);
+  }, []);
+
+  // Handle component mounting to prevent hydration errors
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Handle WebSocket messages for real-time updates
   useEffect(() => {
+    if (!isMounted) return;
+    
     if (lastMessage) {
       if (lastMessage.type === 'trading_status') {
         setIsBotRunning(lastMessage.status === 'started');
@@ -79,10 +122,12 @@ export default function TradingPage() {
         setSignals(prev => [lastMessage.data, ...prev].slice(0, 10));
       }
     }
-  }, [lastMessage]);
+  }, [lastMessage, isMounted]);
 
   // Fetch market data when the symbol or timeframe changes
   useEffect(() => {
+    if (!isMounted) return;
+    
     async function fetchMarketData() {
       try {
         const response = await apiService.getMarketData(symbol, timeframe);
@@ -118,57 +163,81 @@ export default function TradingPage() {
     }
 
     fetchMarketData();
-  }, [symbol, timeframe]);
+  }, [symbol, timeframe, isMounted]);
 
   // Fetch signals when the symbol changes
   useEffect(() => {
+    if (!isMounted) return;
+    
     async function fetchSignals() {
       try {
         const response = await apiService.getSignalHistory(symbol, 10);
-        if (response.status === 'success' && response.signals) {
+        // Check if response has status field and it's 'success'
+        if (response && response.status === 'success' && Array.isArray(response.signals)) {
           setSignals(response.signals);
+        } else if (response && response.status === 'error') {
+          console.warn('Error fetching signals:', response.message);
+          // Set empty signals instead of throwing
+          setSignals([]);
         }
       } catch (error) {
         console.error('Failed to fetch signals:', error);
+        // Set empty signals array on error
+        setSignals([]);
       }
     }
 
     fetchSignals();
-  }, [symbol]);
+  }, [symbol, isMounted]);
 
   // Fetch symbols and strategies when the component mounts
   useEffect(() => {
+    if (!isMounted) return;
+    
     async function fetchInitialData() {
       setIsLoading(true);
       try {
         // Fetch symbols
         const symbolsResponse = await apiService.getSymbols();
-        if (symbolsResponse.status === 'success' && symbolsResponse.symbols) {
+        if (symbolsResponse && symbolsResponse.status === 'success' && Array.isArray(symbolsResponse.symbols)) {
           const formattedSymbols = symbolsResponse.symbols.map((s: any) => ({
             value: s.symbol,
             name: `${s.baseAsset}/${s.quoteAsset}`
           }));
           setSymbols(formattedSymbols);
+        } else {
+          // Default to empty array if API call fails
+          setSymbols([]);
+          console.warn('Could not load symbols:', 
+            symbolsResponse?.message || 'Unknown error');
         }
 
         // Fetch strategies
         const strategiesResponse = await apiService.getStrategies();
-        if (strategiesResponse.status === 'success' && strategiesResponse.strategies) {
+        if (strategiesResponse && strategiesResponse.status === 'success' && Array.isArray(strategiesResponse.strategies)) {
           const formattedStrategies = strategiesResponse.strategies.map((s: any) => ({
             value: s.name,
             name: s.description
           }));
           setStrategies(formattedStrategies);
+        } else {
+          // Default to empty array if API call fails
+          setStrategies([]);
+          console.warn('Could not load strategies:', 
+            strategiesResponse?.message || 'Unknown error');
         }
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
+        // Set defaults on error
+        setSymbols([]);
+        setStrategies([]);
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchInitialData();
-  }, []);
+  }, [isMounted]);
 
   const toggleBot = async () => {
     try {
@@ -199,131 +268,214 @@ export default function TradingPage() {
     }
   };
 
+  // Conditionally render the entire page based on clientSide flag
+  if (!clientSide) {
+    return (
+      <ClientWrapper>
+        <DashboardLayout>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '80vh' 
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </DashboardLayout>
+      </ClientWrapper>
+    );
+  }
+
   return (
     <ClientWrapper>
       <DashboardLayout>
-        <div className="mb-6 bg-slate-800 rounded-lg p-4 shadow-md border border-slate-700">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <Title className="text-white mb-2">Live Trading</Title>
-              <Text className="text-gray-400">Configure and manage your trading bot</Text>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              <Select 
-                value={symbol} 
-                onValueChange={setSymbol}
-                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
-                disabled={isLoading}
-              >
-                {symbols.map((s) => (
-                  <SelectItem key={s.value} value={s.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Select 
-                value={timeframe} 
-                onValueChange={setTimeframe}
-                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
-              >
-                {timeframes.map((t) => (
-                  <SelectItem key={t.value} value={t.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Select 
-                value={strategy} 
-                onValueChange={setStrategy}
-                className="md:col-span-1 text-white border-slate-600 rounded-md px-3"
-                disabled={isLoading}
-              >
-                {strategies.map((s) => (
-                  <SelectItem key={s.value} value={s.value} className="bg-slate-700 text-slate-200 hover:bg-blue-600">
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Button
-                className={`${isBotRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} md:col-span-1 text-white font-medium px-4 py-2 rounded shadow-md transition-colors duration-200`}
-                onClick={toggleBot}
-                icon={isBotRunning ? FaPowerOff : FaPlay}
-                disabled={isLoading}
-              >
-                {isBotRunning ? 'Stop Bot' : 'Start Bot'}
-              </Button>
-            </div>
-          </div>
-        </div>
+        {isMounted ? (
+          <>
+            <Card sx={{ mb: 3, bgcolor: 'background.paper', borderRadius: 1 }}>
+              <CardContent>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="h5" component="h1" gutterBottom>
+                      Live Trading
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Configure and manage your trading bot
+                    </Typography>
+                  </Grid>
 
-        <div className="grid grid-cols-1 gap-6">
-          <Card className="bg-slate-800 border-slate-700">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <Text className="text-xl font-semibold text-white">{symbol}</Text>
-                <Text className="text-sm text-gray-400">{timeframe}</Text>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className={`h-3 w-3 rounded-full ${isConnected ? (isBotRunning ? 'bg-green-500' : 'bg-yellow-500') : 'bg-red-500'}`}></div>
-                <Text>{isConnected ? (isBotRunning ? 'Bot Running' : 'Bot Ready') : 'Disconnected'}</Text>
-              </div>
-            </div>
-            {candleData.length > 0 ? (
-              <TradingChart candles={candleData} trades={tradeData} height={400} />
-            ) : (
-              <div className="h-[400px] flex items-center justify-center">
-                <Text>Loading chart data...</Text>
-              </div>
-            )}
-          </Card>
+                  <Grid item xs={12} md={8}>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel id="symbol-select-label">Symbol</InputLabel>
+                          <Select
+                            labelId="symbol-select-label"
+                            value={symbol}
+                            label="Symbol"
+                            onChange={(e: SelectChangeEvent) => setSymbol(e.target.value)}
+                            disabled={isLoading}
+                          >
+                            {symbols.map((s) => (
+                              <MenuItem key={s.value} value={s.value}>
+                                {s.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
 
-          <Card className="bg-slate-800 border-slate-700 overflow-hidden">
-            <div className="border-b border-slate-700 px-4 py-3 bg-slate-700">
-              <Title className="text-white text-lg">Recent Signals</Title>
-            </div>
-            
-            <div className="p-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-700">
-                <thead className="bg-slate-700">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Symbol</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Strategy</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Signal</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Strength</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Action Taken</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700 bg-slate-800">
-                  {signals.length > 0 ? (
-                    signals.map((signal, index) => (
-                      <tr key={index} className="hover:bg-slate-700 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.time}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.symbol}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{signal.strategy}</td>
-                        <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium ${signal.signal === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
-                          {signal.signal}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                          {typeof signal.confidence === 'number' ? signal.confidence.toFixed(2) : signal.confidence}
-                        </td>
-                        <td className={`px-4 py-3 whitespace-nowrap text-sm ${signal.action_taken.includes('Order') ? 'text-green-400' : 'text-gray-400'}`}>
-                          {signal.action_taken}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                        No signals available
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </div>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel id="timeframe-select-label">Timeframe</InputLabel>
+                          <Select
+                            labelId="timeframe-select-label"
+                            value={timeframe}
+                            label="Timeframe"
+                            onChange={(e: SelectChangeEvent) => setTimeframe(e.target.value)}
+                          >
+                            {timeframes.map((t) => (
+                              <MenuItem key={t.value} value={t.value}>
+                                {t.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel id="strategy-select-label">Strategy</InputLabel>
+                          <Select
+                            labelId="strategy-select-label"
+                            value={strategy}
+                            label="Strategy"
+                            onChange={(e: SelectChangeEvent) => setStrategy(e.target.value)}
+                            disabled={isLoading}
+                          >
+                            {strategies.map((s) => (
+                              <MenuItem key={s.value} value={s.value}>
+                                {s.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sm={6} md={3}>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color={isBotRunning ? "error" : "success"}
+                          onClick={toggleBot}
+                          startIcon={isBotRunning ? <PowerSettingsNewIcon /> : <PlayArrowIcon />}
+                          disabled={isLoading}
+                        >
+                          {isBotRunning ? 'Stop Bot' : 'Start Bot'}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Card sx={{ bgcolor: 'background.paper' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="h6">{symbol}</Typography>
+                        <Typography variant="body2" color="text.secondary">{timeframe}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box 
+                          sx={{ 
+                            height: 10, 
+                            width: 10, 
+                            borderRadius: '50%', 
+                            bgcolor: isConnected ? (isBotRunning ? 'success.main' : 'warning.main') : 'error.main'
+                          }}
+                        />
+                        <Typography variant="body2">
+                          {isConnected ? (isBotRunning ? 'Bot Running' : 'Bot Ready') : 'Disconnected'}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ height: 400 }}>
+                      {candleData.length > 0 ? (
+                        <TradingChart candles={candleData} trades={tradeData} height={400} />
+                      ) : (
+                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography>Loading chart data...</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Card sx={{ bgcolor: 'background.paper' }}>
+                  <CardHeader 
+                    title="Recent Signals" 
+                    sx={{ bgcolor: 'action.selected', borderBottom: 1, borderColor: 'divider' }}
+                  />
+                  
+                  <CardContent>
+                    <TableContainer sx={{ maxHeight: 400 }}>
+                      <Table stickyHeader>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Time</TableCell>
+                            <TableCell>Symbol</TableCell>
+                            <TableCell>Strategy</TableCell>
+                            <TableCell>Signal</TableCell>
+                            <TableCell>Strength</TableCell>
+                            <TableCell>Action Taken</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {signals.length > 0 ? (
+                            signals.map((signal, index) => (
+                              <TableRow key={index} hover>
+                                <TableCell>{signal.time}</TableCell>
+                                <TableCell>{signal.symbol}</TableCell>
+                                <TableCell>{signal.strategy}</TableCell>
+                                <TableCell sx={{ color: signal.signal === 'BUY' ? 'success.main' : 'error.main', fontWeight: 'medium' }}>
+                                  {signal.signal}
+                                </TableCell>
+                                <TableCell>
+                                  {typeof signal.confidence === 'number' ? signal.confidence.toFixed(2) : signal.confidence}
+                                </TableCell>
+                                <TableCell sx={{ color: signal.action_taken.includes('Order') ? 'success.main' : 'text.secondary' }}>
+                                  {signal.action_taken}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={6} align="center">
+                                No signals available
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </>
+        ) : (
+          <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Typography>Loading trading interface...</Typography>
+          </Box>
+        )}
       </DashboardLayout>
     </ClientWrapper>
   );

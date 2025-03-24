@@ -1,37 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ClientWrapper from '../../components/ClientWrapper';
-import { Card, Metric, Text, Title, BarList, Subtitle, AreaChart } from '@tremor/react';
-import { useState } from 'react';
+import { 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Grid, 
+  Box, 
+  Table, 
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper
+} from '@mui/material';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { BarChart } from '@mui/x-charts/BarChart';
 
 // Placeholder data for demonstration
 const performanceData = [
-  {
-    date: 'Jan 22',
-    'Profit/Loss': 2890,
-  },
-  {
-    date: 'Feb 22',
-    'Profit/Loss': 1890,
-  },
-  {
-    date: 'Mar 22',
-    'Profit/Loss': 3890,
-  },
-  {
-    date: 'Apr 22',
-    'Profit/Loss': -1290,
-  },
-  {
-    date: 'May 22',
-    'Profit/Loss': 1890,
-  },
-  {
-    date: 'Jun 22',
-    'Profit/Loss': 2890,
-  },
+  { date: new Date(2022, 0, 22), profit: 2890 },
+  { date: new Date(2022, 1, 22), profit: 1890 },
+  { date: new Date(2022, 2, 22), profit: 3890 },
+  { date: new Date(2022, 3, 22), profit: -1290 },
+  { date: new Date(2022, 4, 22), profit: 1890 },
+  { date: new Date(2022, 5, 22), profit: 2890 },
 ];
 
 const strategyPerformance = [
@@ -47,97 +44,147 @@ export default function Dashboard() {
   return (
     <ClientWrapper>
       <DashboardLayout>
-        <Title className="mb-4">Trading Dashboard</Title>
+        <Typography variant="h4" gutterBottom>Trading Dashboard</Typography>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card className="bg-slate-800 border-slate-700">
-            <Text className="text-gray-400">Total Profit/Loss</Text>
-            <Metric className="text-white">$2,450.56</Metric>
-          </Card>
-          <Card className="bg-slate-800 border-slate-700">
-            <Text className="text-gray-400">Win Rate</Text>
-            <Metric className="text-white">68.2%</Metric>
-          </Card>
-          <Card className="bg-slate-800 border-slate-700">
-            <Text className="text-gray-400">Total Trades</Text>
-            <Metric className="text-white">42</Metric>
-          </Card>
-        </div>
+        <Grid container spacing={3} mb={3}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total Profit/Loss
+                </Typography>
+                <Typography variant="h3">
+                  $2,450.56
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Win Rate
+                </Typography>
+                <Typography variant="h3">
+                  68.2%
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total Trades
+                </Typography>
+                <Typography variant="h3">
+                  42
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <Card className="bg-slate-800 border-slate-700">
-            <Title className="text-white mb-2">Monthly Performance</Title>
-            <AreaChart
-              className="h-72 mt-4"
-              data={performanceData}
-              index="date"
-              categories={['Profit/Loss']}
-              colors={['blue']}
-              showLegend={false}
-              valueFormatter={(value: number) => `$${value}`}
-              showAnimation={true}
-            />
-          </Card>
+        <Grid container spacing={3} mb={3}>
+          <Grid item xs={12} lg={6}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="Monthly Performance" />
+              <CardContent>
+                <Box sx={{ height: 300 }}>
+                  <LineChart
+                    xAxis={[{
+                      data: performanceData.map(item => item.date),
+                      scaleType: 'time',
+                    }]}
+                    series={[{
+                      data: performanceData.map(item => item.profit),
+                      label: 'Profit/Loss',
+                      color: '#2196f3',
+                      area: true,
+                    }]}
+                    height={300}
+                    margin={{ top: 20, right: 20, bottom: 30, left: 40 }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
 
-          <Card className="bg-slate-800 border-slate-700">
-            <Title className="text-white mb-2">Strategy Performance</Title>
-            <Subtitle className="text-gray-400 mb-4">
-              Profit/Loss by strategy ($)
-            </Subtitle>
-            <BarList
-              data={strategyPerformance}
-              className="mt-2"
-              valueFormatter={(value: number) => `$${value}`}
-              color="blue"
-            />
-          </Card>
-        </div>
+          <Grid item xs={12} lg={6}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader 
+                title="Strategy Performance" 
+                subheader="Profit/Loss by strategy ($)"
+              />
+              <CardContent>
+                <Box sx={{ height: 300 }}>
+                  <BarChart
+                    xAxis={[{
+                      scaleType: 'band',
+                      data: strategyPerformance.map(item => item.name),
+                    }]}
+                    series={[{
+                      data: strategyPerformance.map(item => item.value),
+                      color: '#2196f3',
+                    }]}
+                    height={300}
+                    margin={{ top: 20, right: 20, bottom: 50, left: 40 }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-        <div className="grid grid-cols-1 gap-6">
-          <Card className="bg-slate-800 border-slate-700">
-            <Title className="text-white mb-2">Recent Trades</Title>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-700">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Symbol</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Quantity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">P/L</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700">
-                  <tr>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">2023-03-23 14:22:05</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">BTCUSDT</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-green-400">BUY</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">$42,560.78</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">0.25</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-green-400">+$125.45</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">2023-03-23 11:45:32</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">ETHUSDT</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-red-400">SELL</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">$2,785.25</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">1.5</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-red-400">-$42.32</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">2023-03-22 18:33:17</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">BTCUSDT</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-green-400">BUY</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">$42,105.92</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">0.15</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-green-400">+$87.21</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </div>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardHeader title="Recent Trades" />
+              <CardContent>
+                <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 500px)', overflow: 'auto' }}>
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Time</TableCell>
+                        <TableCell>Symbol</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Price</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell>P/L</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>2023-03-23 14:22:05</TableCell>
+                        <TableCell>BTCUSDT</TableCell>
+                        <TableCell sx={{ color: 'success.main' }}>BUY</TableCell>
+                        <TableCell>$42,560.78</TableCell>
+                        <TableCell>0.25</TableCell>
+                        <TableCell sx={{ color: 'success.main' }}>+$125.45</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>2023-03-23 11:45:32</TableCell>
+                        <TableCell>ETHUSDT</TableCell>
+                        <TableCell sx={{ color: 'error.main' }}>SELL</TableCell>
+                        <TableCell>$2,785.25</TableCell>
+                        <TableCell>1.5</TableCell>
+                        <TableCell sx={{ color: 'error.main' }}>-$42.32</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>2023-03-22 18:33:17</TableCell>
+                        <TableCell>BTCUSDT</TableCell>
+                        <TableCell sx={{ color: 'success.main' }}>BUY</TableCell>
+                        <TableCell>$42,105.92</TableCell>
+                        <TableCell>0.15</TableCell>
+                        <TableCell sx={{ color: 'success.main' }}>+$87.21</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </DashboardLayout>
     </ClientWrapper>
   );

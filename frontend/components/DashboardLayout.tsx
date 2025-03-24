@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Navbar from './Navbar';
+import { Box } from '@mui/material';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -9,13 +10,23 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="flex h-screen bg-slate-900">
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <Navbar />
-      <main className="flex-1 pl-64 overflow-auto bg-slate-900 text-white">
-        <div className="p-6">
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          pl: { xs: 0, sm: 8 },
+          pt: 0,
+          width: { sm: `calc(100% - 240px)` },
+          overflow: 'auto',
+          color: 'text.primary'
+        }}
+      >
+        <Box sx={{ p: 3 }}>
           {children}
-        </div>
-      </main>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 } 

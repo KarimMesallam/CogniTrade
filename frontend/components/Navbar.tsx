@@ -2,7 +2,27 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaHome, FaChartLine, FaHistory, FaCog, FaRobot } from 'react-icons/fa';
+import {
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Divider,
+  Chip
+} from '@mui/material';
+
+// MUI Icons
+import HomeIcon from '@mui/icons-material/Home';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import HistoryIcon from '@mui/icons-material/History';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CircleIcon from '@mui/icons-material/Circle';
 
 interface NavItemProps {
   href: string;
@@ -11,19 +31,36 @@ interface NavItemProps {
   isActive: boolean;
 }
 
+const drawerWidth = 240;
+
 const NavItem = ({ href, text, icon, isActive }: NavItemProps) => {
   return (
-    <Link 
-      href={href} 
-      className={`flex items-center gap-2 p-3 rounded-md transition-colors ${
-        isActive 
-          ? 'bg-blue-600 text-white' 
-          : 'text-gray-400 hover:bg-slate-800 hover:text-white'
-      }`}
-    >
-      <span className="text-lg">{icon}</span>
-      <span className="font-medium">{text}</span>
-    </Link>
+    <ListItem disablePadding>
+      <ListItemButton
+        component={Link}
+        href={href}
+        selected={isActive}
+        sx={{ 
+          borderRadius: 1,
+          mb: 0.5,
+          '&.Mui-selected': {
+            backgroundColor: 'primary.main',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'primary.dark',
+            },
+            '& .MuiListItemIcon-root': {
+              color: 'white'
+            }
+          }
+        }}
+      >
+        <ListItemIcon sx={{ color: isActive ? 'white' : 'text.secondary', minWidth: 36 }}>
+          {icon}
+        </ListItemIcon>
+        <ListItemText primary={text} />
+      </ListItemButton>
+    </ListItem>
   );
 };
 
@@ -31,24 +68,49 @@ export default function Navbar() {
   const pathname = usePathname();
   
   const navItems = [
-    { href: '/', text: 'Home', icon: <FaHome /> },
-    { href: '/dashboard', text: 'Dashboard', icon: <FaChartLine /> },
-    { href: '/trading', text: 'Live Trading', icon: <FaRobot /> },
-    { href: '/backtesting', text: 'Backtesting', icon: <FaChartLine /> },
-    { href: '/history', text: 'History', icon: <FaHistory /> },
-    { href: '/settings', text: 'Settings', icon: <FaCog /> },
+    { href: '/', text: 'Home', icon: <HomeIcon fontSize="small" /> },
+    { href: '/dashboard', text: 'Dashboard', icon: <BarChartIcon fontSize="small" /> },
+    { href: '/trading', text: 'Live Trading', icon: <SmartToyIcon fontSize="small" /> },
+    { href: '/backtesting', text: 'Backtesting', icon: <TimelineIcon fontSize="small" /> },
+    { href: '/history', text: 'History', icon: <HistoryIcon fontSize="small" /> },
+    { href: '/settings', text: 'Settings', icon: <SettingsIcon fontSize="small" /> },
   ];
   
   return (
-    <nav className="w-64 h-screen p-4 bg-slate-950 border-r border-slate-800 fixed">
-      <div className="flex items-center gap-2 mb-8 px-3 pt-2">
-        <div className="bg-blue-600 w-8 h-8 rounded-md flex items-center justify-center">
-          <FaRobot className="text-white text-lg" />
-        </div>
-        <h1 className="text-xl font-bold text-white">AI Trading Bot</h1>
-      </div>
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: { 
+          width: drawerWidth, 
+          boxSizing: 'border-box',
+          bgcolor: 'background.default',
+          borderRight: 1,
+          borderColor: 'divider',
+        },
+      }}
+    >
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            bgcolor: 'primary.main',
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <SmartToyIcon sx={{ color: 'white', fontSize: 20 }} />
+        </Box>
+        <Typography variant="h6" component="h1" fontWeight="bold">
+          AI Trading Bot
+        </Typography>
+      </Box>
       
-      <div className="flex flex-col gap-1">
+      <List sx={{ px: 2, mt: 2 }}>
         {navItems.map((item) => (
           <NavItem
             key={item.href}
@@ -58,19 +120,31 @@ export default function Navbar() {
             isActive={pathname === item.href}
           />
         ))}
-      </div>
+      </List>
       
-      <div className="absolute bottom-8 left-0 right-0 px-4">
-        <div className="bg-slate-800 p-3 rounded-md">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-sm text-gray-300">API Connected</span>
-          </div>
-          <div className="text-xs text-gray-400">
-            Paper Trading Mode
-          </div>
-        </div>
-      </div>
-    </nav>
+      <Box sx={{ position: 'absolute', bottom: 16, left: 0, right: 0, px: 2 }}>
+        <Box
+          sx={{
+            bgcolor: 'action.selected',
+            p: 2,
+            borderRadius: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <CircleIcon sx={{ fontSize: 10, color: 'success.main' }} />
+            <Typography variant="body2" color="text.secondary">
+              API Connected
+            </Typography>
+          </Box>
+          <Chip 
+            label="Paper Trading Mode" 
+            size="small" 
+            variant="outlined" 
+            color="primary"
+            sx={{ fontSize: '0.7rem' }}
+          />
+        </Box>
+      </Box>
+    </Drawer>
   );
 } 
