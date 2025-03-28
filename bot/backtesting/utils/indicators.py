@@ -1,6 +1,7 @@
 """
 Technical indicator calculation functions for the backtesting module.
 These functions are designed to work with pandas DataFrames of market data.
+These implementations are closely aligned with TA-Lib for consistency.
 """
 import pandas as pd
 import numpy as np
@@ -24,7 +25,7 @@ def calculate_sma(df: pd.DataFrame, period: int = 20, column: str = 'close') -> 
 
 def calculate_ema(df: pd.DataFrame, period: int = 20, column: str = 'close') -> pd.Series:
     """
-    Calculate Exponential Moving Average.
+    Calculate Exponential Moving Average using TA-Lib compatible method.
     
     Args:
         df: DataFrame containing OHLCV data
@@ -34,12 +35,32 @@ def calculate_ema(df: pd.DataFrame, period: int = 20, column: str = 'close') -> 
     Returns:
         pd.Series: Series with calculated EMA values
     """
-    return df[column].ewm(span=period, adjust=False).mean()
+    # TA-Lib uses alpha = 2/(period+1) with SMA initialization
+    alpha = 2.0 / (period + 1)
+    
+    # Calculate SMA for the initial value (TA-Lib approach)
+    sma = df[column].rolling(window=period).mean().iloc[period-1]
+    
+    # Create a copy of the data to avoid modifying the original
+    ema_values = df[column].copy()
+    
+    # Initialize with NaN for values before the period
+    ema_values.iloc[:period-1] = np.nan
+    
+    # Set the first value to SMA of the first period entries
+    if period <= len(df):
+        ema_values.iloc[period-1] = sma
+    
+    # Calculate EMA recursively
+    for i in range(period, len(df)):
+        ema_values.iloc[i] = (df[column].iloc[i] * alpha) + (ema_values.iloc[i-1] * (1 - alpha))
+    
+    return ema_values
 
 
 def calculate_rsi(df: pd.DataFrame, period: int = 14, column: str = 'close') -> pd.Series:
     """
-    Calculate Relative Strength Index.
+    Calculate Relative Strength Index using TA-Lib compatible method.
     
     Args:
         df: DataFrame containing OHLCV data
@@ -49,20 +70,56 @@ def calculate_rsi(df: pd.DataFrame, period: int = 14, column: str = 'close') -> 
     Returns:
         pd.Series: Series with calculated RSI values (0-100)
     """
+    # Calculate price changes
     delta = df[column].diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
     
-    avg_gain = gain.rolling(window=period).mean()
-    avg_loss = loss.rolling(window=period).mean()
+    # Separate gains and losses
+    gain = delta.copy()
+    loss = delta.copy()
+    gain[gain < 0] = 0
+    loss[loss > 0] = 0
+    loss = abs(loss)
     
-    # For values after the initial period
-    for i in range(period, len(df)):
-        avg_gain.iloc[i] = (avg_gain.iloc[i-1] * (period-1) + gain.iloc[i]) / period
-        avg_loss.iloc[i] = (avg_loss.iloc[i-1] * (period-1) + loss.iloc[i]) / period
+    # First values for average gain and loss
+    avg_gain = np.nan
+    avg_loss = np.nan
     
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
+    # Initialize RSI series with explicit dtype to avoid warning
+    rsi = pd.Series(index=df.index, dtype=float)
+    
+    # Fill the first period values with NaN
+    rsi.iloc[:period] = np.nan
+    
+    # Initial average gain and loss calculation (simple average)
+    if len(gain) >= period:
+        avg_gain = gain.iloc[1:period+1].mean()  # Skip first row as it's NaN
+        avg_loss = loss.iloc[1:period+1].mean()  # Skip first row as it's NaN
+        
+        # Special case for flat prices - RSI should be 50
+        if avg_gain == 0 and avg_loss == 0:
+            rsi.iloc[period] = 50.0
+        # Normal case
+        elif avg_loss != 0:
+            rs = avg_gain / avg_loss
+            rsi.iloc[period] = 100 - (100 / (1 + rs))
+        else:
+            rsi.iloc[period] = 100  # If no losses, RSI is 100
+    
+    # Calculate RSI for remaining rows using Wilder's smoothing method
+    for i in range(period + 1, len(df)):
+        # TA-Lib uses Wilder's smoothing: avg_gain = ((prev_avg_gain * (period-1)) + current_gain) / period
+        avg_gain = ((avg_gain * (period-1)) + gain.iloc[i]) / period
+        avg_loss = ((avg_loss * (period-1)) + loss.iloc[i]) / period
+        
+        # Special case for flat prices - RSI should be 50
+        if avg_gain == 0 and avg_loss == 0:
+            rsi.iloc[i] = 50.0
+        # Normal case
+        elif avg_loss != 0:
+            rs = avg_gain / avg_loss
+            rsi.iloc[i] = 100 - (100 / (1 + rs))
+        else:
+            rsi.iloc[i] = 100  # If no losses, RSI is 100
     
     return rsi
 
@@ -70,7 +127,7 @@ def calculate_rsi(df: pd.DataFrame, period: int = 14, column: str = 'close') -> 
 def calculate_bollinger_bands(df: pd.DataFrame, period: int = 20, deviation: float = 2.0, 
                             column: str = 'close') -> Dict[str, pd.Series]:
     """
-    Calculate Bollinger Bands.
+    Calculate Bollinger Bands using TA-Lib compatible method.
     
     Args:
         df: DataFrame containing OHLCV data
@@ -81,8 +138,13 @@ def calculate_bollinger_bands(df: pd.DataFrame, period: int = 20, deviation: flo
     Returns:
         Dict[str, pd.Series]: Dictionary with 'upper_band', 'middle_band', 'lower_band'
     """
+    # Calculate SMA (middle band)
     sma = df[column].rolling(window=period).mean()
-    std = df[column].rolling(window=period).std()
+    
+    # Calculate standard deviation using population method (ddof=0) as TA-Lib does
+    std = df[column].rolling(window=period).std(ddof=0)
+    
+    # Calculate upper and lower bands
     upper_band = sma + (std * deviation)
     lower_band = sma - (std * deviation)
     
@@ -96,7 +158,7 @@ def calculate_bollinger_bands(df: pd.DataFrame, period: int = 20, deviation: flo
 def calculate_macd(df: pd.DataFrame, fast_period: int = 12, slow_period: int = 26, 
                  signal_period: int = 9, column: str = 'close') -> Dict[str, pd.Series]:
     """
-    Calculate Moving Average Convergence Divergence.
+    Calculate Moving Average Convergence Divergence using TA-Lib compatible method.
     
     Args:
         df: DataFrame containing OHLCV data
@@ -108,11 +170,41 @@ def calculate_macd(df: pd.DataFrame, fast_period: int = 12, slow_period: int = 2
     Returns:
         Dict[str, pd.Series]: Dictionary with 'macd_line', 'signal_line', 'macd_histogram'
     """
-    fast_ema = df[column].ewm(span=fast_period, adjust=False).mean()
-    slow_ema = df[column].ewm(span=slow_period, adjust=False).mean()
+    # Use the fixed EMA calculation to match TA-Lib
+    fast_ema = calculate_ema(df, period=fast_period, column=column)
+    slow_ema = calculate_ema(df, period=slow_period, column=column)
     
+    # Calculate MACD line
     macd_line = fast_ema - slow_ema
-    signal_line = macd_line.ewm(span=signal_period, adjust=False).mean()
+    
+    # For signal line, we need to handle NaN values properly
+    # First, determine where both EMAs have valid data
+    valid_macd = macd_line.dropna()
+    
+    # Create a signal line of the same length as macd_line
+    signal_line = pd.Series(index=macd_line.index, dtype=float)
+    signal_line[:] = np.nan
+    
+    # Only calculate signal where we have valid MACD values
+    if len(valid_macd) >= signal_period:
+        # First signal value is SMA of MACD for initial signal_period points
+        start_idx = valid_macd.index[0]
+        valid_idx = valid_macd.index
+        
+        # Use a range of values for the initial SMA calculation
+        initial_range = valid_macd.iloc[:signal_period]
+        signal_line.loc[valid_idx[signal_period-1]] = initial_range.mean()
+        
+        # Apply EMA smoothing for subsequent values
+        alpha = 2.0 / (signal_period + 1)
+        
+        for i in range(signal_period, len(valid_idx)):
+            current_idx = valid_idx[i]
+            prev_idx = valid_idx[i-1]
+            signal_line.loc[current_idx] = (valid_macd.loc[current_idx] * alpha) + \
+                                           (signal_line.loc[prev_idx] * (1 - alpha))
+    
+    # Calculate histogram
     macd_histogram = macd_line - signal_line
     
     return {
@@ -138,7 +230,18 @@ def calculate_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
     low_close = (df['low'] - df['close'].shift()).abs()
     
     true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    atr = true_range.rolling(window=period).mean()
+    
+    # Use Wilder's smoothing method
+    atr = pd.Series(index=df.index)
+    atr.iloc[:period] = np.nan
+    
+    # First ATR value is simple average of true ranges
+    if len(true_range) >= period:
+        atr.iloc[period-1] = true_range.iloc[:period].mean()
+    
+    # Calculate ATR for remaining rows using Wilder's smoothing
+    for i in range(period, len(df)):
+        atr.iloc[i] = ((atr.iloc[i-1] * (period-1)) + true_range.iloc[i]) / period
     
     return atr
 

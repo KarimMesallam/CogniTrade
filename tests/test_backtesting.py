@@ -7,6 +7,7 @@ import logging
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 import unittest.mock
+from decimal import Decimal
 
 # Add the parent directory to the path to import the bot modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -656,7 +657,7 @@ def test_trade_execution(backtest_engine):
     # Verify that a trade was executed
     assert len(backtest_engine.trades) == 1
     assert backtest_engine.trades[0].side == 'BUY'
-    assert backtest_engine.trades[0].price == current_price
+    assert float(backtest_engine.trades[0].price) == current_price  # Convert Decimal to float for comparison
     assert backtest_engine.position_size > 0.0
     assert backtest_engine.current_capital < 10000.0  # Capital should be reduced
     
@@ -679,12 +680,12 @@ def test_trade_execution(backtest_engine):
     # Verify that a SELL trade was executed
     assert len(backtest_engine.trades) == 2
     assert backtest_engine.trades[1].side == 'SELL'
-    assert backtest_engine.trades[1].price == new_price
+    assert float(backtest_engine.trades[1].price) == new_price  # Convert Decimal to float for comparison
     assert backtest_engine.position_size == 0.0  # Position is closed
     
     # Check that profit was recorded
-    assert backtest_engine.trades[1].profit_loss > 0.0  # Price increased, so profit
-    assert backtest_engine.trades[1].roi_pct > 0.0  # ROI should be positive
+    assert float(backtest_engine.trades[1].profit_loss) > 0.0  # Price increased, so profit
+    assert float(backtest_engine.trades[1].roi_pct) > 0.0  # ROI should be positive
     
     # Test HOLD signal
     backtest_engine._process_signal('HOLD', current_time, current_price)
@@ -693,10 +694,12 @@ def test_trade_execution(backtest_engine):
     assert len(backtest_engine.trades) == 2  # Still 2 trades
     
     # Test executing a direct trade
-    backtest_engine._execute_trade('BUY', current_time, current_price, 0.1)
+    test_quantity = 0.1
+    backtest_engine._execute_trade('BUY', current_time, current_price, test_quantity)
     assert len(backtest_engine.trades) == 3
     assert backtest_engine.trades[2].side == 'BUY'
-    assert backtest_engine.trades[2].quantity == 0.1
+    # Use string representation for Decimal comparison to avoid precision issues
+    assert str(backtest_engine.trades[2].quantity) == str(test_quantity)
     
     # Test market indicators are added to trades
     assert hasattr(backtest_engine.trades[0], 'market_indicators')
@@ -881,9 +884,9 @@ def test_create_backtest_result(backtest_engine):
         symbol='BTCUSDT',
         side='BUY',
         timestamp=pd.Timestamp('2023-01-10 12:00:00'),
-        price=20000.0,
-        quantity=0.1,
-        commission=2.0,
+        price=Decimal('20000.0'),
+        quantity=Decimal('0.1'),
+        commission=Decimal('2.0'),
         status='FILLED'
     )
     buy_trade.entry_point = True
@@ -895,15 +898,15 @@ def test_create_backtest_result(backtest_engine):
         symbol='BTCUSDT',
         side='SELL',
         timestamp=pd.Timestamp('2023-01-15 12:00:00'),
-        price=21000.0,
-        quantity=0.1,
-        commission=2.1,
+        price=Decimal('21000.0'),
+        quantity=Decimal('0.1'),
+        commission=Decimal('2.1'),
         status='FILLED'
     )
-    sell_trade.entry_price = 20000.0
-    sell_trade.exit_price = 21000.0
-    sell_trade.profit_loss = 97.9  # (21000 - 20000) * 0.1 - 2.1
-    sell_trade.roi_pct = 4.895  # (97.9 / (20000 * 0.1)) * 100
+    sell_trade.entry_price = Decimal('20000.0')
+    sell_trade.exit_price = Decimal('21000.0')
+    sell_trade.profit_loss = Decimal('97.9')  # (21000 - 20000) * 0.1 - 2.1
+    sell_trade.roi_pct = Decimal('4.895')  # (97.9 / (20000 * 0.1)) * 100
     sell_trade.entry_time = pd.Timestamp('2023-01-10 12:00:00')
     sell_trade.exit_time = pd.Timestamp('2023-01-15 12:00:00')
     sell_trade.holding_period_hours = 120  # 5 days * 24 hours
@@ -953,9 +956,9 @@ def test_create_backtest_result(backtest_engine):
     assert hasattr(result.metrics, 'max_drawdown_pct')
     assert hasattr(result.metrics, 'win_rate')
     
-    # Check specific metrics
-    assert result.metrics.total_return_pct == pytest.approx(0.979, 0.001)  # 97.9 / 10000 * 100
-    assert result.metrics.win_rate == 100.0  # 1 out of 1 trades was profitable 
+    # Check specific metrics - convert both sides to float for proper comparison
+    assert float(result.metrics.total_return_pct) == pytest.approx(0.979, 0.001)  # 97.9 / 10000 * 100
+    assert float(result.metrics.win_rate) == pytest.approx(100.0, 0.001)  # 1 out of 1 trades was profitable
 
 def test_error_handling(backtest_engine):
     """Test error handling in the backtesting engine"""

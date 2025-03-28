@@ -6,7 +6,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 import uuid
+from decimal import Decimal, getcontext
 
+# Set Decimal precision
+getcontext().prec = 28
 
 @dataclass
 class Trade:
@@ -15,16 +18,16 @@ class Trade:
     symbol: str = ""
     side: str = ""  # 'BUY' or 'SELL'
     timestamp: datetime = field(default_factory=datetime.now)
-    price: float = 0.0
-    quantity: float = 0.0
-    commission: float = 0.0
+    price: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    quantity: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    commission: Decimal = field(default_factory=lambda: Decimal('0.0'))
     status: str = "FILLED"  # Trade status (e.g., 'FILLED', 'CANCELED')
     
     # Added when a trade is completed
-    entry_price: Optional[float] = None
-    exit_price: Optional[float] = None
-    profit_loss: Optional[float] = None
-    roi_pct: Optional[float] = None
+    entry_price: Optional[Decimal] = None
+    exit_price: Optional[Decimal] = None
+    profit_loss: Optional[Decimal] = None
+    roi_pct: Optional[Decimal] = None
     
     # For advanced analysis
     entry_time: Optional[datetime] = None
@@ -42,13 +45,30 @@ class Trade:
     # Raw data (e.g., from exchange)
     raw_data: Dict[str, Any] = field(default_factory=dict)
     
+    def __post_init__(self):
+        """Convert numeric values to Decimal if they aren't already"""
+        if not isinstance(self.price, Decimal):
+            self.price = Decimal(str(self.price))
+        if not isinstance(self.quantity, Decimal):
+            self.quantity = Decimal(str(self.quantity))
+        if not isinstance(self.commission, Decimal):
+            self.commission = Decimal(str(self.commission))
+        if self.entry_price is not None and not isinstance(self.entry_price, Decimal):
+            self.entry_price = Decimal(str(self.entry_price))
+        if self.exit_price is not None and not isinstance(self.exit_price, Decimal):
+            self.exit_price = Decimal(str(self.exit_price))
+        if self.profit_loss is not None and not isinstance(self.profit_loss, Decimal):
+            self.profit_loss = Decimal(str(self.profit_loss))
+        if self.roi_pct is not None and not isinstance(self.roi_pct, Decimal):
+            self.roi_pct = Decimal(str(self.roi_pct))
+    
     @property
-    def value(self) -> float:
+    def value(self) -> Decimal:
         """Calculate the total trade value excluding commission."""
         return self.price * self.quantity
     
     @property
-    def total_cost(self) -> float:
+    def total_cost(self) -> Decimal:
         """Calculate the total cost including commission."""
         return self.value + self.commission
 
@@ -60,26 +80,50 @@ class TradeAnalytics:
     winning_trades: int = 0
     losing_trades: int = 0
     breakeven_trades: int = 0
-    win_rate: float = 0.0
-    average_win: float = 0.0
-    average_loss: float = 0.0
-    largest_win: float = 0.0
-    largest_loss: float = 0.0
-    profit_factor: float = 0.0
-    expectancy: float = 0.0
+    win_rate: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    average_win: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    average_loss: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    largest_win: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    largest_loss: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    profit_factor: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    expectancy: Decimal = field(default_factory=lambda: Decimal('0.0'))
     avg_holding_period: float = 0.0
     
     # Trade distribution
     trade_count_by_hour: Dict[int, int] = field(default_factory=dict)
     trade_count_by_day: Dict[str, int] = field(default_factory=dict)
-    profit_by_hour: Dict[int, float] = field(default_factory=dict)
-    profit_by_day: Dict[str, float] = field(default_factory=dict)
+    profit_by_hour: Dict[int, Decimal] = field(default_factory=dict)
+    profit_by_day: Dict[str, Decimal] = field(default_factory=dict)
     
     # Market condition statistics
     trades_in_uptrend: int = 0
     trades_in_downtrend: int = 0
     trades_in_high_volatility: int = 0
     trades_in_low_volatility: int = 0
+    
+    def __post_init__(self):
+        """Convert numeric values to Decimal if they aren't already"""
+        if not isinstance(self.win_rate, Decimal):
+            self.win_rate = Decimal(str(self.win_rate))
+        if not isinstance(self.average_win, Decimal):
+            self.average_win = Decimal(str(self.average_win))
+        if not isinstance(self.average_loss, Decimal):
+            self.average_loss = Decimal(str(self.average_loss))
+        if not isinstance(self.largest_win, Decimal):
+            self.largest_win = Decimal(str(self.largest_win))
+        if not isinstance(self.largest_loss, Decimal):
+            self.largest_loss = Decimal(str(self.largest_loss))
+        if not isinstance(self.profit_factor, Decimal):
+            self.profit_factor = Decimal(str(self.profit_factor))
+        if not isinstance(self.expectancy, Decimal):
+            self.expectancy = Decimal(str(self.expectancy))
+        # Convert profit_by_hour and profit_by_day values to Decimal
+        for hour, profit in self.profit_by_hour.items():
+            if not isinstance(profit, Decimal):
+                self.profit_by_hour[hour] = Decimal(str(profit))
+        for day, profit in self.profit_by_day.items():
+            if not isinstance(profit, Decimal):
+                self.profit_by_day[day] = Decimal(str(profit))
 
 
 @dataclass
@@ -111,9 +155,9 @@ class TradeBatch:
         if not self.strategy and self.trades:
             self.strategy = self.trades[0].strategy
         
-        winning_trades = [t for t in self.trades if t.profit_loss and t.profit_loss > 0]
-        losing_trades = [t for t in self.trades if t.profit_loss and t.profit_loss < 0]
-        breakeven_trades = [t for t in self.trades if t.profit_loss == 0]
+        winning_trades = [t for t in self.trades if t.profit_loss and t.profit_loss > Decimal('0')]
+        losing_trades = [t for t in self.trades if t.profit_loss and t.profit_loss < Decimal('0')]
+        breakeven_trades = [t for t in self.trades if t.profit_loss == Decimal('0')]
         
         self.analytics.winning_trades = len(winning_trades)
         self.analytics.losing_trades = len(losing_trades)
@@ -121,27 +165,27 @@ class TradeBatch:
         
         # Calculate win rate
         if self.analytics.total_trades > 0:
-            self.analytics.win_rate = (self.analytics.winning_trades / self.analytics.total_trades) * 100
+            self.analytics.win_rate = (Decimal(str(self.analytics.winning_trades)) / Decimal(str(self.analytics.total_trades))) * Decimal('100')
         
         # Calculate average win/loss
         if winning_trades:
-            self.analytics.average_win = sum(t.profit_loss for t in winning_trades) / len(winning_trades)
+            self.analytics.average_win = sum(t.profit_loss for t in winning_trades) / Decimal(str(len(winning_trades)))
             self.analytics.largest_win = max(t.profit_loss for t in winning_trades)
         
         if losing_trades:
-            self.analytics.average_loss = sum(t.profit_loss for t in losing_trades) / len(losing_trades)
+            self.analytics.average_loss = sum(t.profit_loss for t in losing_trades) / Decimal(str(len(losing_trades)))
             self.analytics.largest_loss = min(t.profit_loss for t in losing_trades)
         
         # Calculate profit factor
         total_profit = sum(t.profit_loss for t in winning_trades)
         total_loss = abs(sum(t.profit_loss for t in losing_trades))
-        self.analytics.profit_factor = total_profit / total_loss if total_loss > 0 else float('inf')
+        self.analytics.profit_factor = total_profit / total_loss if total_loss > Decimal('0') else Decimal('inf')
         
         # Calculate expectancy
         if self.analytics.total_trades > 0:
             self.analytics.expectancy = (
-                (self.analytics.win_rate / 100 * self.analytics.average_win) + 
-                ((1 - self.analytics.win_rate / 100) * self.analytics.average_loss)
+                (self.analytics.win_rate / Decimal('100') * self.analytics.average_win) + 
+                ((Decimal('1') - self.analytics.win_rate / Decimal('100')) * self.analytics.average_loss)
             )
             
         # Calculate holding period
@@ -167,10 +211,10 @@ class TradeBatch:
             # Sum profit by hour and day
             if trade.profit_loss:
                 self.analytics.profit_by_hour[hour] = (
-                    self.analytics.profit_by_hour.get(hour, 0) + trade.profit_loss
+                    self.analytics.profit_by_hour.get(hour, Decimal('0')) + trade.profit_loss
                 )
                 self.analytics.profit_by_day[day] = (
-                    self.analytics.profit_by_day.get(day, 0) + trade.profit_loss
+                    self.analytics.profit_by_day.get(day, Decimal('0')) + trade.profit_loss
                 )
                 
         # Calculate market condition statistics

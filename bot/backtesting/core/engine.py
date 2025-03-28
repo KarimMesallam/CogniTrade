@@ -11,6 +11,8 @@ from pathlib import Path
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import time
+import math
+from decimal import Decimal, getcontext
 
 from bot.backtesting.config.settings import DEFAULT_BACKTEST_SETTINGS, PERFORMANCE_SETTINGS
 from bot.backtesting.data.market_data import MarketData
@@ -20,6 +22,9 @@ from bot.backtesting.exceptions.base import (
     BacktestError, DataError, MissingDataError, InvalidParameterError, 
     StrategyError, TradeExecutionError
 )
+
+# Set Decimal precision
+getcontext().prec = 28
 
 logger = logging.getLogger("trading_bot.backtest")
 
@@ -84,6 +89,10 @@ class BacktestEngine:
             logger.error(f"Error loading market data: {e.message}")
             # Re-raise with more context
             raise DataError(f"Failed to initialize backtest engine: {e.message}", e.details)
+        
+        # Symbol-specific parameters for quantity adjustment
+        self.symbol_info = {}
+        self._load_symbol_info()
     
     def _validate_inputs(self, symbol: str, timeframes: List[str], 
                         start_date: str, end_date: str) -> None:
@@ -621,7 +630,20 @@ class BacktestEngine:
                 signal = strategy_func(data_for_strategy, self.symbol)
                 
                 # Ensure signal is a string and one of the valid values
-                if not isinstance(signal, str) or signal not in ['BUY', 'SELL', 'HOLD']:
+                if isinstance(signal, pd.DataFrame):
+                    # If the strategy returns a DataFrame, it's using the vectorized approach
+                    # but we're in traditional mode - extract just the latest signal
+                    if 'signal' in signal.columns and not signal.empty:
+                        # Get the latest signal (last row)
+                        signal = signal['signal'].iloc[-1]
+                        # Ensure the extracted signal is a valid string
+                        if not isinstance(signal, str) or signal not in ['BUY', 'SELL', 'HOLD']:
+                            logger.warning(f"Invalid signal '{signal}' extracted from DataFrame, using 'HOLD' instead")
+                            signal = 'HOLD'
+                    else:
+                        logger.warning(f"DataFrame returned from strategy doesn't have the expected structure (needs 'signal' column), using 'HOLD' instead")
+                        signal = 'HOLD'
+                elif not isinstance(signal, str) or signal not in ['BUY', 'SELL', 'HOLD']:
                     logger.warning(f"Invalid signal '{signal}' received from strategy, using 'HOLD' instead")
                     signal = 'HOLD'
                 
@@ -690,98 +712,91 @@ class BacktestEngine:
             quantity: Trade quantity
             
         Returns:
-            Trade: Executed trade object
+            Trade object
             
         Raises:
             TradeExecutionError: If trade execution fails
         """
         try:
-            # Validate price to prevent division by zero and unrealistic trades
-            if price <= 0:
-                logger.warning(f"Invalid price {price} detected, using minimum price of 0.01")
-                price = 0.01  # Set minimum valid price
+            # Convert to Decimal for precise calculations
+            price_decimal = Decimal(str(price))
+            quantity_decimal = Decimal(str(quantity))
             
-            # Validate quantity
-            if quantity <= 0:
-                logger.warning(f"Invalid quantity {quantity} detected. Adjusting to minimum.")
-                quantity = 0.01
+            # Calculate trade value and commission
+            trade_value = price_decimal * quantity_decimal
+            commission_amount = trade_value * Decimal(str(self.commission_rate))
             
-            trade_value = price * quantity
-            commission_amount = trade_value * self.commission_rate
-            
+            # Create a new trade
             trade = Trade(
                 symbol=self.symbol,
                 side=side,
                 timestamp=timestamp,
-                price=price,
-                quantity=quantity,
+                price=price_decimal,
+                quantity=quantity_decimal,
                 commission=commission_amount,
                 status="FILLED",
-                raw_data={
-                    'timeframe': self.timeframes[0],
-                    'strategy': getattr(self, 'strategy_name', 'Custom_Strategy')
-                }
+                strategy=getattr(self, 'strategy_name', None),
+                timeframe=self.timeframes[0] if self.timeframes else None
             )
             
+            # Process buy or sell
             if side == 'BUY':
-                # Update position and capital
-                self.position_size = quantity
-                self.current_capital -= (trade_value + commission_amount)
+                # Calculate total cost (including commission)
+                total_cost = trade_value + commission_amount
                 
-                # Validate capital is not negative
-                if self.current_capital < 0:
-                    logger.warning(f"Capital went negative after BUY: {self.current_capital}. Adjusting to minimum.")
-                    self.current_capital = 0.01
+                # Update capital and position
+                self.current_capital -= float(total_cost)
+                self.position_size = float(quantity_decimal)
                 
                 # Set entry point flag
                 trade.entry_point = True
                 trade.entry_time = timestamp
                 
-                # Add market indicators at entry point (if available)
+                # Add market indicators
                 trade.market_indicators = self._get_market_indicators(timestamp)
                 
-                # Record the trade
+                # Add trade to list
                 self.trades.append(trade)
                 
-                logger.debug(f"BUY: {quantity} {self.symbol} at {price} (Value: {trade_value:.2f}, Commission: {commission_amount:.2f})")
+                logger.debug(f"BUY: {quantity} {self.symbol} at {price} (Cost: {float(total_cost):.2f})")
                 
             elif side == 'SELL':
-                # Find matching buy trade
+                # Find matching buy trade for P&L calculation
                 entry_trade = None
                 for t in reversed(self.trades):
                     if t.side == 'BUY' and t.entry_point:
                         entry_trade = t
                         break
                 
+                # Calculate profit/loss with Decimal precision
                 if entry_trade:
-                    # Calculate profit/loss
                     entry_price = entry_trade.price
-                    profit_loss = (price - entry_price) * quantity - commission_amount
+                    entry_commission = entry_trade.commission
                     
-                    # Calculate ROI safely (prevent division by zero)
-                    entry_value = entry_price * quantity
-                    if entry_value > 0:
-                        roi_pct = (profit_loss / entry_value) * 100
-                        
-                        # Clamp ROI to reasonable limits
-                        if abs(roi_pct) > 1000:
-                            logger.warning(f"Extreme ROI value detected: {roi_pct}%. Clamping to ±1000%.")
-                            roi_pct = min(max(roi_pct, -1000), 1000)
+                    # Calculate P&L with full decimal precision
+                    # P&L = (Sell price - Buy price) * Quantity - Total commission
+                    profit_loss = ((price_decimal - entry_price) * quantity_decimal) - (commission_amount + entry_commission)
+                    
+                    # Calculate ROI percentage
+                    entry_value = entry_price * quantity_decimal
+                    if entry_value > Decimal('0'):
+                        roi_pct = (profit_loss / entry_value) * Decimal('100')
                     else:
-                        logger.warning("Entry value is zero or negative, setting ROI to 0")
-                        roi_pct = 0
+                        roi_pct = Decimal('0')
                     
                     # Calculate holding period
                     if entry_trade.timestamp:
                         trade.entry_time = entry_trade.timestamp
                         trade.exit_time = timestamp
+                        
+                        # Calculate hours between timestamps
                         if isinstance(timestamp, pd.Timestamp) and isinstance(entry_trade.timestamp, pd.Timestamp):
                             diff = timestamp - entry_trade.timestamp
                             trade.holding_period_hours = diff.total_seconds() / 3600
                     
-                    # Set profit/loss info
+                    # Set trade properties
                     trade.entry_price = entry_price
-                    trade.exit_price = price
+                    trade.exit_price = price_decimal
                     trade.profit_loss = profit_loss
                     trade.roi_pct = roi_pct
                     
@@ -789,27 +804,33 @@ class BacktestEngine:
                     entry_trade.entry_point = False
                     
                 else:
-                    # No matching entry found (shouldn't happen in normal operation)
-                    logger.warning("No matching BUY entry found for SELL trade")
+                    # No matching entry (shouldn't happen in normal operation)
                     trade.profit_loss = -commission_amount
-                    trade.roi_pct = 0
+                    trade.roi_pct = Decimal('0')
                 
-                # Add market indicators at exit point
+                # Add market indicators
                 trade.market_indicators = self._get_market_indicators(timestamp)
                 
-                # Update position and capital
-                self.current_capital += (trade_value - commission_amount)
-                # Validate capital is not negative
-                if self.current_capital < 0:
-                    logger.warning(f"Capital went negative after SELL: {self.current_capital}. Adjusting to minimum.")
-                    self.current_capital = 0.01
+                # Update capital and position
+                self.current_capital += float(trade_value - commission_amount)
+                self.position_size = 0.0
                 
-                self.position_size = 0
-                
-                # Record the trade
+                # Add trade to list
                 self.trades.append(trade)
                 
-                logger.debug(f"SELL: {quantity} {self.symbol} at {price} (P/L: {trade.profit_loss:.2f}, ROI: {trade.roi_pct:.2f}%)")
+                # Debug log
+                logger.debug(
+                    f"SELL: {quantity} {self.symbol} at {price} "
+                    f"(P/L: {float(trade.profit_loss):.2f}, "
+                    f"ROI: {float(trade.roi_pct):.2f}%)"
+                )
+            
+            # Update equity curve
+            self.equity_curve.append(EquityPoint(
+                timestamp=timestamp,
+                equity=self.current_capital + (self.position_size * float(price)),
+                position_size=self.position_size
+            ))
             
             return trade
             
@@ -1099,6 +1120,89 @@ class BacktestEngine:
         else:
             logger.warning("Optimization failed to find valid parameters")
             raise BacktestError("Optimization failed to find valid parameters")
+    
+    def _load_symbol_info(self) -> None:
+        """
+        Load symbol trading information (minQty, stepSize) from exchange info.
+        Falls back to default values if information cannot be loaded.
+        """
+        try:
+            # Try to get symbol information from an API or database
+            self.symbol_info = self._get_symbol_info(self.symbol)
+        except Exception as e:
+            logger.warning(f"Could not load symbol info: {str(e)}. Using default values.")
+            # Use default values if symbol info cannot be fetched
+            self.symbol_info = {
+                'minQty': 0.001,  # Default minimum quantity
+                'stepSize': 0.001  # Default step size
+            }
+    
+    def _get_symbol_info(self, symbol: str) -> Dict[str, float]:
+        """
+        Fetch symbol trading rules from exchange API or database.
+        
+        Args:
+            symbol: Trading pair symbol
+            
+        Returns:
+            Dictionary containing symbol trading parameters
+        """
+        # This is a placeholder - in a real implementation, this would fetch
+        # from the exchange API or a local database of cached exchange info
+        
+        # Example implementation:
+        # from bot.exchanges.binance import get_exchange_info
+        # exchange_info = get_exchange_info()
+        # symbol_info = next((s for s in exchange_info['symbols'] if s['symbol'] == symbol), None)
+        # if not symbol_info:
+        #     raise ValueError(f"Symbol {symbol} not found in exchange info")
+        
+        # Parse lot size filter
+        # lot_size = next((f for f in symbol_info['filters'] if f['filterType'] == 'LOT_SIZE'), None)
+        # return {
+        #     'minQty': float(lot_size['minQty']),
+        #     'stepSize': float(lot_size['stepSize'])
+        # }
+        
+        # For now, return default values based on common crypto pairs
+        if symbol.endswith('BTC'):
+            return {'minQty': 0.00001, 'stepSize': 0.00001}
+        elif symbol.endswith('ETH'):
+            return {'minQty': 0.0001, 'stepSize': 0.0001}
+        elif symbol.endswith('USDT'):
+            return {'minQty': 0.001, 'stepSize': 0.001}
+        else:
+            return {'minQty': 0.001, 'stepSize': 0.001}
+    
+    def _adjust_quantity(self, quantity: float) -> float:
+        """
+        Adjust the quantity based on exchange rules:
+        1. Ensure it's above the minimum quantity
+        2. Round it to the nearest step size increment
+        
+        Args:
+            quantity: Raw calculated quantity
+            
+        Returns:
+            Adjusted quantity that complies with exchange rules
+        """
+        # Get the trading parameters
+        min_qty = self.symbol_info.get('minQty', 0.001)
+        step_size = self.symbol_info.get('stepSize', 0.001)
+        
+        # Check minimum quantity
+        if quantity < min_qty:
+            logger.warning(f"Quantity {quantity} is below minimum {min_qty}. Adjusting to minimum.")
+            return min_qty
+        
+        # Round to the nearest step size increment
+        precision = int(round(-math.log10(step_size)))
+        adjusted_quantity = round(math.floor(quantity / step_size) * step_size, precision)
+        
+        if adjusted_quantity != quantity:
+            logger.debug(f"Adjusted quantity from {quantity} to {adjusted_quantity} based on step size {step_size}")
+        
+        return adjusted_quantity
 
 
 class MultiSymbolBacktester:

@@ -709,6 +709,59 @@ The improved decision-making process now includes:
 5. **Consensus Determination** - Apply the selected consensus method to reach a final decision
 6. **Order Execution** - Execute trades based on the consensus decision and configuration parameters
 
+## Enhanced Precision with Decimal Type
+
+CogniTrade now uses Python's `Decimal` type for critical financial calculations to ensure maximum precision and accuracy:
+
+### Benefits of Decimal Implementation
+
+1. **Precise Financial Calculations:** The `Decimal` type eliminates floating-point precision issues that can accumulate in trading operations, particularly with:
+   - Transaction amounts
+   - Profit/loss calculations 
+   - Position sizing
+   - Commission and fee calculations
+   - Performance metrics
+
+2. **Implementation Areas:**
+   - `OrderManager`: Uses `Decimal` for calculating trade values, commissions, and profit/loss
+   - `Trade` model: Stores financial values as `Decimal` objects
+   - `BacktestEngine`: Performs P&L calculations with `Decimal` precision 
+   - `TradeAnalytics`: Aggregates performance metrics using `Decimal`
+
+3. **Compatibility:**
+   - Core financial calculations use `Decimal`
+   - Values are converted to/from float at API/database boundaries
+   - Implementation is transparent to most user-facing code
+
+4. **When to Use `Decimal`:**
+   - Always for transaction amounts and P&L calculations
+   - Required for high-frequency trading where tiny errors can accumulate
+   - Essential when dealing with very large capital amounts
+   - Recommended for any calculation where financial precision is critical
+
+### Code Example
+
+```python
+from decimal import Decimal, getcontext
+
+# Set precision
+getcontext().prec = 28
+
+# Calculate trade value with exact precision
+price = Decimal('1234.56789')
+quantity = Decimal('0.12345678')
+commission_rate = Decimal('0.001')  # 0.1%
+
+# Precise calculations
+trade_value = price * quantity
+commission = trade_value * commission_rate
+total_cost = trade_value + commission
+
+print(f"Trade value: {trade_value}")
+print(f"Commission: {commission}")
+print(f"Total cost: {total_cost}")
+```
+
 ## Future Improvements
 
 - **Advanced Trading Strategies:** Implement additional strategies beyond the basic examples.

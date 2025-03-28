@@ -3,6 +3,7 @@ import json
 import os
 import uuid
 from datetime import datetime
+from decimal import Decimal, getcontext
 from bot.binance_api import (
     get_order_status, get_open_orders, cancel_order, 
     place_market_buy, place_market_sell, 
@@ -31,10 +32,13 @@ class OrderManager:
             use_database: Whether to use database for storage (in addition to JSON files)
         """
         self.symbol = symbol
-        self.risk_percentage = risk_percentage
+        self.risk_percentage = Decimal(str(risk_percentage))
         self.active_orders = {}
         self.order_history = []
         self.use_database = use_database
+        
+        # Set Decimal precision
+        getcontext().prec = 28
         
         # Initialize database integration if enabled
         if self.use_database:
@@ -121,7 +125,7 @@ class OrderManager:
                     "trade_id": trade_id,
                     "symbol": self.symbol,
                     "side": order.get("side"),
-                    "quantity": float(order.get("origQty", 0)),
+                    "quantity": float(order.get("origQty", 0)),  # Keep as float for database
                     "timestamp": timestamp,
                     "order_id": str(order.get("orderId")),
                     "status": status,
@@ -133,22 +137,25 @@ class OrderManager:
                 # For market orders, calculate the average price from fills
                 price = order.get("price")
                 if (not price or price == "0.00000000") and order.get("fills"):
-                    total_cost = sum(float(fill["price"]) * float(fill["qty"]) for fill in order["fills"])
-                    total_qty = sum(float(fill["qty"]) for fill in order["fills"])
-                    if total_qty > 0:
+                    # Use Decimal for precision calculations
+                    total_cost = sum(Decimal(str(fill["price"])) * Decimal(str(fill["qty"])) for fill in order["fills"])
+                    total_qty = sum(Decimal(str(fill["qty"])) for fill in order["fills"])
+                    if total_qty > Decimal('0'):
                         avg_price = total_cost / total_qty
-                        db_trade_data["price"] = avg_price
+                        db_trade_data["price"] = float(avg_price)  # Convert back to float for database
                 else:
                     db_trade_data["price"] = float(price) if price else 0.0
                 
                 # Calculate profit/loss if possible
                 if order.get("fills"):
-                    total_cost = sum(float(fill["price"]) * float(fill["qty"]) for fill in order["fills"])
-                    total_qty = sum(float(fill["qty"]) for fill in order["fills"])
-                    if total_qty > 0:
+                    # Use Decimal for precision calculations
+                    total_cost = sum(Decimal(str(fill["price"])) * Decimal(str(fill["qty"])) for fill in order["fills"])
+                    total_qty = sum(Decimal(str(fill["qty"])) for fill in order["fills"])
+                    if total_qty > Decimal('0'):
                         # Add execution time and fees
                         db_trade_data["execution_time"] = order.get("transactTime", 0)
-                        db_trade_data["fees"] = sum(float(fill.get("commission", 0)) for fill in order["fills"])
+                        # Use Decimal for commission calculations
+                        db_trade_data["fees"] = float(sum(Decimal(str(fill.get("commission", 0))) for fill in order["fills"]))
                 
                 # Save or update in database
                 self.db.save_trade(db_trade_data)
@@ -170,7 +177,10 @@ class OrderManager:
         try:
             # If quantity is not provided, calculate it from quote_amount
             if quantity is None and quote_amount is not None:
-                quantity = calculate_order_quantity(self.symbol, quote_amount)
+                # Convert to Decimal if provided
+                if quote_amount is not None:
+                    quote_amount = Decimal(str(quote_amount))
+                quantity = calculate_order_quantity(self.symbol, float(quote_amount))  # API expects float
                 if quantity is None:
                     logger.error(f"Failed to calculate quantity for {self.symbol} with {quote_amount}")
                     return None
