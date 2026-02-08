@@ -14,10 +14,18 @@ import time
 import math
 from decimal import Decimal, getcontext
 
-from bot.backtesting.config.settings import DEFAULT_BACKTEST_SETTINGS, PERFORMANCE_SETTINGS
+from bot.backtesting.config.settings import (
+    DEFAULT_BACKTEST_SETTINGS,
+    PERFORMANCE_SETTINGS,
+    EXECUTION_SIMULATION_SETTINGS,
+)
 from bot.backtesting.data.market_data import MarketData
 from bot.backtesting.models.trade import Trade, TradeBatch
 from bot.backtesting.models.results import EquityPoint, BacktestResult, OptimizationResult
+from bot.backtesting.models.execution import (
+    ExecutionSimulationConfig,
+    ExecutionSimulator,
+)
 from bot.backtesting.exceptions.base import (
     BacktestError, DataError, MissingDataError, InvalidParameterError, 
     StrategyError, TradeExecutionError
@@ -35,10 +43,18 @@ class BacktestEngine:
     Optimized for performance and error handling.
     """
     
-    def __init__(self, symbol: str, timeframes: List[str], start_date: str, 
-                 end_date: str, initial_capital: float = None, 
-                 commission_rate: float = None, db_path: str = None,
-                 position_size_pct: float = None):
+    def __init__(
+        self,
+        symbol: str,
+        timeframes: List[str],
+        start_date: str,
+        end_date: str,
+        initial_capital: float = None,
+        commission_rate: float = None,
+        db_path: str = None,
+        position_size_pct: float = None,
+        execution_simulation: Optional[Dict[str, Any]] = None,
+    ):
         """
         Initialize the backtesting engine with parameters.
         
@@ -68,6 +84,12 @@ class BacktestEngine:
         self.initial_capital = initial_capital or DEFAULT_BACKTEST_SETTINGS['initial_capital']
         self.commission_rate = commission_rate or DEFAULT_BACKTEST_SETTINGS['commission_rate']
         self.position_size_pct = position_size_pct or DEFAULT_BACKTEST_SETTINGS['position_size_pct']
+
+        execution_config_values = dict(EXECUTION_SIMULATION_SETTINGS)
+        if execution_simulation:
+            execution_config_values.update(execution_simulation)
+        self.execution_config = ExecutionSimulationConfig(**execution_config_values)
+        self.execution_simulator = ExecutionSimulator(self.execution_config)
         
         # Initialize market data manager
         self.data_manager = MarketData(db_path)
@@ -232,6 +254,11 @@ class BacktestEngine:
             
             # Use vectorized operations if enabled
             use_vectorized = PERFORMANCE_SETTINGS.get('use_vectorized_operations', True)
+            if self.execution_config.enabled and use_vectorized:
+                logger.info(
+                    "Execution simulation is enabled; using traditional backtest mode for realistic fills."
+                )
+                use_vectorized = False
             
             if use_vectorized and self._can_use_vectorized_backtest(strategy_func):
                 # Vectorized backtesting for better performance
@@ -701,6 +728,27 @@ class BacktestEngine:
             logger.error(f"Error processing signal {signal}: {str(e)}", exc_info=True)
             raise TradeExecutionError(f"Failed to process signal: {str(e)}")
     
+    def _get_primary_candle_volume(self, timestamp: datetime) -> Optional[Decimal]:
+        """
+        Get the latest known primary-timeframe candle volume at or before timestamp.
+        """
+        primary_tf = self.timeframes[0] if self.timeframes else None
+        if not primary_tf or primary_tf not in self.market_data:
+            return None
+
+        df = self.market_data[primary_tf]
+        if 'volume' not in df.columns:
+            return None
+
+        candle_rows = df[df['timestamp'] <= timestamp]
+        if candle_rows.empty:
+            return None
+
+        volume_value = candle_rows.iloc[-1]['volume']
+        if pd.isna(volume_value):
+            return None
+        return Decimal(str(volume_value))
+
     def _execute_trade(self, side: str, timestamp: datetime, price: float, quantity: float) -> Trade:
         """
         Execute a simulated trade.
@@ -718,122 +766,174 @@ class BacktestEngine:
             TradeExecutionError: If trade execution fails
         """
         try:
-            # Convert to Decimal for precise calculations
+            side = side.upper()
             price_decimal = Decimal(str(price))
-            quantity_decimal = Decimal(str(quantity))
-            
-            # Calculate trade value and commission
-            trade_value = price_decimal * quantity_decimal
-            commission_amount = trade_value * Decimal(str(self.commission_rate))
-            
-            # Create a new trade
+            requested_quantity = Decimal(str(quantity))
+
+            if requested_quantity <= 0:
+                raise TradeExecutionError("Requested quantity must be positive")
+
+            candle_volume = self._get_primary_candle_volume(timestamp)
+            execution_fill = self.execution_simulator.simulate_fill(
+                side=side,
+                reference_price=price_decimal,
+                requested_quantity=requested_quantity,
+                candle_volume=candle_volume,
+            )
+            executed_price = execution_fill.executed_price
+            executed_quantity = execution_fill.executed_quantity
+
+            if side == 'SELL':
+                executed_quantity = min(executed_quantity, Decimal(str(self.position_size)))
+
+            if executed_quantity <= 0:
+                raise TradeExecutionError("Execution simulation produced zero filled quantity")
+
+            trade_value = executed_price * executed_quantity
+            commission_rate_dec = Decimal(str(self.commission_rate))
+            commission_amount = trade_value * commission_rate_dec
+
             trade = Trade(
                 symbol=self.symbol,
                 side=side,
                 timestamp=timestamp,
-                price=price_decimal,
-                quantity=quantity_decimal,
+                price=executed_price,
+                quantity=executed_quantity,
+                requested_quantity=requested_quantity,
+                fill_ratio=execution_fill.fill_ratio,
                 commission=commission_amount,
+                spread_cost=execution_fill.spread_cost,
+                slippage_cost=execution_fill.slippage_cost,
+                latency_cost=execution_fill.latency_cost,
+                funding_cost=Decimal('0'),
                 status="FILLED",
                 strategy=getattr(self, 'strategy_name', None),
-                timeframe=self.timeframes[0] if self.timeframes else None
+                timeframe=self.timeframes[0] if self.timeframes else None,
+                raw_data={
+                    "requested_quantity": float(requested_quantity),
+                    "filled_quantity": float(executed_quantity),
+                    "fill_ratio": float(execution_fill.fill_ratio),
+                    "execution": {
+                        "spread_cost": float(execution_fill.spread_cost),
+                        "slippage_cost": float(execution_fill.slippage_cost),
+                        "latency_cost": float(execution_fill.latency_cost),
+                    },
+                }
             )
-            
-            # Process buy or sell
+
             if side == 'BUY':
-                # Calculate total cost (including commission)
                 total_cost = trade_value + commission_amount
-                
-                # Update capital and position
                 self.current_capital -= float(total_cost)
-                self.position_size = float(quantity_decimal)
-                
-                # Set entry point flag
+                self.position_size = float(executed_quantity)
+
                 trade.entry_point = True
                 trade.entry_time = timestamp
-                
-                # Add market indicators
                 trade.market_indicators = self._get_market_indicators(timestamp)
-                
-                # Add trade to list
+                trade.raw_data["remaining_quantity"] = float(executed_quantity)
+                trade.raw_data["remaining_entry_commission"] = float(commission_amount)
                 self.trades.append(trade)
-                
-                logger.debug(f"BUY: {quantity} {self.symbol} at {price} (Cost: {float(total_cost):.2f})")
-                
+
+                logger.debug(
+                    "BUY: requested=%s filled=%s %s at %s (Cost: %.2f)",
+                    requested_quantity,
+                    executed_quantity,
+                    self.symbol,
+                    executed_price,
+                    float(total_cost),
+                )
+
             elif side == 'SELL':
-                # Find matching buy trade for P&L calculation
                 entry_trade = None
-                for t in reversed(self.trades):
-                    if t.side == 'BUY' and t.entry_point:
-                        entry_trade = t
+                for existing_trade in reversed(self.trades):
+                    if existing_trade.side == 'BUY' and existing_trade.entry_point:
+                        entry_trade = existing_trade
                         break
-                
-                # Calculate profit/loss with Decimal precision
+
+                funding_cost = Decimal('0')
+                if entry_trade and entry_trade.timestamp and isinstance(timestamp, pd.Timestamp) and isinstance(entry_trade.timestamp, pd.Timestamp):
+                    holding_hours = (timestamp - entry_trade.timestamp).total_seconds() / 3600
+                    funding_cost = self.execution_simulator.estimate_funding_cost(
+                        notional=entry_trade.price * executed_quantity,
+                        holding_hours=holding_hours,
+                        position_side="LONG",
+                    )
+                    trade.holding_period_hours = holding_hours
+                trade.funding_cost = funding_cost
+
                 if entry_trade:
                     entry_price = entry_trade.price
-                    entry_commission = entry_trade.commission
-                    
-                    # Calculate P&L with full decimal precision
-                    # P&L = (Sell price - Buy price) * Quantity - Total commission
-                    profit_loss = ((price_decimal - entry_price) * quantity_decimal) - (commission_amount + entry_commission)
-                    
-                    # Calculate ROI percentage
-                    entry_value = entry_price * quantity_decimal
+                    remaining_qty = Decimal(
+                        str(entry_trade.raw_data.get("remaining_quantity", entry_trade.quantity))
+                    )
+                    remaining_entry_commission = Decimal(
+                        str(entry_trade.raw_data.get("remaining_entry_commission", entry_trade.commission))
+                    )
+
+                    if remaining_qty > 0 and executed_quantity > remaining_qty:
+                        executed_quantity = remaining_qty
+                        trade.quantity = executed_quantity
+                        trade_value = executed_price * executed_quantity
+                        commission_amount = trade_value * commission_rate_dec
+                        trade.commission = commission_amount
+
+                    if remaining_qty > 0:
+                        entry_commission_alloc = remaining_entry_commission * (executed_quantity / remaining_qty)
+                    else:
+                        entry_commission_alloc = Decimal('0')
+
+                    profit_loss = (
+                        (executed_price - entry_price) * executed_quantity
+                    ) - (commission_amount + entry_commission_alloc + funding_cost)
+
+                    entry_value = entry_price * executed_quantity
                     if entry_value > Decimal('0'):
                         roi_pct = (profit_loss / entry_value) * Decimal('100')
                     else:
                         roi_pct = Decimal('0')
-                    
-                    # Calculate holding period
-                    if entry_trade.timestamp:
-                        trade.entry_time = entry_trade.timestamp
-                        trade.exit_time = timestamp
-                        
-                        # Calculate hours between timestamps
-                        if isinstance(timestamp, pd.Timestamp) and isinstance(entry_trade.timestamp, pd.Timestamp):
-                            diff = timestamp - entry_trade.timestamp
-                            trade.holding_period_hours = diff.total_seconds() / 3600
-                    
-                    # Set trade properties
+
                     trade.entry_price = entry_price
-                    trade.exit_price = price_decimal
+                    trade.exit_price = executed_price
                     trade.profit_loss = profit_loss
                     trade.roi_pct = roi_pct
-                    
-                    # Mark the entry trade as closed
-                    entry_trade.entry_point = False
-                    
+                    trade.entry_time = entry_trade.timestamp
+                    trade.exit_time = timestamp
+
+                    new_remaining_qty = max(Decimal('0'), remaining_qty - executed_quantity)
+                    new_remaining_commission = max(
+                        Decimal('0'),
+                        remaining_entry_commission - entry_commission_alloc
+                    )
+                    entry_trade.raw_data["remaining_quantity"] = float(new_remaining_qty)
+                    entry_trade.raw_data["remaining_entry_commission"] = float(new_remaining_commission)
+                    if new_remaining_qty <= Decimal('0'):
+                        entry_trade.entry_point = False
                 else:
-                    # No matching entry (shouldn't happen in normal operation)
-                    trade.profit_loss = -commission_amount
+                    trade.profit_loss = -(commission_amount + funding_cost)
                     trade.roi_pct = Decimal('0')
-                
-                # Add market indicators
+
                 trade.market_indicators = self._get_market_indicators(timestamp)
-                
-                # Update capital and position
-                self.current_capital += float(trade_value - commission_amount)
-                self.position_size = 0.0
-                
-                # Add trade to list
+                self.current_capital += float(trade_value - commission_amount - funding_cost)
+                self.position_size = max(0.0, self.position_size - float(executed_quantity))
                 self.trades.append(trade)
-                
-                # Debug log
+
                 logger.debug(
-                    f"SELL: {quantity} {self.symbol} at {price} "
-                    f"(P/L: {float(trade.profit_loss):.2f}, "
-                    f"ROI: {float(trade.roi_pct):.2f}%)"
+                    "SELL: requested=%s filled=%s %s at %s (P/L: %.2f, ROI: %.2f%%)",
+                    requested_quantity,
+                    executed_quantity,
+                    self.symbol,
+                    executed_price,
+                    float(trade.profit_loss or Decimal('0')),
+                    float(trade.roi_pct or Decimal('0')),
                 )
-            
-            # Update equity curve
+
             self.equity_curve.append(EquityPoint(
                 timestamp=timestamp,
                 equity=self.current_capital + (self.position_size * float(price)),
                 position_size=self.position_size
             ))
-            
+
             return trade
-            
+
         except Exception as e:
             logger.error(f"Error executing {side} trade: {str(e)}", exc_info=True)
             raise TradeExecutionError(f"Failed to execute {side} trade: {str(e)}")

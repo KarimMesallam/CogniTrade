@@ -1,7 +1,9 @@
 import time
 import logging
 from datetime import datetime
+from typing import Dict, Any, Optional
 from binance.exceptions import BinanceAPIException, BinanceRequestException
+import pandas as pd
 from bot.config import (
     SYMBOL, TESTNET, TRADING_CONFIG, 
     get_trading_parameter, get_loop_interval, 
@@ -12,6 +14,7 @@ from bot.binance_api import place_market_buy, place_market_sell, client, get_rec
 from bot.llm_manager import get_decision_from_llm, log_decision_with_context, LLMManager
 from bot.order_manager import OrderManager
 from bot.db_integration import DatabaseIntegration
+from bot.portfolio import PortfolioOptimizer, PortfolioConstraints, PortfolioAllocationResult
 import json
 import uuid
 import asyncio
@@ -30,6 +33,44 @@ logger = logging.getLogger("trading_bot")
 
 # Set this to True when running tests to bypass sleeps
 TESTING_MODE = os.environ.get('TESTING_MODE', '0') == '1'
+
+
+def optimize_portfolio_from_returns(
+    asset_returns: Dict[str, list],
+    method: str = "risk_parity",
+    risk_budgets: Optional[Dict[str, float]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> PortfolioAllocationResult:
+    """
+    Build a constrained multi-asset allocation from historical return series.
+    """
+    returns_df = pd.DataFrame(asset_returns)
+    optimizer = PortfolioOptimizer(
+        PortfolioConstraints(**(constraints or {}))
+    )
+    return optimizer.optimize(
+        returns=returns_df,
+        method=method,
+        risk_budgets=risk_budgets,
+    )
+
+
+def build_portfolio_targets(
+    total_capital: float,
+    allocation: PortfolioAllocationResult,
+    latest_prices: Dict[str, float],
+    min_notional: float = 0.0,
+) -> Dict[str, Dict[str, float]]:
+    """
+    Convert optimized weights into per-asset notional and unit targets.
+    """
+    optimizer = PortfolioOptimizer()
+    return optimizer.allocate_units(
+        total_capital=total_capital,
+        weights=allocation.weights,
+        prices=latest_prices,
+        min_notional=min_notional,
+    )
 
 def handle_testnet_balance(symbol='BTC'):
     """

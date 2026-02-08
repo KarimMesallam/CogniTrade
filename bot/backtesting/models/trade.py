@@ -28,6 +28,14 @@ class Trade:
     exit_price: Optional[Decimal] = None
     profit_loss: Optional[Decimal] = None
     roi_pct: Optional[Decimal] = None
+
+    # Execution simulation fields
+    requested_quantity: Optional[Decimal] = None
+    fill_ratio: Optional[Decimal] = None
+    spread_cost: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    slippage_cost: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    latency_cost: Decimal = field(default_factory=lambda: Decimal('0.0'))
+    funding_cost: Decimal = field(default_factory=lambda: Decimal('0.0'))
     
     # For advanced analysis
     entry_time: Optional[datetime] = None
@@ -61,6 +69,18 @@ class Trade:
             self.profit_loss = Decimal(str(self.profit_loss))
         if self.roi_pct is not None and not isinstance(self.roi_pct, Decimal):
             self.roi_pct = Decimal(str(self.roi_pct))
+        if self.requested_quantity is not None and not isinstance(self.requested_quantity, Decimal):
+            self.requested_quantity = Decimal(str(self.requested_quantity))
+        if self.fill_ratio is not None and not isinstance(self.fill_ratio, Decimal):
+            self.fill_ratio = Decimal(str(self.fill_ratio))
+        if not isinstance(self.spread_cost, Decimal):
+            self.spread_cost = Decimal(str(self.spread_cost))
+        if not isinstance(self.slippage_cost, Decimal):
+            self.slippage_cost = Decimal(str(self.slippage_cost))
+        if not isinstance(self.latency_cost, Decimal):
+            self.latency_cost = Decimal(str(self.latency_cost))
+        if not isinstance(self.funding_cost, Decimal):
+            self.funding_cost = Decimal(str(self.funding_cost))
     
     @property
     def value(self) -> Decimal:

@@ -77,6 +77,17 @@ PERFORMANCE_SETTINGS = {
     "chunk_size": 10000,  # For processing large datasets in chunks
 }
 
+# Execution simulation settings (disabled by default for backward compatibility)
+EXECUTION_SIMULATION_SETTINGS = {
+    "enabled": False,
+    "spread_bps": 0.0,
+    "slippage_bps": 0.0,
+    "latency_bps": 0.0,
+    "max_volume_participation": 1.0,
+    "min_partial_fill_ratio": 0.0,
+    "funding_rate_per_8h": 0.0,
+}
+
 def get_config() -> Dict[str, Any]:
     """
     Returns the complete configuration dictionary.
@@ -92,6 +103,7 @@ def get_config() -> Dict[str, Any]:
         "report": REPORT_SETTINGS,
         "logging": LOGGING_CONFIG,
         "performance": PERFORMANCE_SETTINGS,
+        "execution_simulation": EXECUTION_SIMULATION_SETTINGS,
         "paths": {
             "base_dir": str(BASE_DIR),
             "output_dir": str(OUTPUT_DIR),
@@ -115,6 +127,7 @@ def update_config(section: str, key: str, value: Any) -> None:
         "report": REPORT_SETTINGS,
         "logging": LOGGING_CONFIG,
         "performance": PERFORMANCE_SETTINGS,
+        "execution_simulation": EXECUTION_SIMULATION_SETTINGS,
     }
     
     if section in config_map and key in config_map[section]:

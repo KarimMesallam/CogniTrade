@@ -2,6 +2,45 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-08 (Session 13)
+
+- Session objective: execute `P2-03` and `P2-04` with implementation and test-backed evidence.
+- Completed:
+1. Added execution simulation module `bot/backtesting/models/execution.py` for spread/slippage/latency costs, deterministic partial fills, and funding estimation.
+2. Added execution simulation configuration in `bot/backtesting/config/settings.py` with safe default `enabled=False`.
+3. Integrated execution simulation into `BacktestEngine` (`bot/backtesting/core/engine.py`) and forced traditional mode when simulation is enabled to avoid vectorized/realism mismatch.
+4. Extended trade model (`bot/backtesting/models/trade.py`) with execution/fill/funding fields for auditability.
+5. Added portfolio optimization module `bot/portfolio.py` with constrained `risk_parity` and `mean_variance` allocation, risk contributions, and unit/notional allocation helpers.
+6. Added portfolio helper functions in `bot/main.py` (`optimize_portfolio_from_returns`, `build_portfolio_targets`) for app-level integration.
+7. Added targeted test suites:
+   - `tests/test_execution_simulation.py`
+   - `tests/test_portfolio.py`
+8. Updated tracker statuses for `P2-03` and `P2-04` to `done`.
+- Files changed:
+1. `bot/backtesting/models/execution.py`
+2. `bot/backtesting/config/settings.py`
+3. `bot/backtesting/core/engine.py`
+4. `bot/backtesting/models/trade.py`
+5. `bot/portfolio.py`
+6. `bot/main.py`
+7. `tests/test_execution_simulation.py`
+8. `tests/test_portfolio.py`
+9. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+10. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_execution_simulation.py -v`
+2. `venv/bin/pytest tests/test_portfolio.py -v`
+3. `venv/bin/pytest tests/test_backtesting.py -v`
+4. `venv/bin/pytest tests/test_vectorized_backtesting.py -v`
+5. `venv/bin/pytest -q`
+- Result summary:
+1. Execution simulation suite passed (`4 passed`).
+2. Portfolio optimizer suite passed (`4 passed`).
+3. Backtesting regression suites passed (`14 passed` + `6 passed`).
+4. Full regression passed (`182 passed, 3 skipped`).
+- Open blockers:
+1. None for `P2-03` and `P2-04`.
+
 ## 2026-02-08 (Session 12)
 
 - Session objective: execute `P1-03` and `P1-04` with implementation and test-backed evidence.
