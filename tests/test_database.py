@@ -57,6 +57,9 @@ def test_database_initialization():
         assert "market_data" in tables
         assert "alerts" in tables
         assert "regime_state" in tables
+        assert "feature_snapshots" in tables
+        assert "risk_state" in tables
+        assert "reconciliation_events" in tables
     
     # Cleanup
     if os.path.exists(TEST_DB_PATH):
@@ -289,6 +292,81 @@ def test_insert_and_get_latest_regime_state(test_db):
     assert latest["regime"] == "BEAR"
     assert latest["confidence"] == 0.78
     assert latest["details"]["iteration"] == 2
+
+
+def test_insert_and_get_feature_snapshot_asof(test_db):
+    decision_ts = datetime(2026, 2, 8, 12, 0, 0).isoformat()
+    rows = [
+        {
+            "symbol": "BTCUSDT",
+            "timeframe": "1m",
+            "decision_timestamp": decision_ts,
+            "feature_name": "close_last",
+            "feature_value": 100.0,
+            "feature_timestamp": decision_ts,
+            "available_timestamp": decision_ts,
+            "provenance": {"source": "unit-test"},
+        },
+        {
+            "symbol": "BTCUSDT",
+            "timeframe": "1m",
+            "decision_timestamp": decision_ts,
+            "feature_name": "return_1",
+            "feature_value": 0.01,
+            "feature_timestamp": decision_ts,
+            "available_timestamp": decision_ts,
+            "provenance": {"source": "unit-test"},
+        },
+    ]
+    inserted = test_db.insert_feature_snapshots(rows)
+    assert inserted >= 2
+
+    asof_rows = test_db.get_feature_snapshot_asof("BTCUSDT", "1m", decision_ts)
+    assert len(asof_rows) == 2
+    assert {row["feature_name"] for row in asof_rows} == {"close_last", "return_1"}
+    assert test_db.find_feature_leakage_violations("BTCUSDT", "1m") == []
+
+
+def test_insert_and_get_latest_risk_state(test_db):
+    snapshot = {
+        "timestamp": "2026-02-08T12:00:00",
+        "equity_usd": 1000.0,
+        "peak_equity_usd": 1100.0,
+        "gross_exposure_usd": 200.0,
+        "drawdown_pct": 9.1,
+        "daily_pnl_usd": -25.0,
+        "kill_switch_active": False,
+        "kill_switch_reason": None,
+    }
+    assert test_db.insert_risk_state(snapshot) is True
+
+    latest = test_db.get_latest_risk_state()
+    assert latest is not None
+    assert latest["equity_usd"] == 1000.0
+    assert latest["drawdown_pct"] == 9.1
+    assert latest["kill_switch_active"] is False
+
+
+def test_insert_and_get_reconciliation_events(test_db):
+    report = {
+        "symbol": "BTCUSDT",
+        "trade_mode": "SPOT",
+        "reconciled_at": "2026-02-08T12:10:00",
+        "local_active_count": 2,
+        "exchange_open_count": 3,
+        "stale_local_order_ids": ["1"],
+        "missing_local_order_ids": ["3"],
+        "synced_local_order_ids": ["2"],
+        "position_mismatch": True,
+        "position_delta": 0.001,
+        "details": {"source": "unit-test"},
+    }
+    assert test_db.insert_reconciliation_event(report) is True
+
+    events = test_db.get_recent_reconciliation_events(symbol="BTCUSDT", limit=5)
+    assert len(events) == 1
+    assert events[0]["position_mismatch"] is True
+    assert events[0]["missing_local_order_ids"] == ["3"]
 
 
 def test_store_and_get_market_data(test_db):

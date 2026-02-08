@@ -393,6 +393,62 @@ class TestDatabaseIntegration:
             )
             assert success is False
 
+    def test_save_feature_snapshots_and_query_asof(self, db_integration):
+        decision_ts = "2026-02-08T12:00:00"
+        rows = [
+            {
+                "symbol": "BTCUSDT",
+                "timeframe": "1m",
+                "decision_timestamp": decision_ts,
+                "feature_name": "close_last",
+                "feature_value": 50000.0,
+                "feature_timestamp": decision_ts,
+                "available_timestamp": decision_ts,
+                "provenance": {"source": "test"},
+            }
+        ]
+        inserted = db_integration.save_feature_snapshots(rows)
+        assert inserted >= 1
+
+        asof_rows = db_integration.get_feature_snapshot_asof("BTCUSDT", "1m", decision_ts)
+        assert len(asof_rows) == 1
+        assert asof_rows[0]["feature_name"] == "close_last"
+
+    def test_save_and_get_latest_risk_state(self, db_integration):
+        snapshot = {
+            "timestamp": "2026-02-08T12:00:00",
+            "equity_usd": 1000.0,
+            "peak_equity_usd": 1100.0,
+            "gross_exposure_usd": 300.0,
+            "drawdown_pct": 9.09,
+            "daily_pnl_usd": -10.0,
+            "kill_switch_active": False,
+            "kill_switch_reason": None,
+        }
+        assert db_integration.save_risk_state(snapshot) is True
+        latest = db_integration.get_latest_risk_state()
+        assert latest is not None
+        assert latest["equity_usd"] == 1000.0
+
+    def test_save_and_get_recent_reconciliation_events(self, db_integration):
+        report = {
+            "symbol": "BTCUSDT",
+            "trade_mode": "SPOT",
+            "reconciled_at": "2026-02-08T12:15:00",
+            "local_active_count": 1,
+            "exchange_open_count": 2,
+            "stale_local_order_ids": ["10"],
+            "missing_local_order_ids": ["20"],
+            "synced_local_order_ids": [],
+            "position_mismatch": False,
+            "position_delta": 0.0,
+            "details": {"source": "test"},
+        }
+        assert db_integration.save_reconciliation_event(report) is True
+        events = db_integration.get_recent_reconciliation_events(symbol="BTCUSDT", limit=5)
+        assert len(events) >= 1
+        assert events[0]["symbol"] == "BTCUSDT"
+
     # Mock tests
     def test_save_signal_with_mock(self, mock_db):
         """Test saving a signal using a mock database."""

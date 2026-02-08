@@ -8,16 +8,27 @@ from bot.config import (
     SYMBOL, TESTNET, TRADING_CONFIG, 
     get_trading_parameter, get_loop_interval, 
     get_consensus_method, is_llm_agreement_required, is_live_trading_enabled,
-    get_trade_mode, is_futures_short_enabled, get_regime_config, get_policy_config
+    get_trade_mode, is_futures_short_enabled, get_regime_config, get_policy_config,
+    get_data_pipeline_config, get_risk_engine_config, get_reconciliation_config
 )
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
-from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
+from bot.binance_api import (
+    place_market_buy,
+    place_market_sell,
+    client,
+    get_recent_closes,
+    synchronize_time,
+    get_account_balance,
+    get_futures_mark_price,
+)
 from bot.llm_manager import get_decision_from_llm, log_decision_with_context, LLMManager
 from bot.order_manager import OrderManager
 from bot.db_integration import DatabaseIntegration
 from bot.portfolio import PortfolioOptimizer, PortfolioConstraints, PortfolioAllocationResult
 from bot.regime import MarketRegimeDetector, RegimeState, REGIME_UNKNOWN
 from bot.policy import RegimePolicyEngine, PolicyDecision
+from bot.data_pipeline import PointInTimeDataPipeline, find_lookahead_violations
+from bot.risk_engine import LiveRiskEngine
 import json
 import uuid
 import asyncio
@@ -115,6 +126,67 @@ def handle_testnet_balance(symbol='BTC'):
     except Exception as e:
         logger.error(f"Error checking testnet balance: {e}")
         return False
+
+
+def _extract_last_price_from_market_data(market_data: Dict[str, Any], symbol: str) -> Optional[float]:
+    """Best-effort last-trade/close price extraction from market payload."""
+    candles = (market_data or {}).get("candles") or []
+    if candles:
+        last = candles[-1]
+        try:
+            if isinstance(last, (list, tuple)) and len(last) > 4:
+                return float(last[4])
+            if isinstance(last, dict) and "close" in last:
+                return float(last["close"])
+        except Exception:
+            pass
+
+    try:
+        ticker = client.get_symbol_ticker(symbol=symbol)
+        if ticker and "price" in ticker:
+            return float(ticker["price"])
+    except Exception:
+        pass
+
+    return None
+
+
+def estimate_portfolio_risk_state(
+    symbol: str,
+    market_data: Dict[str, Any],
+    order_manager: OrderManager,
+    trade_mode: str,
+) -> Dict[str, float]:
+    """
+    Estimate live portfolio equity and gross exposure for hard risk checks.
+    """
+    price = _extract_last_price_from_market_data(market_data, symbol) or 0.0
+    quote_asset = getattr(order_manager, "quote_asset", "USDT") or "USDT"
+    base_asset = getattr(order_manager, "base_asset", symbol.replace("USDT", ""))
+
+    if trade_mode == "FUTURES":
+        quote_balance = get_account_balance(quote_asset) or get_account_balance("USDT") or {}
+        equity_usd = float(quote_balance.get("total", quote_balance.get("free", 0.0)) or 0.0)
+        position_qty = order_manager.get_position_quantity()
+        mark_price = get_futures_mark_price(symbol) or price or 0.0
+        gross_exposure_usd = abs(float(position_qty or 0.0)) * float(mark_price)
+        return {
+            "equity_usd": float(equity_usd),
+            "gross_exposure_usd": float(gross_exposure_usd),
+            "reference_price": float(mark_price),
+        }
+
+    quote_balance = get_account_balance(quote_asset) or {}
+    base_balance = get_account_balance(base_asset) or {}
+    quote_total = float(quote_balance.get("total", quote_balance.get("free", 0.0)) or 0.0)
+    base_total = float(base_balance.get("total", base_balance.get("free", 0.0)) or 0.0)
+    equity_usd = quote_total + (base_total * float(price))
+    gross_exposure_usd = abs(base_total * float(price))
+    return {
+        "equity_usd": float(equity_usd),
+        "gross_exposure_usd": float(gross_exposure_usd),
+        "reference_price": float(price),
+    }
 
 def enforce_live_trading_safety_gate():
     """
@@ -307,6 +379,7 @@ def execute_trade(
     db_integration=None,
     strategy_weights: Optional[Dict[str, float]] = None,
     position_size_multiplier: float = 1.0,
+    risk_engine: Optional[LiveRiskEngine] = None,
 ):
     """Execute a trade based on signals and decisions."""
     try:
@@ -369,6 +442,37 @@ def execute_trade(
             logger.info("Skipping futures short execution because effective order amount is zero after policy sizing.")
             return None
 
+        market_price = _extract_last_price_from_market_data(market_data or {}, symbol) or 0.0
+
+        def _check_risk(order_notional_usd: float, *, reduces_exposure: bool) -> bool:
+            if not risk_engine:
+                return True
+            result = risk_engine.pre_trade_check(
+                order_notional_usd=float(order_notional_usd),
+                reduces_exposure=reduces_exposure,
+            )
+            if result.allowed:
+                return True
+            logger.warning(
+                "Risk engine rejected order for %s: %s (projected exposure %.4f)",
+                symbol,
+                result.reason,
+                float(result.projected_exposure_usd),
+            )
+            if db_integration:
+                db_integration.add_system_alert(
+                    message=f"Risk engine rejected order for {symbol}: {result.reason}",
+                    alert_type="warning",
+                    severity="high",
+                    data={
+                        "order_notional_usd": float(order_notional_usd),
+                        "projected_exposure_usd": float(result.projected_exposure_usd),
+                        "kill_switch_active": bool(result.kill_switch_active),
+                        "reduces_exposure": bool(reduces_exposure),
+                    },
+                )
+            return False
+
         def _link_signals_to_trade(order_payload):
             if db_integration and order_payload and 'trade_id' in order_payload and signal_ids:
                 for signal_id in signal_ids.values():
@@ -385,6 +489,8 @@ def execute_trade(
             if execute_sell:
                 logger.info("Executing futures SHORT for %s", symbol)
                 if not futures_shorts_enabled:
+                    return None
+                if not _check_risk(effective_order_amount, reduces_exposure=False):
                     return None
 
                 order = order_manager.execute_market_short(
@@ -413,6 +519,9 @@ def execute_trade(
                 if current_position >= 0:
                     logger.info("No open short position to cover for %s", symbol)
                     return None
+                cover_notional = abs(float(current_position)) * float(market_price)
+                if not _check_risk(cover_notional, reduces_exposure=True):
+                    return None
 
                 order = order_manager.execute_market_cover(abs(current_position))
                 if order:
@@ -434,6 +543,8 @@ def execute_trade(
         else:
             if execute_buy:
                 logger.info(f"Executing BUY for {symbol}")
+                if not _check_risk(effective_order_amount, reduces_exposure=False):
+                    return None
                 order = order_manager.execute_market_buy(quote_amount=effective_order_amount)
                 if order:
                     logger.info(f"Buy order executed successfully: {order['orderId']}")
@@ -451,6 +562,9 @@ def execute_trade(
 
                 if balance and balance.get('free', 0) > 0:
                     quantity = balance['free']
+                    sell_notional = float(quantity) * float(market_price)
+                    if not _check_risk(sell_notional, reduces_exposure=True):
+                        return None
                     order = order_manager.execute_market_sell(quantity)
                     if order:
                         logger.info(f"Sell order executed successfully: {order['orderId']}")
@@ -557,6 +671,56 @@ def trading_loop():
         strategy_config=TRADING_CONFIG.get("strategies", {}),
         policy_config=get_policy_config(),
     )
+
+    data_pipeline_config = get_data_pipeline_config()
+    pit_pipeline = None
+    if data_pipeline_config.get("enabled", True):
+        pit_pipeline = PointInTimeDataPipeline(
+            require_monotonic_timestamps=data_pipeline_config.get("require_monotonic_timestamps", True),
+            source=data_pipeline_config.get("feature_source", "exchange_ohlcv"),
+        )
+
+    risk_engine_config = get_risk_engine_config()
+    risk_engine = None
+    if risk_engine_config.get("enabled", True):
+        risk_engine = LiveRiskEngine(
+            max_drawdown_pct=risk_engine_config.get("max_drawdown_pct", 20.0),
+            max_gross_exposure_usd=risk_engine_config.get("max_gross_exposure_usd", 0.0),
+            daily_loss_limit_usd=risk_engine_config.get("daily_loss_limit_usd", 0.0),
+            kill_switch_enabled=risk_engine_config.get("kill_switch_enabled", True),
+            allow_risk_reducing_orders=risk_engine_config.get("allow_risk_reducing_orders", True),
+        )
+        logger.info(
+            "Risk engine enabled | max_drawdown=%.2f%% max_exposure=%.2f daily_loss=%.2f kill_switch=%s",
+            float(risk_engine.max_drawdown_pct),
+            float(risk_engine.max_gross_exposure_usd),
+            float(risk_engine.daily_loss_limit_usd),
+            "enabled" if risk_engine.kill_switch_enabled else "disabled",
+        )
+
+    reconciliation_config = get_reconciliation_config()
+    reconciliation_enabled = reconciliation_config.get("enabled", True)
+    reconciliation_interval_loops = max(1, int(reconciliation_config.get("interval_loops", 5)))
+    reconciliation_position_tolerance = float(reconciliation_config.get("position_tolerance", 0.000001))
+    if reconciliation_enabled and reconciliation_config.get("run_on_startup", True):
+        startup_report = order_manager.recover_state_from_exchange()
+        logger.info("Startup reconciliation report: %s", startup_report)
+        if db_integration:
+            db_integration.save_reconciliation_event(
+                {
+                    "symbol": startup_report.get("symbol", SYMBOL),
+                    "trade_mode": startup_report.get("trade_mode", trade_mode),
+                    "reconciled_at": startup_report.get("reconciled_at", datetime.utcnow().isoformat()),
+                    "local_active_count": len(order_manager.get_active_orders()),
+                    "exchange_open_count": startup_report.get("exchange_open_count", 0),
+                    "stale_local_order_ids": [],
+                    "missing_local_order_ids": [],
+                    "synced_local_order_ids": [],
+                    "position_mismatch": False,
+                    "position_delta": 0.0,
+                    "details": startup_report,
+                }
+            )
     
     # Track consecutive errors to implement exponential backoff
     consecutive_errors = 0
@@ -565,9 +729,29 @@ def trading_loop():
     
     # Get loop interval from config
     loop_interval = get_loop_interval()
+    loop_count = 0
     
     while True:
         try:
+            loop_count += 1
+            if reconciliation_enabled and loop_count % reconciliation_interval_loops == 0:
+                reconciliation_report = order_manager.reconcile_with_exchange(
+                    position_tolerance=reconciliation_position_tolerance,
+                )
+                logger.info("Periodic reconciliation report: %s", reconciliation_report)
+                if db_integration and "error" not in reconciliation_report:
+                    db_integration.save_reconciliation_event(reconciliation_report)
+                if reconciliation_report.get("position_mismatch") and db_integration:
+                    db_integration.add_system_alert(
+                        message=(
+                            f"Position mismatch detected for {SYMBOL}: "
+                            f"delta={reconciliation_report.get('position_delta')}"
+                        ),
+                        alert_type="warning",
+                        severity="medium",
+                        data=reconciliation_report,
+                    )
+
             # Update statuses of existing orders
             updated_orders = order_manager.update_order_statuses()
             if updated_orders:
@@ -582,6 +766,93 @@ def trading_loop():
             # Save market data to database if available
             if db_integration:
                 db_integration.save_market_data(market_data, SYMBOL, primary_timeframe)
+
+            if pit_pipeline:
+                try:
+                    pit_rows = pit_pipeline.build_snapshot(
+                        symbol=SYMBOL,
+                        timeframe=primary_timeframe,
+                        candles=market_data.get("candles", []),
+                        decision_timestamp=market_data.get("timestamp"),
+                    )
+                    leakage_rows = find_lookahead_violations(pit_rows)
+                    if leakage_rows:
+                        raise RuntimeError(
+                            f"Detected {len(leakage_rows)} PIT leakage rows for {SYMBOL} {primary_timeframe}"
+                        )
+                    if db_integration:
+                        db_integration.save_feature_snapshots(pit_rows)
+                        persisted_leaks = db_integration.get_feature_leakage_violations(
+                            symbol=SYMBOL,
+                            timeframe=primary_timeframe,
+                        )
+                        if persisted_leaks:
+                            raise RuntimeError(
+                                f"Persisted PIT leakage check failed with {len(persisted_leaks)} violating rows."
+                            )
+                    market_data["pit_features"] = {
+                        row["feature_name"]: row["feature_value"] for row in pit_rows
+                    }
+                except Exception as pit_error:
+                    logger.error("PIT pipeline failed; skipping trade iteration: %s", pit_error)
+                    if db_integration:
+                        db_integration.add_system_alert(
+                            message=f"PIT pipeline failure for {SYMBOL}: {pit_error}",
+                            alert_type="error",
+                            severity="high",
+                            data={"symbol": SYMBOL, "timeframe": primary_timeframe},
+                        )
+                    continue
+
+            if risk_engine:
+                portfolio_state = estimate_portfolio_risk_state(
+                    symbol=SYMBOL,
+                    market_data=market_data,
+                    order_manager=order_manager,
+                    trade_mode=trade_mode,
+                )
+                risk_snapshot = risk_engine.update_portfolio_state(
+                    equity_usd=portfolio_state["equity_usd"],
+                    gross_exposure_usd=portfolio_state["gross_exposure_usd"],
+                    timestamp=market_data.get("timestamp"),
+                )
+                logger.info(
+                    "Risk snapshot | equity=%.4f peak=%.4f exposure=%.4f drawdown=%.4f%% daily_pnl=%.4f kill_switch=%s",
+                    float(risk_snapshot.equity_usd),
+                    float(risk_snapshot.peak_equity_usd),
+                    float(risk_snapshot.gross_exposure_usd),
+                    float(risk_snapshot.drawdown_pct),
+                    float(risk_snapshot.daily_pnl_usd),
+                    "active" if risk_snapshot.kill_switch_active else "inactive",
+                )
+                if db_integration:
+                    db_integration.save_risk_state(
+                        {
+                            "timestamp": risk_snapshot.timestamp,
+                            "equity_usd": risk_snapshot.equity_usd,
+                            "peak_equity_usd": risk_snapshot.peak_equity_usd,
+                            "gross_exposure_usd": risk_snapshot.gross_exposure_usd,
+                            "drawdown_pct": risk_snapshot.drawdown_pct,
+                            "daily_pnl_usd": risk_snapshot.daily_pnl_usd,
+                            "kill_switch_active": risk_snapshot.kill_switch_active,
+                            "kill_switch_reason": risk_snapshot.kill_switch_reason,
+                        }
+                    )
+                    if risk_snapshot.kill_switch_triggered:
+                        db_integration.add_system_alert(
+                            message=f"Risk kill-switch activated: {risk_snapshot.kill_switch_reason}",
+                            alert_type="error",
+                            severity="critical",
+                            data={
+                                "equity_usd": risk_snapshot.equity_usd,
+                                "peak_equity_usd": risk_snapshot.peak_equity_usd,
+                                "drawdown_pct": risk_snapshot.drawdown_pct,
+                                "gross_exposure_usd": risk_snapshot.gross_exposure_usd,
+                                "daily_pnl_usd": risk_snapshot.daily_pnl_usd,
+                            },
+                        )
+                if risk_snapshot.kill_switch_active:
+                    logger.warning("Risk kill-switch active: %s", risk_snapshot.kill_switch_reason)
             
             # Get signals from all enabled strategies
             signals = get_all_strategy_signals(SYMBOL)
@@ -736,6 +1007,7 @@ def trading_loop():
                 db_integration,
                 strategy_weights=policy_decision.strategy_weight_overrides,
                 position_size_multiplier=policy_decision.size_multiplier,
+                risk_engine=risk_engine,
             )
             
             # Reset error counter on success

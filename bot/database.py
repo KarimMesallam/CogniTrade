@@ -147,6 +147,55 @@ class Database:
                     UNIQUE(symbol, timeframe, timestamp)
                 )
                 ''')
+
+                # Create feature_snapshots table for point-in-time feature persistence
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS feature_snapshots (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    decision_timestamp TEXT NOT NULL,
+                    feature_name TEXT NOT NULL,
+                    feature_value REAL NOT NULL,
+                    feature_timestamp TEXT NOT NULL,
+                    available_timestamp TEXT NOT NULL,
+                    provenance TEXT,
+                    UNIQUE(symbol, timeframe, decision_timestamp, feature_name)
+                )
+                ''')
+
+                # Create risk_state table for live risk snapshots
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS risk_state (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    equity_usd REAL NOT NULL,
+                    peak_equity_usd REAL NOT NULL,
+                    gross_exposure_usd REAL NOT NULL,
+                    drawdown_pct REAL NOT NULL,
+                    daily_pnl_usd REAL NOT NULL,
+                    kill_switch_active INTEGER NOT NULL DEFAULT 0,
+                    kill_switch_reason TEXT
+                )
+                ''')
+
+                # Create reconciliation_events table for exchange sync audit trail
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS reconciliation_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    trade_mode TEXT NOT NULL,
+                    reconciled_at TEXT NOT NULL,
+                    local_active_count INTEGER NOT NULL,
+                    exchange_open_count INTEGER NOT NULL,
+                    stale_local_order_ids TEXT,
+                    missing_local_order_ids TEXT,
+                    synced_local_order_ids TEXT,
+                    position_mismatch INTEGER NOT NULL DEFAULT 0,
+                    position_delta REAL NOT NULL DEFAULT 0.0,
+                    details TEXT
+                )
+                ''')
                 
                 # Create trade_signal_link table for many-to-many relationship
                 cursor.execute('''
@@ -360,6 +409,384 @@ class Database:
         except Exception as e:
             logger.error(f"Error fetching latest regime state: {e}")
             return None
+
+    def insert_feature_snapshots(self, snapshot_rows: List[Dict[str, Any]]) -> int:
+        """
+        Insert point-in-time feature snapshots with idempotent upsert by
+        (symbol, timeframe, decision_timestamp, feature_name).
+        """
+        if not snapshot_rows:
+            return 0
+
+        required_fields = [
+            "symbol",
+            "timeframe",
+            "decision_timestamp",
+            "feature_name",
+            "feature_value",
+            "feature_timestamp",
+            "available_timestamp",
+        ]
+
+        payloads = []
+        for row in snapshot_rows:
+            for field in required_fields:
+                if field not in row:
+                    raise ValueError(f"Missing required feature snapshot field: {field}")
+            provenance = row.get("provenance")
+            if provenance is not None and not isinstance(provenance, str):
+                provenance = json.dumps(provenance)
+            payloads.append(
+                (
+                    row["symbol"],
+                    row["timeframe"],
+                    row["decision_timestamp"],
+                    row["feature_name"],
+                    float(row["feature_value"]),
+                    row["feature_timestamp"],
+                    row["available_timestamp"],
+                    provenance,
+                )
+            )
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.executemany(
+                    '''
+                    INSERT INTO feature_snapshots
+                    (symbol, timeframe, decision_timestamp, feature_name, feature_value, feature_timestamp, available_timestamp, provenance)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(symbol, timeframe, decision_timestamp, feature_name)
+                    DO UPDATE SET
+                        feature_value = excluded.feature_value,
+                        feature_timestamp = excluded.feature_timestamp,
+                        available_timestamp = excluded.available_timestamp,
+                        provenance = excluded.provenance
+                    ''',
+                    payloads,
+                )
+                conn.commit()
+                affected = cursor.rowcount
+                if affected is None or affected < 0:
+                    return len(payloads)
+                return affected
+        except Exception as e:
+            logger.error(f"Error inserting feature snapshots: {e}")
+            return 0
+
+    def get_feature_snapshot_asof(
+        self,
+        symbol: str,
+        timeframe: str,
+        decision_timestamp: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve the latest feature snapshot at or before `decision_timestamp`.
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    SELECT
+                        symbol,
+                        timeframe,
+                        decision_timestamp,
+                        feature_name,
+                        feature_value,
+                        feature_timestamp,
+                        available_timestamp,
+                        provenance
+                    FROM feature_snapshots
+                    WHERE symbol = ?
+                      AND timeframe = ?
+                      AND decision_timestamp = (
+                        SELECT MAX(decision_timestamp)
+                        FROM feature_snapshots
+                        WHERE symbol = ?
+                          AND timeframe = ?
+                          AND decision_timestamp <= ?
+                      )
+                    ORDER BY feature_name ASC
+                    ''',
+                    (symbol, timeframe, symbol, timeframe, decision_timestamp),
+                )
+                rows = cursor.fetchall()
+
+                results: List[Dict[str, Any]] = []
+                for row in rows:
+                    provenance = row[7]
+                    if provenance:
+                        try:
+                            provenance = json.loads(provenance)
+                        except json.JSONDecodeError:
+                            pass
+                    results.append(
+                        {
+                            "symbol": row[0],
+                            "timeframe": row[1],
+                            "decision_timestamp": row[2],
+                            "feature_name": row[3],
+                            "feature_value": row[4],
+                            "feature_timestamp": row[5],
+                            "available_timestamp": row[6],
+                            "provenance": provenance,
+                        }
+                    )
+                return results
+        except Exception as e:
+            logger.error(f"Error retrieving feature snapshot as-of: {e}")
+            return []
+
+    def find_feature_leakage_violations(self, symbol: str = None, timeframe: str = None) -> List[Dict[str, Any]]:
+        """
+        Find persisted feature rows that violate no-lookahead constraints.
+        """
+        try:
+            query = '''
+                SELECT
+                    symbol,
+                    timeframe,
+                    decision_timestamp,
+                    feature_name,
+                    feature_timestamp,
+                    available_timestamp
+                FROM feature_snapshots
+                WHERE (feature_timestamp > decision_timestamp OR available_timestamp > decision_timestamp)
+            '''
+            params: List[Any] = []
+            if symbol:
+                query += " AND symbol = ?"
+                params.append(symbol)
+            if timeframe:
+                query += " AND timeframe = ?"
+                params.append(timeframe)
+            query += " ORDER BY decision_timestamp DESC, feature_name ASC"
+
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                return [
+                    {
+                        "symbol": row[0],
+                        "timeframe": row[1],
+                        "decision_timestamp": row[2],
+                        "feature_name": row[3],
+                        "feature_timestamp": row[4],
+                        "available_timestamp": row[5],
+                    }
+                    for row in rows
+                ]
+        except Exception as e:
+            logger.error(f"Error checking feature leakage violations: {e}")
+            return []
+
+    def insert_risk_state(self, snapshot: Dict[str, Any]) -> bool:
+        """
+        Persist a risk-engine snapshot.
+        """
+        required = [
+            "timestamp",
+            "equity_usd",
+            "peak_equity_usd",
+            "gross_exposure_usd",
+            "drawdown_pct",
+            "daily_pnl_usd",
+            "kill_switch_active",
+        ]
+        for field in required:
+            if field not in snapshot:
+                raise ValueError(f"Missing required risk_state field: {field}")
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    INSERT INTO risk_state
+                    (timestamp, equity_usd, peak_equity_usd, gross_exposure_usd, drawdown_pct, daily_pnl_usd, kill_switch_active, kill_switch_reason)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        snapshot["timestamp"],
+                        float(snapshot["equity_usd"]),
+                        float(snapshot["peak_equity_usd"]),
+                        float(snapshot["gross_exposure_usd"]),
+                        float(snapshot["drawdown_pct"]),
+                        float(snapshot["daily_pnl_usd"]),
+                        1 if snapshot["kill_switch_active"] else 0,
+                        snapshot.get("kill_switch_reason"),
+                    ),
+                )
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error inserting risk snapshot: {e}")
+            return False
+
+    def get_latest_risk_state(self) -> Optional[Dict[str, Any]]:
+        """
+        Get most recent persisted risk snapshot.
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    SELECT
+                        timestamp,
+                        equity_usd,
+                        peak_equity_usd,
+                        gross_exposure_usd,
+                        drawdown_pct,
+                        daily_pnl_usd,
+                        kill_switch_active,
+                        kill_switch_reason
+                    FROM risk_state
+                    ORDER BY timestamp DESC
+                    LIMIT 1
+                    '''
+                )
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                return {
+                    "timestamp": row[0],
+                    "equity_usd": row[1],
+                    "peak_equity_usd": row[2],
+                    "gross_exposure_usd": row[3],
+                    "drawdown_pct": row[4],
+                    "daily_pnl_usd": row[5],
+                    "kill_switch_active": bool(row[6]),
+                    "kill_switch_reason": row[7],
+                }
+        except Exception as e:
+            logger.error(f"Error fetching latest risk snapshot: {e}")
+            return None
+
+    def insert_reconciliation_event(self, report: Dict[str, Any]) -> bool:
+        """
+        Persist a reconciliation audit event.
+        """
+        required = [
+            "symbol",
+            "trade_mode",
+            "reconciled_at",
+            "local_active_count",
+            "exchange_open_count",
+            "stale_local_order_ids",
+            "missing_local_order_ids",
+            "synced_local_order_ids",
+            "position_mismatch",
+            "position_delta",
+        ]
+        for field in required:
+            if field not in report:
+                raise ValueError(f"Missing required reconciliation field: {field}")
+
+        details = report.get("details")
+        if details is not None and not isinstance(details, str):
+            details = json.dumps(details)
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    INSERT INTO reconciliation_events
+                    (symbol, trade_mode, reconciled_at, local_active_count, exchange_open_count,
+                     stale_local_order_ids, missing_local_order_ids, synced_local_order_ids,
+                     position_mismatch, position_delta, details)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        report["symbol"],
+                        report["trade_mode"],
+                        report["reconciled_at"],
+                        int(report["local_active_count"]),
+                        int(report["exchange_open_count"]),
+                        json.dumps(report["stale_local_order_ids"]),
+                        json.dumps(report["missing_local_order_ids"]),
+                        json.dumps(report["synced_local_order_ids"]),
+                        1 if report["position_mismatch"] else 0,
+                        float(report["position_delta"]),
+                        details,
+                    ),
+                )
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error inserting reconciliation event: {e}")
+            return False
+
+    def get_recent_reconciliation_events(self, symbol: str = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """Retrieve recent reconciliation audit records."""
+        try:
+            query = '''
+                SELECT
+                    symbol,
+                    trade_mode,
+                    reconciled_at,
+                    local_active_count,
+                    exchange_open_count,
+                    stale_local_order_ids,
+                    missing_local_order_ids,
+                    synced_local_order_ids,
+                    position_mismatch,
+                    position_delta,
+                    details
+                FROM reconciliation_events
+            '''
+            params: List[Any] = []
+            if symbol:
+                query += " WHERE symbol = ?"
+                params.append(symbol)
+            query += " ORDER BY reconciled_at DESC LIMIT ?"
+            params.append(int(limit))
+
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+
+                results: List[Dict[str, Any]] = []
+                for row in rows:
+                    def _parse_json(raw: Optional[str]):
+                        if not raw:
+                            return []
+                        try:
+                            return json.loads(raw)
+                        except json.JSONDecodeError:
+                            return raw
+
+                    details = row[10]
+                    if details:
+                        try:
+                            details = json.loads(details)
+                        except json.JSONDecodeError:
+                            pass
+
+                    results.append(
+                        {
+                            "symbol": row[0],
+                            "trade_mode": row[1],
+                            "reconciled_at": row[2],
+                            "local_active_count": row[3],
+                            "exchange_open_count": row[4],
+                            "stale_local_order_ids": _parse_json(row[5]),
+                            "missing_local_order_ids": _parse_json(row[6]),
+                            "synced_local_order_ids": _parse_json(row[7]),
+                            "position_mismatch": bool(row[8]),
+                            "position_delta": row[9],
+                            "details": details,
+                        }
+                    )
+                return results
+        except Exception as e:
+            logger.error(f"Error fetching reconciliation events: {e}")
+            return []
 
     @staticmethod
     def _prepare_trade_data(trade_data: Dict[str, Any]) -> Dict[str, Any]:

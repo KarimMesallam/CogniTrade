@@ -4,7 +4,7 @@ import os
 import uuid
 from datetime import datetime
 from decimal import Decimal, getcontext
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 from bot.binance_api import (
     client, get_account_balance, get_order_status, get_open_orders, cancel_order,
     place_market_buy, place_market_sell,
@@ -15,6 +15,7 @@ from bot.binance_api import (
 )
 from bot.config import get_trading_parameter, get_trade_mode, is_futures_short_enabled
 from bot.db_integration import DatabaseIntegration
+from bot.reconciliation import ExchangeReconciler
 
 logger = logging.getLogger("trading_bot")
 
@@ -103,6 +104,8 @@ class OrderManager:
         self.default_futures_leverage = Decimal(str(resolved_default_futures_leverage))
         self.max_short_leverage = Decimal(str(resolved_max_short_leverage))
         self.min_short_liquidation_buffer_pct = Decimal(str(resolved_min_short_liq_buffer))
+        self.reconciler = ExchangeReconciler(symbol=self.symbol, trade_mode=self.trade_mode)
+        self.last_reconciliation_report: Optional[Dict[str, Any]] = None
         
         # Set Decimal precision
         getcontext().prec = 28
@@ -800,12 +803,12 @@ class OrderManager:
             List of canceled orders
         """
         try:
-            open_orders = get_open_orders(self.symbol)
+            open_orders = get_open_orders(self.symbol, trade_mode=self.trade_mode)
             canceled_orders = []
             
             for order in open_orders:
                 order_id = order["orderId"]
-                result = cancel_order(self.symbol, order_id)
+                result = cancel_order(self.symbol, order_id, trade_mode=self.trade_mode)
                 
                 if result:
                     self._log_order(result, "CANCEL", "CANCELED")
@@ -829,7 +832,7 @@ class OrderManager:
         updated_orders = {}
         
         for order_id in list(self.active_orders.keys()):
-            order_status = get_order_status(self.symbol, order_id)
+            order_status = get_order_status(self.symbol, order_id, trade_mode=self.trade_mode)
             
             if order_status:
                 current_status = order_status.get("status")
@@ -878,6 +881,160 @@ class OrderManager:
         if limit:
             return self.order_history[-limit:]
         return self.order_history 
+
+    def _build_active_order_entry(self, order_payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert exchange order payload into local active-order schema."""
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "symbol": self.symbol,
+            "order_id": order_payload.get("orderId"),
+            "client_order_id": order_payload.get("clientOrderId"),
+            "action": str(order_payload.get("side", "UNKNOWN")).upper(),
+            "type": order_payload.get("type"),
+            "side": order_payload.get("side"),
+            "quantity": order_payload.get("origQty", order_payload.get("origQty", "0")),
+            "price": order_payload.get("price", order_payload.get("avgPrice", "0")),
+            "status": order_payload.get("status", "UNKNOWN"),
+            "fills": order_payload.get("fills", []),
+            "raw_response": order_payload,
+        }
+
+    def _estimate_local_position_qty_from_history(self) -> Optional[Decimal]:
+        """
+        Estimate signed position from local filled order history.
+
+        This is a best-effort estimate used only for reconciliation diagnostics.
+        """
+        if not self.order_history:
+            return Decimal("0")
+
+        signed_qty = Decimal("0")
+        for entry in self.order_history:
+            try:
+                if str(entry.get("status", "")).upper() != "FILLED":
+                    continue
+                qty = Decimal(str(entry.get("quantity", "0")))
+                if qty <= Decimal("0"):
+                    continue
+
+                action = str(entry.get("action", entry.get("side", ""))).upper()
+                side = str(entry.get("side", "")).upper()
+                if action in {"BUY", "COVER"} or side == "BUY":
+                    signed_qty += qty
+                elif action in {"SELL", "SHORT"} or side == "SELL":
+                    signed_qty -= qty
+            except Exception:
+                continue
+        return signed_qty
+
+    def recover_state_from_exchange(self) -> Dict[str, Any]:
+        """
+        Recover local active-order state from exchange open orders.
+        """
+        report = {
+            "symbol": self.symbol,
+            "trade_mode": self.trade_mode,
+            "recovered": 0,
+            "exchange_open_count": 0,
+            "reconciled_at": datetime.utcnow().isoformat(),
+        }
+        try:
+            exchange_open_orders = get_open_orders(self.symbol, trade_mode=self.trade_mode)
+            report["exchange_open_count"] = len(exchange_open_orders)
+            recovered = 0
+            for order in exchange_open_orders:
+                order_id = order.get("orderId")
+                if order_id is None:
+                    continue
+                if order_id in self.active_orders:
+                    continue
+                self.active_orders[order_id] = self._build_active_order_entry(order)
+                recovered += 1
+            report["recovered"] = recovered
+            self.last_reconciliation_report = report
+            logger.info(
+                "Recovered %s/%s active orders from exchange for %s (%s)",
+                recovered,
+                len(exchange_open_orders),
+                self.symbol,
+                self.trade_mode,
+            )
+            return report
+        except Exception as e:
+            logger.error("Failed to recover state from exchange for %s: %s", self.symbol, e)
+            report["error"] = str(e)
+            self.last_reconciliation_report = report
+            return report
+
+    def reconcile_with_exchange(self, position_tolerance: float = 1e-8) -> Dict[str, Any]:
+        """
+        Reconcile local active orders against exchange state.
+        """
+        try:
+            exchange_open_orders = get_open_orders(self.symbol, trade_mode=self.trade_mode)
+            recon_report = self.reconciler.reconcile_orders(
+                local_active_orders=self.active_orders,
+                exchange_open_orders=exchange_open_orders,
+            )
+
+            exchange_by_id: Dict[str, Dict[str, Any]] = {
+                str(order.get("orderId")): order
+                for order in exchange_open_orders
+                if order.get("orderId") is not None
+            }
+
+            for stale_order_id in recon_report.stale_local_order_ids:
+                stale_key = int(stale_order_id) if stale_order_id.isdigit() else stale_order_id
+                status_payload = get_order_status(
+                    self.symbol,
+                    stale_key,
+                    trade_mode=self.trade_mode,
+                )
+                if status_payload:
+                    previous = self.active_orders.get(stale_key) or self.active_orders.get(stale_order_id) or {}
+                    action = previous.get("action", str(status_payload.get("side", "UNKNOWN")).upper())
+                    self._log_order(status_payload, action, status_payload.get("status", "UNKNOWN"))
+                else:
+                    self.active_orders.pop(stale_key, None)
+                    self.active_orders.pop(stale_order_id, None)
+
+            for missing_order_id in recon_report.missing_local_order_ids:
+                order_payload = exchange_by_id.get(missing_order_id)
+                if not order_payload:
+                    continue
+                order_key = order_payload.get("orderId")
+                self.active_orders[order_key] = self._build_active_order_entry(order_payload)
+
+            local_position = self._estimate_local_position_qty_from_history()
+            exchange_position = self._get_current_position_qty()
+            mismatch, delta = self.reconciler.reconcile_position(
+                local_position_qty=float(local_position) if local_position is not None else None,
+                exchange_position_qty=float(exchange_position) if exchange_position is not None else None,
+                tolerance=position_tolerance,
+            )
+            recon_report.position_mismatch = mismatch
+            recon_report.position_delta = delta
+
+            report_dict = recon_report.to_dict()
+            self.last_reconciliation_report = report_dict
+            if mismatch:
+                logger.warning(
+                    "Position mismatch detected for %s (%s): delta=%s",
+                    self.symbol,
+                    self.trade_mode,
+                    delta,
+                )
+            return report_dict
+        except Exception as e:
+            logger.error("Error reconciling %s against exchange: %s", self.symbol, e)
+            report = {
+                "symbol": self.symbol,
+                "trade_mode": self.trade_mode,
+                "reconciled_at": datetime.utcnow().isoformat(),
+                "error": str(e),
+            }
+            self.last_reconciliation_report = report
+            return report
 
     def get_recent_turnover_notional(self, window_seconds: int = 3600) -> Decimal:
         """

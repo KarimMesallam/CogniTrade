@@ -142,6 +142,35 @@ TRADING_CONFIG = {
         "switch_shadow_mode": os.getenv('POLICY_SWITCH_SHADOW_MODE', 'False').lower() in ('true', '1', 't'),
         "regimes": _parse_json_env('POLICY_REGIME_CONFIG_JSON', {}),
     },
+
+    # Point-in-time data quality pipeline (P2-01)
+    "data_pipeline": {
+        "enabled": os.getenv('ENABLE_DATA_PIPELINE_PIT', 'True').lower() in ('true', '1', 't'),
+        "require_monotonic_timestamps": os.getenv(
+            'PIT_REQUIRE_MONOTONIC_TIMESTAMPS', 'True'
+        ).lower() in ('true', '1', 't'),
+        "feature_source": os.getenv('PIT_FEATURE_SOURCE', 'exchange_ohlcv'),
+    },
+
+    # Hard live risk engine controls (P2-05)
+    "risk_engine": {
+        "enabled": os.getenv('ENABLE_RISK_ENGINE', 'True').lower() in ('true', '1', 't'),
+        "max_drawdown_pct": float(os.getenv('RISK_ENGINE_MAX_DRAWDOWN_PCT', '20.0')),
+        "max_gross_exposure_usd": float(os.getenv('RISK_ENGINE_MAX_GROSS_EXPOSURE_USD', '300.0')),
+        "daily_loss_limit_usd": float(os.getenv('RISK_ENGINE_DAILY_LOSS_LIMIT_USD', '100.0')),
+        "kill_switch_enabled": os.getenv('RISK_ENGINE_KILL_SWITCH_ENABLED', 'True').lower() in ('true', '1', 't'),
+        "allow_risk_reducing_orders": os.getenv(
+            'RISK_ENGINE_ALLOW_RISK_REDUCING_ORDERS', 'True'
+        ).lower() in ('true', '1', 't'),
+    },
+
+    # Exchange reconciliation controls (P2-06)
+    "reconciliation": {
+        "enabled": os.getenv('ENABLE_RECONCILIATION', 'True').lower() in ('true', '1', 't'),
+        "run_on_startup": os.getenv('RECONCILIATION_RUN_ON_STARTUP', 'True').lower() in ('true', '1', 't'),
+        "interval_loops": int(os.getenv('RECONCILIATION_INTERVAL_LOOPS', '5')),
+        "position_tolerance": float(os.getenv('RECONCILIATION_POSITION_TOLERANCE', '0.000001')),
+    },
     
     # Timeframe configuration for market data
     "timeframes": {
@@ -216,6 +245,21 @@ def get_regime_config():
 def get_policy_config():
     """Get regime-based strategy policy configuration."""
     return TRADING_CONFIG.get("policy", {})
+
+
+def get_data_pipeline_config():
+    """Get point-in-time data pipeline configuration."""
+    return TRADING_CONFIG.get("data_pipeline", {})
+
+
+def get_risk_engine_config():
+    """Get live risk-engine configuration."""
+    return TRADING_CONFIG.get("risk_engine", {})
+
+
+def get_reconciliation_config():
+    """Get exchange reconciliation configuration."""
+    return TRADING_CONFIG.get("reconciliation", {})
 
 
 def get_trade_mode() -> str:

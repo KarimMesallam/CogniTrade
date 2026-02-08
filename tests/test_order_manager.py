@@ -658,3 +658,87 @@ class TestOrderManager:
         )
 
         assert exceeds is False
+
+    @patch('bot.order_manager.get_open_orders')
+    def test_recover_state_from_exchange_adds_missing_orders(self, mock_get_open_orders):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0,
+        )
+        manager.active_orders = {}
+        mock_get_open_orders.return_value = [
+            {
+                "orderId": 777,
+                "clientOrderId": "recover_me",
+                "type": "LIMIT",
+                "side": "BUY",
+                "origQty": "0.001",
+                "price": "50000",
+                "status": "NEW",
+            }
+        ]
+
+        report = manager.recover_state_from_exchange()
+
+        assert report["recovered"] == 1
+        assert 777 in manager.active_orders
+        assert manager.active_orders[777]["status"] == "NEW"
+        mock_get_open_orders.assert_called_once_with("BTCUSDT", trade_mode="SPOT")
+
+    @patch('bot.order_manager.get_order_status')
+    @patch('bot.order_manager.get_open_orders')
+    def test_reconcile_with_exchange_syncs_missing_and_stale(
+        self,
+        mock_get_open_orders,
+        mock_get_order_status,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0,
+        )
+        manager.active_orders = {
+            1: {"order_id": 1, "status": "NEW", "action": "BUY"},
+            2: {"order_id": 2, "status": "NEW", "action": "BUY"},
+        }
+
+        mock_get_open_orders.return_value = [
+            {
+                "orderId": 2,
+                "clientOrderId": "existing",
+                "type": "LIMIT",
+                "side": "BUY",
+                "origQty": "0.001",
+                "price": "50000",
+                "status": "NEW",
+            },
+            {
+                "orderId": 3,
+                "clientOrderId": "missing_local",
+                "type": "LIMIT",
+                "side": "SELL",
+                "origQty": "0.001",
+                "price": "50100",
+                "status": "NEW",
+            },
+        ]
+        mock_get_order_status.return_value = {
+            "orderId": 1,
+            "status": "FILLED",
+            "side": "BUY",
+            "origQty": "0.001",
+            "price": "50000",
+        }
+
+        with patch.object(manager, "_log_order") as mock_log_order, \
+             patch.object(manager, "_get_current_position_qty", return_value=0.0):
+            report = manager.reconcile_with_exchange(position_tolerance=0.0001)
+
+        assert "1" in report["stale_local_order_ids"]
+        assert "3" in report["missing_local_order_ids"]
+        assert 3 in manager.active_orders
+        mock_get_order_status.assert_called_once_with("BTCUSDT", 1, trade_mode="SPOT")
+        mock_log_order.assert_called_once()

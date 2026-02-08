@@ -256,10 +256,24 @@ class TestMainDbIntegration:
     @patch('bot.main.get_decision_from_llm')
     @patch('bot.main.get_all_strategy_signals')
     @patch('bot.main.get_market_data')
+    @patch('bot.main.get_reconciliation_config', return_value={"enabled": False})
+    @patch('bot.main.get_risk_engine_config', return_value={"enabled": False})
+    @patch('bot.main.get_data_pipeline_config', return_value={"enabled": False})
     @patch('bot.main.time.sleep', side_effect=KeyboardInterrupt)  # Stop after first iteration
     @patch('bot.main.LLMManager')
-    def test_trading_loop_uses_db(self, mock_llm_manager, mock_sleep, mock_market_data, 
-                                 mock_get_all_signals, mock_llm, db_integration, test_db):
+    def test_trading_loop_uses_db(
+        self,
+        mock_llm_manager,
+        mock_sleep,
+        _mock_data_pipeline_config,
+        _mock_risk_config,
+        _mock_recon_config,
+        mock_market_data,
+        mock_get_all_signals,
+        mock_llm,
+        db_integration,
+        test_db,
+    ):
         """Test that the trading loop uses the database for signals and alerts"""
         # Set TESTING_MODE environment variable for this test
         import os

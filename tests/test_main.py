@@ -15,6 +15,7 @@ from bot.main import (
 from bot.config import SYMBOL
 from bot.policy import RegimePolicyEngine
 from bot.regime import RegimeState, REGIME_BULL, REGIME_BEAR, REGIME_SIDEWAYS
+from bot.risk_engine import RiskCheckResult
 
 @pytest.fixture
 def mock_client():
@@ -377,6 +378,71 @@ class TestMain:
         assert result is None
         mock_order_manager.execute_market_buy.assert_not_called()
 
+    @patch('bot.main.log_decision_with_context')
+    def test_execute_trade_buy_blocked_by_risk_engine(
+        self,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Entry orders should be blocked when risk engine rejects projected risk."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+        risk_engine = MagicMock()
+        risk_engine.pre_trade_check.return_value = RiskCheckResult(
+            allowed=False,
+            reason="max_gross_exposure_breached",
+            projected_exposure_usd=350.0,
+            kill_switch_active=False,
+        )
+
+        result = execute_trade(
+            signals,
+            llm_decision,
+            SYMBOL,
+            mock_market_data,
+            mock_order_manager,
+            risk_engine=risk_engine,
+        )
+
+        assert result is None
+        mock_order_manager.execute_market_buy.assert_not_called()
+        risk_engine.pre_trade_check.assert_called_once()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.get_account_balance')
+    def test_execute_trade_sell_allowed_as_risk_reducing_under_kill_switch(
+        self,
+        mock_balance,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Risk-reducing exits should remain allowed when kill-switch is active."""
+        signals = {"simple": "SELL", "technical": "SELL"}
+        llm_decision = "SELL"
+        mock_balance.return_value = {"free": 0.1, "locked": 0.0}
+        risk_engine = MagicMock()
+        risk_engine.pre_trade_check.return_value = RiskCheckResult(
+            allowed=True,
+            reason=None,
+            projected_exposure_usd=0.0,
+            kill_switch_active=True,
+        )
+
+        result = execute_trade(
+            signals,
+            llm_decision,
+            SYMBOL,
+            mock_market_data,
+            mock_order_manager,
+            risk_engine=risk_engine,
+        )
+
+        assert result == {"orderId": 456, "status": "FILLED"}
+        mock_order_manager.execute_market_sell.assert_called_once_with(0.1)
+        risk_engine.pre_trade_check.assert_called_once()
+
     def test_regime_policy_switch_hysteresis_behavior(self):
         """Switch hysteresis should delay regime flips until confirmations are met."""
         engine = RegimePolicyEngine(
@@ -464,13 +530,16 @@ class TestMain:
     @patch('bot.main.get_all_strategy_signals')
     @patch('bot.main.get_decision_from_llm')
     @patch('bot.main.execute_trade')
+    @patch('bot.main.get_reconciliation_config', return_value={"enabled": False})
+    @patch('bot.main.get_risk_engine_config', return_value={"enabled": False})
+    @patch('bot.main.get_data_pipeline_config', return_value={"enabled": False})
     @patch('bot.main.time.sleep', side_effect=KeyboardInterrupt)  # Stop after first iteration
     @patch('bot.main.DatabaseIntegration')  # Add mock for DatabaseIntegration
     @patch('bot.main.OrderManager')  # Add mock for OrderManager
     @patch('bot.main.LLMManager')  # Add mock for LLMManager
     def test_trading_loop(self, mock_llm_manager, mock_order_manager_cls, mock_db_integration, 
-                         mock_sleep, mock_execute_trade, mock_llm, mock_get_all_signals, 
-                         mock_market_data):
+                         mock_sleep, _mock_data_pipeline_config, _mock_risk_config, _mock_recon_config,
+                         mock_execute_trade, mock_llm, mock_get_all_signals, mock_market_data):
         """Test the main trading loop with mocked dependencies."""
         # Setup mocks
         mock_market_data.return_value = {"symbol": SYMBOL, "data": "test"}
@@ -505,8 +574,19 @@ class TestMain:
         mock_sleep.assert_called_once_with(60)
     
     @patch('bot.main.get_market_data')
+    @patch('bot.main.get_reconciliation_config', return_value={"enabled": False})
+    @patch('bot.main.get_risk_engine_config', return_value={"enabled": False})
+    @patch('bot.main.get_data_pipeline_config', return_value={"enabled": False})
     @patch('bot.main.time.sleep')
-    def test_trading_loop_error_handling(self, mock_sleep, mock_market_data, mock_order_manager):
+    def test_trading_loop_error_handling(
+        self,
+        mock_sleep,
+        _mock_data_pipeline_config,
+        _mock_risk_config,
+        _mock_recon_config,
+        mock_market_data,
+        mock_order_manager,
+    ):
         """Test error handling in the trading loop."""
         # Configure mock to raise exception on first call, then work, then raise KeyboardInterrupt
         mock_market_data.side_effect = [

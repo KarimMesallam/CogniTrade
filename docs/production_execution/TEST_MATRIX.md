@@ -26,12 +26,12 @@
 | P1-08 | Regime detection correctness and state persistence | `venv/bin/pytest tests/test_regime.py -v` and `venv/bin/pytest tests/test_database.py -k "regime" -v` and `venv/bin/pytest tests/test_db_integration.py -k "regime" -v` | Must pass |
 | P1-09 | Regime-based strategy policy routing and sizing | `venv/bin/pytest tests/test_policy.py -v` and `venv/bin/pytest tests/test_main.py -k "regime or policy" -v` | Must pass |
 | P1-10 | Switch-stability guards (hysteresis/cooldown/turnover limits) | `venv/bin/pytest tests/test_main.py -k "switch or hysteresis or cooldown" -v` and `venv/bin/pytest tests/test_order_manager.py -k "turnover" -v` | Must pass |
-| P2-01 | Point-in-time data integrity and leakage prevention | `venv/bin/pytest tests/test_data_pipeline.py -v` and leakage-specific checks | Must pass |
+| P2-01 | Point-in-time data integrity and leakage prevention | `venv/bin/pytest tests/test_data_pipeline.py -v` and `venv/bin/pytest tests/test_database.py -k "feature_snapshot" -v` | Must pass |
 | P2-02 | Walk-forward + purged CV + regime-slice validation | `venv/bin/pytest tests/test_validation.py -v` | Must pass |
 | P2-03 | Execution simulation realism (spread/slippage/latency/funding) | `venv/bin/pytest tests/test_execution_simulation.py -v` | Must pass |
 | P2-04 | Portfolio optimizer constraints and allocation correctness | `venv/bin/pytest tests/test_portfolio.py -v` | Must pass |
-| P2-05 | Live risk engine invariants and kill-switch behavior | `venv/bin/pytest tests/test_risk_engine.py -v` | Must pass |
-| P2-06 | Reconciliation/retry/restart consistency | `venv/bin/pytest tests/test_reconciliation.py -v` and `venv/bin/pytest tests/test_order_manager.py -k "reconcile or retry" -v` | Must pass |
+| P2-05 | Live risk engine invariants and kill-switch behavior | `venv/bin/pytest tests/test_risk_engine.py -v` and `venv/bin/pytest tests/test_main.py -k "risk_engine" -v` | Must pass |
+| P2-06 | Reconciliation/retry/restart consistency | `venv/bin/pytest tests/test_reconciliation.py -v` and `venv/bin/pytest tests/test_order_manager.py -k "reconcile or retry" -v` and `venv/bin/pytest tests/test_binance_api.py -k "futures_mode" -v` | Must pass |
 | P2-07 | Edge-decay/drift detection and de-risk automation | `venv/bin/pytest tests/test_monitoring.py -v` | Must pass |
 | P2-08 | Observability telemetry and alert-path coverage | `venv/bin/pytest tests/test_observability.py -v` and `venv/bin/pytest tests/test_api.py -k "request_id or telemetry" -v` | Must pass |
 | P2-09 | Shadow and canary rollout guardrails | `venv/bin/pytest tests/test_deploy_policy.py -v` | Must pass |

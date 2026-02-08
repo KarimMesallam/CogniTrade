@@ -352,6 +352,33 @@ def test_place_limit_sell(mock_client, mock_validate):
     assert order is None
 
 
+@patch('bot.binance_api.client')
+def test_get_open_orders_futures_mode(mock_client):
+    """Open-order query should route to futures endpoint when trade_mode=FUTURES."""
+    mock_client.futures_get_open_orders.return_value = [{"orderId": 1, "symbol": SYMBOL}]
+    orders = get_open_orders(SYMBOL, trade_mode="FUTURES")
+    assert len(orders) == 1
+    mock_client.futures_get_open_orders.assert_called_once()
+
+
+@patch('bot.binance_api.client')
+def test_cancel_order_futures_mode(mock_client):
+    """Cancel should route to futures endpoint when trade_mode=FUTURES."""
+    mock_client.futures_cancel_order.return_value = {"orderId": 1, "status": "CANCELED"}
+    result = cancel_order(SYMBOL, 1, trade_mode="FUTURES")
+    assert result["status"] == "CANCELED"
+    mock_client.futures_cancel_order.assert_called_once()
+
+
+@patch('bot.binance_api.client')
+def test_get_order_status_futures_mode(mock_client):
+    """Order-status query should route to futures endpoint when trade_mode=FUTURES."""
+    mock_client.futures_get_order.return_value = {"orderId": 1, "status": "FILLED"}
+    status = get_order_status(SYMBOL, 1, trade_mode="FUTURES")
+    assert status["status"] == "FILLED"
+    mock_client.futures_get_order.assert_called_once()
+
+
 @patch('bot.binance_api.validate_order_filters', return_value=(False, "step size mismatch"))
 @patch('bot.binance_api.client')
 def test_place_limit_buy_blocks_invalid_filter(mock_client, mock_validate):

@@ -305,6 +305,71 @@ class DatabaseIntegration:
             logger.error(f"Error retrieving latest regime state: {e}")
             return None
 
+    def save_feature_snapshots(self, snapshot_rows: List[Dict[str, Any]]) -> int:
+        """
+        Persist point-in-time feature rows for a decision snapshot.
+        """
+        try:
+            inserted = self.db.insert_feature_snapshots(snapshot_rows)
+            logger.info("Saved %s feature snapshot rows", inserted)
+            return inserted
+        except Exception as e:
+            logger.error(f"Error saving feature snapshots: {e}")
+            return 0
+
+    def get_feature_snapshot_asof(
+        self,
+        symbol: str,
+        timeframe: str,
+        decision_timestamp: str,
+    ) -> List[Dict[str, Any]]:
+        """Retrieve latest feature snapshot at or before a decision timestamp."""
+        try:
+            return self.db.get_feature_snapshot_asof(symbol, timeframe, decision_timestamp)
+        except Exception as e:
+            logger.error(f"Error retrieving feature snapshot as-of: {e}")
+            return []
+
+    def get_feature_leakage_violations(self, symbol: str = None, timeframe: str = None) -> List[Dict[str, Any]]:
+        """Retrieve persisted point-in-time leakage violations."""
+        try:
+            return self.db.find_feature_leakage_violations(symbol=symbol, timeframe=timeframe)
+        except Exception as e:
+            logger.error(f"Error retrieving feature leakage violations: {e}")
+            return []
+
+    def save_risk_state(self, snapshot: Dict[str, Any]) -> bool:
+        """Persist a live risk snapshot."""
+        try:
+            return self.db.insert_risk_state(snapshot)
+        except Exception as e:
+            logger.error(f"Error saving risk state: {e}")
+            return False
+
+    def get_latest_risk_state(self) -> Optional[Dict[str, Any]]:
+        """Get latest persisted risk snapshot."""
+        try:
+            return self.db.get_latest_risk_state()
+        except Exception as e:
+            logger.error(f"Error retrieving latest risk state: {e}")
+            return None
+
+    def save_reconciliation_event(self, report: Dict[str, Any]) -> bool:
+        """Persist reconciliation report."""
+        try:
+            return self.db.insert_reconciliation_event(report)
+        except Exception as e:
+            logger.error(f"Error saving reconciliation event: {e}")
+            return False
+
+    def get_recent_reconciliation_events(self, symbol: str = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """Retrieve recent reconciliation reports."""
+        try:
+            return self.db.get_recent_reconciliation_events(symbol=symbol, limit=limit)
+        except Exception as e:
+            logger.error(f"Error retrieving reconciliation events: {e}")
+            return []
+
     def _get_connection(self):
         """Proxy method to get a database connection for custom queries."""
         return self.db._get_connection() 

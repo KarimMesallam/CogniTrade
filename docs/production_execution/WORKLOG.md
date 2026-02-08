@@ -2,6 +2,84 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-08 (Session 17)
+
+- Session objective: execute `P2-01`, `P2-05`, and `P2-06` with implementation + full test-backed validation.
+- Completed:
+1. Added point-in-time data pipeline module `bot/data_pipeline/point_in_time.py` with:
+   - candle normalization
+   - timestamp integrity validation
+   - deterministic as-of feature snapshots
+   - explicit no-lookahead leakage detection.
+2. Added PIT persistence and leakage audit tables/methods in `bot/database.py`:
+   - `feature_snapshots` table
+   - as-of retrieval
+   - persisted leakage-violation query.
+3. Added live hard-risk engine `bot/risk_engine.py` with:
+   - drawdown cap
+   - daily loss cap
+   - gross exposure cap
+   - kill-switch automation
+   - pre-trade allow/block checks with risk-reducing exit allowance.
+4. Integrated risk engine into `bot/main.py`:
+   - portfolio equity/exposure estimation each loop
+   - persisted risk snapshots
+   - kill-switch alerts
+   - pre-trade hard-risk gating in `execute_trade(...)`.
+5. Added reconciliation module `bot/reconciliation.py` and integrated reconciliation/recovery in `bot/order_manager.py`:
+   - startup state recovery from exchange open orders
+   - periodic local-vs-exchange order sync
+   - position mismatch diagnostics
+   - reconciliation report persistence support.
+6. Extended exchange wrappers in `bot/binance_api.py` for mode-aware order APIs (`SPOT` vs `FUTURES`) on:
+   - `get_open_orders(...)`
+   - `cancel_order(...)`
+   - `get_order_status(...)`.
+7. Added new config/env surfaces in `bot/config.py` and `.env.example` for:
+   - PIT pipeline
+   - risk engine
+   - reconciliation controls.
+8. Added/updated tests:
+   - new: `tests/test_data_pipeline.py`, `tests/test_risk_engine.py`, `tests/test_reconciliation.py`
+   - expanded: `tests/test_main.py`, `tests/test_order_manager.py`, `tests/test_database.py`, `tests/test_db_integration.py`, `tests/test_binance_api.py`.
+9. Updated tracker + matrix entries and marked `P2-01`, `P2-05`, and `P2-06` as `done`.
+- Files changed:
+1. `bot/data_pipeline/__init__.py`
+2. `bot/data_pipeline/point_in_time.py`
+3. `bot/risk_engine.py`
+4. `bot/reconciliation.py`
+5. `bot/config.py`
+6. `.env.example`
+7. `bot/database.py`
+8. `bot/db_integration.py`
+9. `bot/binance_api.py`
+10. `bot/order_manager.py`
+11. `bot/main.py`
+12. `tests/test_data_pipeline.py`
+13. `tests/test_risk_engine.py`
+14. `tests/test_reconciliation.py`
+15. `tests/test_main.py`
+16. `tests/test_order_manager.py`
+17. `tests/test_database.py`
+18. `tests/test_db_integration.py`
+19. `tests/test_binance_api.py`
+20. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+21. `docs/production_execution/TEST_MATRIX.md`
+22. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_data_pipeline.py tests/test_risk_engine.py tests/test_reconciliation.py tests/test_database.py -k "feature_snapshot or risk_state or reconciliation_events or data_pipeline or pit or risk or reconciliation" -v`
+2. `venv/bin/pytest tests/test_db_integration.py -k "feature_snapshots or risk_state or reconciliation_events or regime_state" -v`
+3. `venv/bin/pytest tests/test_order_manager.py -k "reconcile or retry" -v`
+4. `venv/bin/pytest tests/test_main.py -k "risk_engine or trading_loop or policy_size" -v`
+5. `venv/bin/pytest tests/test_main_db_integration.py -k "trading_loop_uses_db" -v`
+6. `venv/bin/pytest tests/test_binance_api.py -k "futures_mode" -v`
+7. `venv/bin/pytest -q`
+- Result summary:
+1. All targeted P2 suites passed.
+2. Full regression passed (`247 passed, 3 skipped`).
+- Open blockers:
+1. None for `P2-01`, `P2-05`, or `P2-06`.
+
 ## 2026-02-08 (Session 16)
 
 - Session objective: finalize `P1-08`, `P1-09`, and `P1-10` with implementation, persistence, policy routing, and switch-stability safeguards.

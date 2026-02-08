@@ -658,10 +658,21 @@ def place_limit_sell(symbol, quantity, price):
         return None
 
 
-def get_open_orders(symbol=None):
-    """Get all open orders for a symbol or all symbols."""
+def get_open_orders(symbol=None, trade_mode: str = "SPOT"):
+    """Get all open orders for a symbol or all symbols in SPOT or FUTURES mode."""
     try:
+        trade_mode = str(trade_mode or "SPOT").upper()
         timestamp = int(time.time() * 1000) + time_offset
+        if trade_mode == "FUTURES":
+            if symbol:
+                return _execute_exchange_call(
+                    f"futures_get_open_orders:{symbol}",
+                    lambda: client.futures_get_open_orders(symbol=symbol, timestamp=timestamp)
+                )
+            return _execute_exchange_call(
+                "futures_get_open_orders:all",
+                lambda: client.futures_get_open_orders(timestamp=timestamp)
+            )
         if symbol:
             return _execute_exchange_call(
                 f"get_open_orders:{symbol}",
@@ -676,11 +687,19 @@ def get_open_orders(symbol=None):
         return []
 
 
-def cancel_order(symbol, order_id):
-    """Cancel an open order."""
+def cancel_order(symbol, order_id, trade_mode: str = "SPOT"):
+    """Cancel an open order in SPOT or FUTURES mode."""
     try:
+        trade_mode = str(trade_mode or "SPOT").upper()
         logger.info(f"Cancelling order: {order_id} for {symbol}")
         timestamp = int(time.time() * 1000) + time_offset
+        if trade_mode == "FUTURES":
+            result = _execute_exchange_call(
+                f"futures_cancel_order:{symbol}:{order_id}",
+                lambda: client.futures_cancel_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
+            )
+            logger.info(f"Futures order cancelled successfully: {result}")
+            return result
         result = _execute_exchange_call(
             f"cancel_order:{symbol}:{order_id}",
             lambda: client.cancel_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
@@ -692,10 +711,16 @@ def cancel_order(symbol, order_id):
         return None
 
 
-def get_order_status(symbol, order_id):
-    """Get the status of an order."""
+def get_order_status(symbol, order_id, trade_mode: str = "SPOT"):
+    """Get the status of an order in SPOT or FUTURES mode."""
     try:
+        trade_mode = str(trade_mode or "SPOT").upper()
         timestamp = int(time.time() * 1000) + time_offset
+        if trade_mode == "FUTURES":
+            return _execute_exchange_call(
+                f"futures_get_order:{symbol}:{order_id}",
+                lambda: client.futures_get_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
+            )
         return _execute_exchange_call(
             f"get_order:{symbol}:{order_id}",
             lambda: client.get_order(symbol=symbol, orderId=order_id, timestamp=timestamp)
