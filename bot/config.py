@@ -91,6 +91,11 @@ TRADING_CONFIG = {
     "trading": {
         "default_order_amount_usd": float(os.getenv('DEFAULT_ORDER_AMOUNT_USD', '10.0')),
         "max_order_amount_usd": float(os.getenv('MAX_ORDER_AMOUNT_USD', '100.0')),
+        # Hard pre-trade risk limits
+        "max_order_notional_usd": float(
+            os.getenv('MAX_ORDER_NOTIONAL_USD', os.getenv('MAX_ORDER_AMOUNT_USD', '100.0'))
+        ),
+        "max_position_exposure_usd": float(os.getenv('MAX_POSITION_EXPOSURE_USD', '250.0')),
         "risk_percentage": float(os.getenv('RISK_PERCENTAGE', '1.0')),
         "profit_target_percentage": float(os.getenv('PROFIT_TARGET_PERCENTAGE', '3.0')),
         "stop_loss_percentage": float(os.getenv('STOP_LOSS_PERCENTAGE', '2.0')),
@@ -110,6 +115,16 @@ TRADING_CONFIG = {
         "loop_interval_seconds": int(os.getenv('LOOP_INTERVAL_SECONDS', '60')),
         "max_consecutive_errors": int(os.getenv('MAX_CONSECUTIVE_ERRORS', '5')),
         "max_backoff_seconds": int(os.getenv('MAX_BACKOFF_SECONDS', '3600')),
+        "exchange_timeout_seconds": float(os.getenv('EXCHANGE_TIMEOUT_SECONDS', '10')),
+        "exchange_max_retries": int(os.getenv('EXCHANGE_MAX_RETRIES', '2')),
+        "exchange_retry_backoff_seconds": float(os.getenv('EXCHANGE_RETRY_BACKOFF_SECONDS', '0.5')),
+        "exchange_circuit_breaker_threshold": int(os.getenv('EXCHANGE_CIRCUIT_BREAKER_THRESHOLD', '5')),
+        "exchange_circuit_breaker_cooldown_seconds": float(os.getenv('EXCHANGE_CIRCUIT_BREAKER_COOLDOWN_SECONDS', '30')),
+        "llm_timeout_seconds": float(os.getenv('LLM_TIMEOUT_SECONDS', '20')),
+        "llm_max_retries": int(os.getenv('LLM_MAX_RETRIES', '2')),
+        "llm_retry_backoff_seconds": float(os.getenv('LLM_RETRY_BACKOFF_SECONDS', '0.75')),
+        "llm_circuit_breaker_threshold": int(os.getenv('LLM_CIRCUIT_BREAKER_THRESHOLD', '4')),
+        "llm_circuit_breaker_cooldown_seconds": float(os.getenv('LLM_CIRCUIT_BREAKER_COOLDOWN_SECONDS', '45')),
         "enable_live_trading": LIVE_TRADING_ENABLED
     }
 }
@@ -171,6 +186,10 @@ def get_consensus_method():
 def get_loop_interval():
     """Get the interval between trading loop iterations in seconds."""
     return TRADING_CONFIG["operation"].get("loop_interval_seconds", 60)
+
+def get_operation_parameter(parameter_name, default=None):
+    """Get a specific operational parameter."""
+    return TRADING_CONFIG["operation"].get(parameter_name, default)
 
 def is_live_trading_enabled():
     """Check if explicit live-trading execution is enabled."""

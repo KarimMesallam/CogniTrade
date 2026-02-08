@@ -247,6 +247,19 @@ class Database:
             records = records[offset:]
         records = records[:limit]
         return records
+
+    @staticmethod
+    def _prepare_trade_data(trade_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate and normalize trade payload for insert/upsert operations."""
+        required_fields = ['trade_id', 'symbol', 'side', 'quantity', 'price', 'timestamp', 'status']
+        for field in required_fields:
+            if field not in trade_data:
+                raise ValueError(f"Missing required field: {field}")
+
+        prepared = dict(trade_data)
+        if 'raw_data' in prepared and isinstance(prepared['raw_data'], dict):
+            prepared['raw_data'] = json.dumps(prepared['raw_data'])
+        return prepared
     
     def insert_trade(self, trade_data: Dict[str, Any]) -> bool:
         """
@@ -259,31 +272,56 @@ class Database:
             True if successful, False otherwise
         """
         try:
-            required_fields = ['trade_id', 'symbol', 'side', 'quantity', 'price', 'timestamp', 'status']
-            for field in required_fields:
-                if field not in trade_data:
-                    raise ValueError(f"Missing required field: {field}")
-            
-            # Convert any dict/object data to JSON string
-            if 'raw_data' in trade_data and isinstance(trade_data['raw_data'], dict):
-                trade_data['raw_data'] = json.dumps(trade_data['raw_data'])
+            prepared_trade_data = self._prepare_trade_data(trade_data)
             
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
                 # Build the SQL query dynamically
-                fields = ', '.join(trade_data.keys())
-                placeholders = ', '.join(['?' for _ in trade_data])
-                values = list(trade_data.values())
+                fields = ', '.join(prepared_trade_data.keys())
+                placeholders = ', '.join(['?' for _ in prepared_trade_data])
+                values = list(prepared_trade_data.values())
                 
                 query = f"INSERT INTO trades ({fields}) VALUES ({placeholders})"
                 cursor.execute(query, values)
                 conn.commit()
                 
-                logger.info(f"Trade {trade_data['trade_id']} inserted into database")
+                logger.info(f"Trade {prepared_trade_data['trade_id']} inserted into database")
                 return True
         except Exception as e:
             logger.error(f"Error inserting trade: {e}")
+            return False
+
+    def upsert_trade(self, trade_data: Dict[str, Any]) -> bool:
+        """
+        Insert or update a trade idempotently using trade_id as conflict key.
+
+        This enables safe retries for the same trade record without duplicate rows.
+        """
+        try:
+            prepared_trade_data = self._prepare_trade_data(trade_data)
+
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                fields = list(prepared_trade_data.keys())
+                placeholders = ', '.join(['?' for _ in fields])
+                values = [prepared_trade_data[field] for field in fields]
+
+                update_columns = [field for field in fields if field != "trade_id"]
+                update_set = ', '.join([f"{field} = excluded.{field}" for field in update_columns])
+
+                query = (
+                    f"INSERT INTO trades ({', '.join(fields)}) VALUES ({placeholders}) "
+                    f"ON CONFLICT(trade_id) DO UPDATE SET {update_set}"
+                )
+                cursor.execute(query, values)
+                conn.commit()
+
+                logger.info(f"Trade {prepared_trade_data['trade_id']} upserted into database")
+                return True
+        except Exception as e:
+            logger.error(f"Error upserting trade: {e}")
             return False
     
     def update_trade(self, trade_id: str, update_data: Dict[str, Any]) -> bool:

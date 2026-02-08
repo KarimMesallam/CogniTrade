@@ -87,6 +87,7 @@ class TestMainDbIntegration:
 
         # Create an OrderManager that uses our test database
         with patch('bot.order_manager.DatabaseIntegration', return_value=db_integration), \
+             patch('bot.order_manager.validate_order_filters', return_value=(True, None)), \
              patch('bot.main.log_decision_with_context'), \
              patch.object(db_integration, 'save_trade', return_value=True):  # Force save_trade to return True
 
@@ -174,6 +175,7 @@ class TestMainDbIntegration:
         try:
             # Create OrderManager with test database
             with patch('bot.order_manager.DatabaseIntegration', return_value=db_integration), \
+                 patch('bot.order_manager.validate_order_filters', return_value=(True, None)), \
                  patch.object(db_integration, 'save_trade', return_value=True):  # Force save_trade to return True
                 
                 order_manager = OrderManager("BTCUSDT", use_database=True)

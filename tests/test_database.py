@@ -131,6 +131,35 @@ def test_update_trade(test_db):
     assert trades_df.iloc[0]['notes'] == 'Updated test trade'
 
 
+def test_upsert_trade_idempotent_on_retry(test_db):
+    """Upsert should be idempotent for retries of the same trade_id."""
+    trade_id = str(uuid.uuid4())
+    base_payload = {
+        'trade_id': trade_id,
+        'symbol': 'BTCUSDT',
+        'side': 'BUY',
+        'quantity': 0.001,
+        'price': 50000.0,
+        'timestamp': datetime.now().isoformat(),
+        'status': 'NEW',
+        'strategy': 'retry_test',
+        'order_id': '987654321'
+    }
+
+    assert test_db.upsert_trade(base_payload) is True
+
+    retry_payload = dict(base_payload)
+    retry_payload['status'] = 'FILLED'
+    retry_payload['price'] = 50100.0
+    assert test_db.upsert_trade(retry_payload) is True
+
+    trades_df = test_db.get_trades(symbol='BTCUSDT', strategy='retry_test', limit=10)
+    assert len(trades_df) == 1
+    assert trades_df.iloc[0]['trade_id'] == trade_id
+    assert trades_df.iloc[0]['status'] == 'FILLED'
+    assert trades_df.iloc[0]['price'] == 50100.0
+
+
 def test_insert_and_get_signal(test_db):
     """Test inserting and retrieving signal records"""
     # Create test signal data

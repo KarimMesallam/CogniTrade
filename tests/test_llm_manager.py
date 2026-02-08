@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 import json
 import re
+import requests
 
 # Add the parent directory to the path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -189,6 +190,13 @@ def use_real_api():
         bool: True if using real API, False otherwise
     """
     return USE_REAL_API
+
+
+@pytest.fixture(autouse=True)
+def disable_resilience_sleep():
+    """Disable retry backoff sleep during tests."""
+    with patch('bot.resilience.time.sleep', return_value=None):
+        yield
 
 @pytest.fixture
 def llm_manager(use_real_api, mock_trading_config):
@@ -435,6 +443,44 @@ def test_call_primary_model_error(llm_manager):
         response = llm_manager._call_primary_model(prompt)
         assert "Error" in response
         assert "Connection failed" in response
+
+
+def test_call_primary_model_retries_on_timeout(llm_manager):
+    """Primary model call should retry on transient request failures."""
+    llm_manager.llm_max_retries = 1
+    llm_manager.llm_retry_backoff_seconds = 0.0
+
+    with patch('requests.post') as mock_post:
+        timeout_error = requests.Timeout("temporary timeout")
+        success_response = MagicMock()
+        success_response.status_code = 200
+        success_response.json.return_value = {
+            "choices": [
+                {"message": {"content": "BUY"}}
+            ]
+        }
+        mock_post.side_effect = [timeout_error, success_response]
+
+        response = llm_manager._call_primary_model("Test prompt")
+
+        assert response == "BUY"
+        assert mock_post.call_count == 2
+
+
+def test_primary_model_circuit_breaker_blocks_after_failures(llm_manager):
+    """Circuit breaker should block further requests after threshold failures."""
+    llm_manager.llm_max_retries = 0
+    llm_manager.primary_circuit_breaker.failure_threshold = 1
+    llm_manager.primary_circuit_breaker.cooldown_seconds = 999
+    llm_manager.primary_circuit_breaker.reset()
+
+    with patch('requests.post', side_effect=requests.Timeout("timeout")) as mock_post:
+        first_response = llm_manager._call_primary_model("First prompt")
+        second_response = llm_manager._call_primary_model("Second prompt")
+
+        assert "Error" in first_response
+        assert "circuit breaker" in second_response.lower()
+        assert mock_post.call_count == 1
 
 def test_process_with_secondary_model(llm_manager, sample_deepseek_response):
     """Test processing the primary model's response with the secondary model."""

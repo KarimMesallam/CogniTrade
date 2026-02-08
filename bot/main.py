@@ -308,6 +308,9 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
                 
                 return order
             else:
+                reject_reason = getattr(order_manager, "last_reject_reason", None)
+                if reject_reason:
+                    logger.warning(f"Buy order rejected by risk checks: {reject_reason}")
                 logger.warning("Buy order execution failed")
                 
         elif execute_sell:
@@ -329,6 +332,9 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
                     
                     return order
                 else:
+                    reject_reason = getattr(order_manager, "last_reject_reason", None)
+                    if reject_reason:
+                        logger.warning(f"Sell order rejected by risk checks: {reject_reason}")
                     logger.warning("Sell order execution failed")
             else:
                 logger.warning(f"No balance available to sell for {symbol.replace('USDT', '')}")
@@ -370,8 +376,25 @@ def trading_loop():
     
     # Initialize order manager with risk percentage from config
     risk_percentage = get_trading_parameter("risk_percentage", 1.0)
-    order_manager = OrderManager(SYMBOL, risk_percentage=risk_percentage, use_database=db_integration is not None)
-    logger.info(f"Order manager initialized for {SYMBOL} with risk percentage {risk_percentage}%")
+    max_order_notional_usd = get_trading_parameter(
+        "max_order_notional_usd",
+        get_trading_parameter("max_order_amount_usd", 100.0)
+    )
+    max_position_exposure_usd = get_trading_parameter("max_position_exposure_usd", 250.0)
+    order_manager = OrderManager(
+        SYMBOL,
+        risk_percentage=risk_percentage,
+        use_database=db_integration is not None,
+        max_order_notional_usd=max_order_notional_usd,
+        max_position_exposure_usd=max_position_exposure_usd,
+    )
+    logger.info(
+        "Order manager initialized for %s with risk percentage %s%%, max order notional %.2f, max exposure %.2f",
+        SYMBOL,
+        risk_percentage,
+        float(max_order_notional_usd),
+        float(max_position_exposure_usd),
+    )
     
     # Initialize LLM manager
     llm_manager = LLMManager()

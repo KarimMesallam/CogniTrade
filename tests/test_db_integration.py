@@ -39,6 +39,7 @@ def mock_db():
     mock = MagicMock(spec=Database)
     mock.insert_signal.return_value = 123
     mock.insert_trade.return_value = True
+    mock.upsert_trade.return_value = True
     mock.update_trade.return_value = True
     mock.store_market_data.return_value = True
     mock.add_alert.return_value = 456
@@ -159,7 +160,7 @@ class TestDatabaseIntegration:
     
     def test_save_trade_error(self, db_integration):
         """Test error handling when saving a trade fails."""
-        with patch.object(db_integration.db, 'insert_trade', side_effect=Exception("Test error")):
+        with patch.object(db_integration.db, 'upsert_trade', side_effect=Exception("Test error")):
             success = db_integration.save_trade({
                 "symbol": "BTCUSDT",
                 "side": "BUY",
@@ -168,6 +169,28 @@ class TestDatabaseIntegration:
                 "status": "FILLED"
             })
             assert success is False
+
+    def test_save_trade_derives_deterministic_id_from_order(self, db_integration):
+        """Missing trade_id should be derived deterministically from symbol+order_id."""
+        trade_data = {
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "quantity": 0.001,
+            "price": 50000.0,
+            "status": "FILLED",
+            "order_id": "12345"
+        }
+        assert db_integration.save_trade(trade_data) is True
+
+        expected_trade_id = "915d1f50-c943-5c9a-bda1-44d8e226afb6"
+        conn = sqlite3.connect(TEST_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT trade_id FROM trades WHERE order_id = ?", ("12345",))
+        row = cursor.fetchone()
+        conn.close()
+
+        assert row is not None
+        assert row[0] == expected_trade_id
     
     def test_update_trade(self, db_integration):
         """Test updating a trade in the database."""
@@ -366,7 +389,7 @@ class TestDatabaseIntegration:
             })
             
             assert success is True
-            mock_db.insert_trade.assert_called_once()
+            mock_db.upsert_trade.assert_called_once()
     
     def test_update_trade_with_mock(self, mock_db):
         """Test updating a trade using a mock database."""

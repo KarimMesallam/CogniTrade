@@ -1,8 +1,9 @@
 import os
 import sys
 import json
+import uuid
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 from datetime import datetime
 
 # Add the parent directory to the path to allow imports
@@ -38,7 +39,13 @@ def mock_order_data():
 def order_manager():
     """Fixture to create an OrderManager instance."""
     with patch('bot.order_manager.os.path.exists', return_value=False):
-        manager = OrderManager("BTCUSDT", 1.0)
+        manager = OrderManager(
+            "BTCUSDT",
+            1.0,
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0
+        )
     return manager
 
 class TestOrderManager:
@@ -46,7 +53,13 @@ class TestOrderManager:
     def test_init(self):
         """Test OrderManager initialization."""
         with patch('bot.order_manager.os.path.exists', return_value=False):
-            manager = OrderManager("BTCUSDT", 1.0)
+            manager = OrderManager(
+                "BTCUSDT",
+                1.0,
+                use_database=False,
+                max_order_notional_usd=0,
+                max_position_exposure_usd=0
+            )
         
         assert manager.symbol == "BTCUSDT"
         assert manager.risk_percentage == 1.0
@@ -60,13 +73,25 @@ class TestOrderManager:
         # Mock os.path.exists to return True and open to return mock data
         with patch('bot.order_manager.os.path.exists', return_value=True), \
              patch('builtins.open', mock_open(read_data=json.dumps(mock_history))):
-            manager = OrderManager("BTCUSDT", 1.0)
+            manager = OrderManager(
+                "BTCUSDT",
+                1.0,
+                use_database=False,
+                max_order_notional_usd=0,
+                max_position_exposure_usd=0
+            )
             
         assert manager.order_history == mock_history
     
     def test_save_order_history(self):
         """Test saving order history to file."""
-        manager = OrderManager("BTCUSDT", 1.0)
+        manager = OrderManager(
+            "BTCUSDT",
+            1.0,
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0
+        )
         manager.order_history = [{"orderId": 1, "status": "FILLED"}]
         
         mock_file = mock_open()
@@ -99,8 +124,22 @@ class TestOrderManager:
     
     @patch('bot.order_manager.place_market_buy')
     @patch('bot.order_manager.calculate_order_quantity')
-    def test_execute_market_buy(self, mock_calculate, mock_market_buy, order_manager, mock_order_data):
+    @patch('bot.order_manager.get_account_balance')
+    @patch('bot.order_manager.client')
+    @patch('bot.order_manager.validate_order_filters', return_value=(True, None))
+    def test_execute_market_buy(
+        self,
+        mock_validate_filters,
+        mock_client,
+        mock_get_account_balance,
+        mock_calculate,
+        mock_market_buy,
+        order_manager,
+        mock_order_data
+    ):
         """Test executing a market buy order."""
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
+        mock_get_account_balance.return_value = {"free": 0.0, "locked": 0.0, "total": 0.0}
         mock_calculate.return_value = 0.001
         mock_market_buy.return_value = mock_order_data
         
@@ -122,8 +161,18 @@ class TestOrderManager:
         assert result is None
     
     @patch('bot.order_manager.place_market_sell')
-    def test_execute_market_sell(self, mock_market_sell, order_manager, mock_order_data):
+    @patch('bot.order_manager.client')
+    @patch('bot.order_manager.validate_order_filters', return_value=(True, None))
+    def test_execute_market_sell(
+        self,
+        mock_validate_filters,
+        mock_client,
+        mock_market_sell,
+        order_manager,
+        mock_order_data
+    ):
         """Test executing a market sell order."""
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
         mock_market_sell.return_value = mock_order_data
         
         result = order_manager.execute_market_sell(0.001)
@@ -136,8 +185,18 @@ class TestOrderManager:
         assert result is None
     
     @patch('bot.order_manager.place_limit_buy')
-    def test_execute_limit_buy(self, mock_limit_buy, order_manager, mock_order_data):
+    @patch('bot.order_manager.get_account_balance')
+    @patch('bot.order_manager.validate_order_filters', return_value=(True, None))
+    def test_execute_limit_buy(
+        self,
+        mock_validate_filters,
+        mock_get_account_balance,
+        mock_limit_buy,
+        order_manager,
+        mock_order_data
+    ):
         """Test executing a limit buy order."""
+        mock_get_account_balance.return_value = {"free": 0.0, "locked": 0.0, "total": 0.0}
         mock_limit_buy.return_value = mock_order_data
         
         result = order_manager.execute_limit_buy(0.001, 50000)
@@ -150,7 +209,8 @@ class TestOrderManager:
         assert result is None
     
     @patch('bot.order_manager.place_limit_sell')
-    def test_execute_limit_sell(self, mock_limit_sell, order_manager, mock_order_data):
+    @patch('bot.order_manager.validate_order_filters', return_value=(True, None))
+    def test_execute_limit_sell(self, mock_validate_filters, mock_limit_sell, order_manager, mock_order_data):
         """Test executing a limit sell order."""
         mock_limit_sell.return_value = mock_order_data
         
@@ -226,4 +286,115 @@ class TestOrderManager:
         assert order_manager.get_order_history() == [1, 2, 3, 4, 5]
         
         # Test with limit
-        assert order_manager.get_order_history(limit=2) == [4, 5] 
+        assert order_manager.get_order_history(limit=2) == [4, 5]
+
+    @patch('bot.order_manager.place_market_buy')
+    @patch('bot.order_manager.get_account_balance')
+    @patch('bot.order_manager.client')
+    def test_market_buy_rejected_when_notional_exceeds_max(
+        self,
+        mock_client,
+        mock_get_balance,
+        mock_market_buy
+    ):
+        """Buy should be blocked when order notional exceeds configured max."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=10.0,
+            max_position_exposure_usd=1000.0
+        )
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
+        mock_get_balance.return_value = {"free": 0.0, "locked": 0.0, "total": 0.0}
+
+        result = manager.execute_market_buy(quantity=0.001)  # ~50 USDT notional
+
+        assert result is None
+        assert "Order notional" in manager.last_reject_reason
+        mock_market_buy.assert_not_called()
+
+    @patch('bot.order_manager.place_market_buy')
+    @patch('bot.order_manager.get_account_balance')
+    @patch('bot.order_manager.client')
+    def test_market_buy_rejected_when_exposure_exceeds_max(
+        self,
+        mock_client,
+        mock_get_balance,
+        mock_market_buy
+    ):
+        """Buy should be blocked when projected exposure exceeds configured max."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=60.0
+        )
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
+        mock_get_balance.return_value = {"free": 0.001, "locked": 0.0, "total": 0.001}
+
+        result = manager.execute_market_buy(quantity=0.001)  # projected exposure ~100 USDT
+
+        assert result is None
+        assert "Projected position exposure" in manager.last_reject_reason
+        mock_market_buy.assert_not_called()
+
+    @patch('bot.order_manager.place_market_buy')
+    @patch('bot.order_manager.validate_order_filters', return_value=(False, "step size mismatch"))
+    @patch('bot.order_manager.get_account_balance')
+    @patch('bot.order_manager.client')
+    def test_market_buy_rejected_when_binance_filters_fail(
+        self,
+        mock_client,
+        mock_get_balance,
+        mock_validate_filters,
+        mock_market_buy
+    ):
+        """Buy should be blocked when Binance filter validation fails."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0
+        )
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
+        mock_get_balance.return_value = {"free": 0.0, "locked": 0.0, "total": 0.0}
+
+        result = manager.execute_market_buy(quantity=0.001)
+
+        assert result is None
+        assert "Binance filter validation failed" in manager.last_reject_reason
+        mock_market_buy.assert_not_called()
+
+    @patch('bot.order_manager.place_market_sell')
+    @patch('bot.order_manager.client')
+    def test_market_sell_rejected_when_notional_exceeds_max(self, mock_client, mock_market_sell):
+        """Sell should be blocked when order notional exceeds configured max."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=10.0,
+            max_position_exposure_usd=0.0
+        )
+        mock_client.get_symbol_ticker.return_value = {"price": "50000"}
+
+        result = manager.execute_market_sell(0.001)  # ~50 USDT notional
+
+        assert result is None
+        assert "Order notional" in manager.last_reject_reason
+        mock_market_sell.assert_not_called()
+
+    def test_trade_id_is_deterministic_uuid_per_order_id(self, order_manager, mock_order_data):
+        """Repeated logs for same Binance order should keep a stable UUID trade_id."""
+        order_new = mock_order_data.copy()
+        order_new["status"] = "NEW"
+        order_filled = mock_order_data.copy()
+        order_filled["status"] = "FILLED"
+
+        order_manager._log_order(order_new, "BUY", "NEW")
+        first_trade_id = order_new["trade_id"]
+        uuid.UUID(first_trade_id)
+
+        order_manager._log_order(order_filled, "BUY", "FILLED")
+        second_trade_id = order_filled["trade_id"]
+
+        assert first_trade_id == second_trade_id

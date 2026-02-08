@@ -16,9 +16,21 @@ from bot.binance_api import (
     synchronize_time, get_recent_closes, get_account_balance,
     get_symbol_info, calculate_order_quantity, place_market_buy,
     place_market_sell, place_limit_buy, place_limit_sell,
-    get_open_orders, cancel_order, get_order_status, time_offset
+    get_open_orders, cancel_order, get_order_status, time_offset,
+    validate_order_filters, reset_exchange_circuit_breaker
 )
+import bot.binance_api as binance_api
 from bot.config import SYMBOL
+
+
+@pytest.fixture(autouse=True)
+def isolate_exchange_resilience(monkeypatch):
+    """Reset circuit breaker and disable retries by default in unit tests."""
+    reset_exchange_circuit_breaker()
+    monkeypatch.setattr(binance_api, "EXCHANGE_MAX_RETRIES", 0)
+    monkeypatch.setattr(binance_api, "EXCHANGE_RETRY_BACKOFF_SECONDS", 0.0)
+    yield
+    reset_exchange_circuit_breaker()
 
 @pytest.fixture(scope="module")
 def time_offset():
@@ -115,8 +127,53 @@ def test_calculate_order_quantity_with_mock(mock_client):
     quantity = calculate_order_quantity(SYMBOL, 100.0)
     assert quantity is None
 
+
 @patch('bot.binance_api.client')
-def test_place_market_buy(mock_client):
+def test_validate_order_filters(mock_client):
+    """Validate success and rejection paths for Binance pre-trade filters."""
+    mock_client.get_symbol_info.return_value = {
+        "symbol": SYMBOL,
+        "baseAsset": "BTC",
+        "filters": [
+            {"filterType": "LOT_SIZE", "minQty": "0.00010000", "maxQty": "100.00000000", "stepSize": "0.00010000"},
+            {"filterType": "PRICE_FILTER", "minPrice": "100.00", "maxPrice": "1000000.00", "tickSize": "0.10"},
+            {"filterType": "MIN_NOTIONAL", "minNotional": "10.00", "applyToMarket": True},
+        ],
+    }
+    mock_client.get_symbol_ticker.return_value = {"symbol": SYMBOL, "price": "50000.00"}
+
+    is_valid, reason = validate_order_filters(
+        symbol=SYMBOL,
+        side="BUY",
+        order_type="LIMIT",
+        quantity=0.001,
+        price=50000.0,
+    )
+    assert is_valid is True
+    assert reason is None
+
+    is_valid, reason = validate_order_filters(
+        symbol=SYMBOL,
+        side="BUY",
+        order_type="LIMIT",
+        quantity=0.001,
+        price=50000.05,
+    )
+    assert is_valid is False
+    assert "tickSize" in reason
+
+    is_valid, reason = validate_order_filters(
+        symbol=SYMBOL,
+        side="BUY",
+        order_type="MARKET",
+        quantity=0.0001,
+    )
+    assert is_valid is False
+    assert "MIN_NOTIONAL" in reason or "Notional" in reason
+
+@patch('bot.binance_api.validate_order_filters', return_value=(True, None))
+@patch('bot.binance_api.client')
+def test_place_market_buy(mock_client, mock_validate):
     """Test placing a market buy order."""
     mock_response = {
         "symbol": SYMBOL,
@@ -143,8 +200,9 @@ def test_place_market_buy(mock_client):
     order = place_market_buy(SYMBOL, 0.001)
     assert order is None
 
+@patch('bot.binance_api.validate_order_filters', return_value=(True, None))
 @patch('bot.binance_api.client')
-def test_place_market_sell(mock_client):
+def test_place_market_sell(mock_client, mock_validate):
     """Test placing a market sell order."""
     mock_response = {
         "symbol": SYMBOL,
@@ -171,8 +229,9 @@ def test_place_market_sell(mock_client):
     order = place_market_sell(SYMBOL, 0.001)
     assert order is None
 
+@patch('bot.binance_api.validate_order_filters', return_value=(True, None))
 @patch('bot.binance_api.client')
-def test_place_limit_buy(mock_client):
+def test_place_limit_buy(mock_client, mock_validate):
     """Test placing a limit buy order."""
     mock_response = {
         "symbol": SYMBOL,
@@ -199,8 +258,9 @@ def test_place_limit_buy(mock_client):
     order = place_limit_buy(SYMBOL, 0.001, 50000)
     assert order is None
 
+@patch('bot.binance_api.validate_order_filters', return_value=(True, None))
 @patch('bot.binance_api.client')
-def test_place_limit_sell(mock_client):
+def test_place_limit_sell(mock_client, mock_validate):
     """Test placing a limit sell order."""
     mock_response = {
         "symbol": SYMBOL,
@@ -226,6 +286,15 @@ def test_place_limit_sell(mock_client):
     mock_client.order_limit_sell.side_effect = Exception("Test error")
     order = place_limit_sell(SYMBOL, 0.001, 50000)
     assert order is None
+
+
+@patch('bot.binance_api.validate_order_filters', return_value=(False, "step size mismatch"))
+@patch('bot.binance_api.client')
+def test_place_limit_buy_blocks_invalid_filter(mock_client, mock_validate):
+    """Order placement should be blocked before exchange call when validation fails."""
+    order = place_limit_buy(SYMBOL, 0.00123, 50000)
+    assert order is None
+    mock_client.order_limit_buy.assert_not_called()
 
 @patch('bot.binance_api.client')
 def test_get_open_orders(mock_client):
@@ -320,8 +389,9 @@ def test_get_order_status(mock_client):
 
 # New tests for specific Binance exceptions and edge cases
 
+@patch('bot.binance_api.validate_order_filters', return_value=(True, None))
 @patch('bot.binance_api.client')
-def test_binance_api_exception_handling(mock_client):
+def test_binance_api_exception_handling(mock_client, mock_validate):
     """Test handling of specific Binance API exceptions."""
     # Test BinanceAPIException in get_account_balance
     mock_client.get_account.side_effect = BinanceAPIException(
@@ -417,3 +487,39 @@ def test_edge_cases(mock_client):
     mock_client.get_symbol_info.return_value = None
     result = calculate_order_quantity(SYMBOL, 100.0)
     assert result is None
+
+
+@patch('bot.binance_api.time.sleep', return_value=None)
+@patch('bot.binance_api.client')
+def test_exchange_retry_and_circuit_breaker(mock_client, mock_sleep):
+    """Exchange calls should retry on transient errors and then open circuit on repeated failures."""
+    reset_exchange_circuit_breaker()
+    original_threshold = binance_api.EXCHANGE_CIRCUIT_BREAKER.failure_threshold
+    original_cooldown = binance_api.EXCHANGE_CIRCUIT_BREAKER.cooldown_seconds
+
+    try:
+        # Retry path: one transient failure then success.
+        with patch('bot.binance_api.EXCHANGE_MAX_RETRIES', 1):
+            mock_client.get_symbol_info.side_effect = [
+                BinanceRequestException(message="temporary issue"),
+                {"symbol": SYMBOL, "filters": []},
+            ]
+            symbol_info = get_symbol_info(SYMBOL)
+            assert symbol_info is not None
+            assert symbol_info["symbol"] == SYMBOL
+            assert mock_client.get_symbol_info.call_count == 2
+
+        # Circuit-breaker path: open after first failure and block subsequent call.
+        reset_exchange_circuit_breaker()
+        binance_api.EXCHANGE_CIRCUIT_BREAKER.failure_threshold = 1
+        binance_api.EXCHANGE_CIRCUIT_BREAKER.cooldown_seconds = 999.0
+        with patch('bot.binance_api.EXCHANGE_MAX_RETRIES', 0):
+            mock_client.get_symbol_info.reset_mock()
+            mock_client.get_symbol_info.side_effect = BinanceRequestException(message="down")
+            assert get_symbol_info(SYMBOL) is None
+            assert get_symbol_info(SYMBOL) is None
+            assert mock_client.get_symbol_info.call_count == 1
+    finally:
+        binance_api.EXCHANGE_CIRCUIT_BREAKER.failure_threshold = original_threshold
+        binance_api.EXCHANGE_CIRCUIT_BREAKER.cooldown_seconds = original_cooldown
+        reset_exchange_circuit_breaker()

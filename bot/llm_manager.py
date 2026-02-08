@@ -5,9 +5,11 @@ import os
 import re
 from datetime import datetime
 from typing import Dict, Any, Optional
-from bot.config import TRADING_CONFIG, is_llm_enabled, get_required_llm_confidence
+from bot.config import TRADING_CONFIG, is_llm_enabled, get_required_llm_confidence, get_operation_parameter
+from bot.resilience import CircuitBreaker, CircuitBreakerOpenError, execute_with_resilience
 
 logger = logging.getLogger("trading_bot")
+RETRYABLE_LLM_HTTP_STATUS_CODES = {408, 425, 429, 500, 502, 503, 504}
 
 # Get LLM configuration from the new config system
 def get_llm_config():
@@ -52,6 +54,51 @@ class LLMManager:
         
         # Read required confidence from config
         self.required_confidence = get_required_llm_confidence()
+        self.request_timeout_seconds = float(get_operation_parameter("llm_timeout_seconds", 20.0))
+        self.llm_max_retries = int(get_operation_parameter("llm_max_retries", 2))
+        self.llm_retry_backoff_seconds = float(get_operation_parameter("llm_retry_backoff_seconds", 0.75))
+        llm_breaker_threshold = int(get_operation_parameter("llm_circuit_breaker_threshold", 4))
+        llm_breaker_cooldown = float(get_operation_parameter("llm_circuit_breaker_cooldown_seconds", 45.0))
+        self.primary_circuit_breaker = CircuitBreaker(
+            name="llm_primary",
+            failure_threshold=llm_breaker_threshold,
+            cooldown_seconds=llm_breaker_cooldown,
+        )
+        self.secondary_circuit_breaker = CircuitBreaker(
+            name="llm_secondary",
+            failure_threshold=llm_breaker_threshold,
+            cooldown_seconds=llm_breaker_cooldown,
+        )
+
+    def _post_json_with_resilience(self, endpoint, headers, payload, operation_name, circuit_breaker):
+        """
+        Execute an HTTP POST with timeout, retry/backoff, and circuit breaker protection.
+        """
+        serialized_payload = json.dumps(payload)
+
+        def _post():
+            response = requests.post(
+                endpoint,
+                headers=headers,
+                data=serialized_payload,
+                timeout=self.request_timeout_seconds,
+            )
+            if response.status_code in RETRYABLE_LLM_HTTP_STATUS_CODES:
+                raise requests.HTTPError(
+                    f"Retryable HTTP status {response.status_code}",
+                    response=response
+                )
+            return response
+
+        return execute_with_resilience(
+            operation_name=operation_name,
+            operation=_post,
+            max_retries=self.llm_max_retries,
+            initial_backoff_seconds=self.llm_retry_backoff_seconds,
+            retry_exceptions=(requests.RequestException, CircuitBreakerOpenError),
+            circuit_breaker=circuit_breaker,
+            logger=logger,
+        )
     
     def make_llm_decision(self, market_data, symbol, timeframe, context, strategy_signals=None):
         """
@@ -208,10 +255,12 @@ class LLMManager:
             # Log API endpoint
             logger.debug(f"Making API request to: {self.api_endpoint}")
             
-            response = requests.post(
-                self.api_endpoint,
+            response = self._post_json_with_resilience(
+                endpoint=self.api_endpoint,
                 headers=headers,
-                data=json.dumps(payload)
+                payload=payload,
+                operation_name=f"primary_llm:{provider}:{self.model}",
+                circuit_breaker=self.primary_circuit_breaker,
             )
             
             if response.status_code == 200:
@@ -323,10 +372,12 @@ class LLMManager:
             
             logger.debug(f"Making secondary API request to: {self.secondary_api_endpoint}")
             
-            response = requests.post(
-                self.secondary_api_endpoint,
+            response = self._post_json_with_resilience(
+                endpoint=self.secondary_api_endpoint,
                 headers=headers,
-                data=json.dumps(payload)
+                payload=payload,
+                operation_name=f"secondary_llm:{provider}:{self.secondary_model}",
+                circuit_breaker=self.secondary_circuit_breaker,
             )
             
             if response.status_code == 200:
@@ -478,10 +529,12 @@ class LLMManager:
                 "Authorization": f"Bearer {self.api_key}"
             }
             
-            response = requests.post(
-                self.api_endpoint,
+            response = self._post_json_with_resilience(
+                endpoint=self.api_endpoint,
                 headers=headers,
-                data=json.dumps(payload)
+                payload=payload,
+                operation_name=f"primary_llm_decision:{self.model}",
+                circuit_breaker=self.primary_circuit_breaker,
             )
             
             if response.status_code == 200:
@@ -713,57 +766,19 @@ def get_decision_from_llm(prompt):
 
 def call_real_llm_api(prompt):
     """
-    Call the DeepSeek R1 API service.
+    Backward-compatible helper that routes through LLMManager resilience logic.
     
     Returns:
         String: "BUY", "SELL", or "HOLD" decision
     """
     try:
-        # DeepSeek R1 specific request structure
-        payload = {
-            "model": LLM_MODEL,
-            "messages": [
-                {"role": "system", "content": """
-                    You are a trading assistant that helps make decisions based on technical indicators and market data.
-                    You should respond ONLY with "BUY", "SELL", or "HOLD".
-                    Consider technical indicators carefully and be conservative with your recommendations.
-                """},
-                {"role": "user", "content": prompt}
-            ],
-            "max_tokens": 10,
-            "temperature": 0.3
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {LLM_API_KEY}"
-        }
-        
-        response = requests.post(
-            LLM_API_ENDPOINT,
-            headers=headers,
-            data=json.dumps(payload)
-        )
-        
-        if response.status_code == 200:
-            # Extract the decision from the response format
-            response_data = response.json()
-            content = response_data["choices"][0]["message"]["content"].strip().upper()
-            
-            # Validate and normalize the response
-            if "BUY" in content:
-                return "BUY"
-            elif "SELL" in content:
-                return "SELL"
-            else:
-                return "HOLD"
-        else:
-            logger.error(f"LLM API error: {response.status_code}, {response.text}")
-            return "HOLD"  # Default to conservative action
-            
+        manager = LLMManager()
+        decision_result = manager._call_primary_model_for_decision(prompt)
+        decision = decision_result.get("decision", "HOLD")
+        return str(decision).upper()
     except Exception as e:
         logger.error(f"Exception calling LLM API: {e}")
-        return "HOLD"  # Default to conservative action
+        return "HOLD"
 
 def make_rule_based_decision(prompt):
     """

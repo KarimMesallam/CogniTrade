@@ -84,13 +84,24 @@ class DatabaseIntegration:
         try:
             # Ensure trade has a unique ID
             if 'trade_id' not in trade_data:
-                trade_data['trade_id'] = str(uuid.uuid4())
+                if trade_data.get('symbol') and trade_data.get('order_id') is not None:
+                    trade_data['trade_id'] = str(
+                        uuid.uuid5(
+                            uuid.NAMESPACE_URL,
+                            f"binance:{trade_data['symbol']}:{trade_data['order_id']}"
+                        )
+                    )
+                else:
+                    trade_data['trade_id'] = str(uuid.uuid4())
             
             # Ensure timestamp exists
             if 'timestamp' not in trade_data:
                 trade_data['timestamp'] = datetime.now().isoformat()
             
-            success = self.db.insert_trade(trade_data)
+            if hasattr(self.db, "upsert_trade"):
+                success = self.db.upsert_trade(trade_data)
+            else:
+                success = self.db.insert_trade(trade_data)
             if success:
                 logger.info(f"Saved trade {trade_data['trade_id']} to database")
             else:
