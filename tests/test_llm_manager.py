@@ -285,6 +285,17 @@ def test_make_rule_based_decision():
         # Check that reasoning is included
         assert "rule-based" in result["reasoning"].lower()
 
+def test_public_make_rule_based_decision_api():
+    """Public method should delegate to internal rule-based implementation."""
+    manager = LLMManager()
+    expected = {"decision": "hold", "confidence": 0.6, "reasoning": "Rule-based decision"}
+
+    with patch.object(manager, '_make_rule_based_decision', return_value=expected) as mock_internal:
+        result = manager.make_rule_based_decision({"price": 100.0}, {"simple": "HOLD"})
+
+    mock_internal.assert_called_once_with({"price": 100.0}, {"simple": "HOLD"})
+    assert result == expected
+
 @patch('bot.llm_manager.is_llm_enabled', return_value=True)
 def test_get_decision_from_llm(mock_is_llm_enabled, llm_manager):
     """Test the get_decision_from_llm function with mocked LLMManager."""
@@ -541,11 +552,11 @@ def test_make_llm_decision(llm_manager, sample_data, sample_deepseek_response):
 @patch('bot.llm_manager.is_llm_enabled', return_value=False)
 def test_make_llm_decision_disabled(mock_is_llm_enabled, llm_manager, sample_data):
     """Test the LLM decision making when LLM is disabled in config."""
-    with patch.object(llm_manager, '_make_rule_based_decision', return_value={
+    with patch.object(llm_manager, 'make_rule_based_decision', return_value={
         "decision": "HOLD",
         "confidence": 0.6, 
         "reasoning": "Rule-based decision"
-    }):
+    }) as mock_public_rule_based:
         result = llm_manager.make_llm_decision(
             sample_data['market_data'],
             'BTCUSDT',
@@ -558,6 +569,7 @@ def test_make_llm_decision_disabled(mock_is_llm_enabled, llm_manager, sample_dat
         assert result["decision"] == "HOLD"
         assert result["confidence"] == 0.6
         assert "Rule-based" in result["reasoning"]
+        mock_public_rule_based.assert_called_once()
 
 @pytest.mark.skipif(not USE_REAL_API or not DEEPSEEK_KEY_AVAILABLE or not OPENAI_KEY_AVAILABLE,
                    reason="Skipping real API integration test - need both API keys")

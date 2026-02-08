@@ -18,10 +18,6 @@ from bot.backtesting.models.results import BacktestResult, PerformanceMetrics
 # Create test client - updated for newer FastAPI/starlette versions
 client = TestClient(app)
 
-# Set up module-level mocks for strategy and backtesting
-strategy.sma_crossover_strategy = MagicMock(return_value='BUY')
-strategy.rsi_strategy = MagicMock(return_value='SELL')
-
 # Fixture for mocking the database
 @pytest.fixture
 def mock_db():
@@ -51,14 +47,6 @@ def mock_llm_manager():
         manager_mock = MagicMock()
         mock.return_value = manager_mock
         yield manager_mock
-
-# Mock strategy functions
-@pytest.fixture(autouse=True)
-def mock_strategy_functions():
-    # Create strategy function mocks
-    with patch('bot.strategy.sma_crossover_strategy', MagicMock(return_value='BUY')), \
-         patch('bot.strategy.rsi_strategy', MagicMock(return_value='SELL')):
-        yield
 
 # Test API health check
 def test_health_check():
@@ -142,10 +130,8 @@ def test_get_account_info(mock_binance_client):
     mock_binance_client.get_account.side_effect = Exception("API error")
     response = client.get("/account/info")
     
-    # Should return mock data instead of error
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "balances" in response.json()
+    assert response.status_code == 502
+    assert "detail" in response.json()
 
 # Test get symbols endpoint
 def test_get_symbols(mock_binance_client):
@@ -168,10 +154,8 @@ def test_get_symbols(mock_binance_client):
     mock_binance_client.get_exchange_info.side_effect = Exception("API error")
     response = client.get("/market/symbols")
     
-    # Should return mock data instead of error
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "symbols" in response.json()
+    assert response.status_code == 502
+    assert "detail" in response.json()
 
 # Test get market data endpoint
 def test_get_market_data(mock_binance_client):
@@ -200,10 +184,8 @@ def test_get_market_data(mock_binance_client):
     mock_binance_client.get_klines.side_effect = Exception("API error")
     response = client.get("/market/data/BTCUSDT/1h?limit=2")
     
-    # Should return mock data instead of error
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "candles" in response.json()
+    assert response.status_code == 502
+    assert "detail" in response.json()
 
 # Test get strategies endpoint
 def test_get_strategies():
@@ -353,6 +335,9 @@ def test_llm_decision_rule_based(mock_llm_manager):
         "confidence": 0.8,
         "reasoning": "Strong buy signal from technical indicators"
     }
+    mock_llm_manager._make_rule_based_decision.side_effect = AssertionError(
+        "Private fallback should not be used by API"
+    )
     
     # Request data
     request_data = {
@@ -383,6 +368,7 @@ def test_llm_decision_rule_based(mock_llm_manager):
     
     # Verify the right method was called
     mock_llm_manager.make_rule_based_decision.assert_called_once()
+    mock_llm_manager._make_rule_based_decision.assert_not_called()
     mock_llm_manager.make_llm_decision.assert_not_called()
 
 # Test LLM integration endpoint with actual LLM
@@ -445,17 +431,29 @@ def test_llm_decision_error_handling(mock_llm_manager):
     
     response = client.post("/llm/decision", json=request_data)
     
-    # Should return a default 'hold' decision
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert response.json()["decision"] == "hold"
-    assert "reasoning" in response.json()
-    assert "Error" in response.json()["reasoning"]
+    assert response.status_code == 500
+    assert "detail" in response.json()
+
+def test_llm_decision_invalid_payload(mock_llm_manager):
+    # Force an invalid manager response shape
+    mock_llm_manager.make_rule_based_decision.return_value = {"decision": "buy"}
+
+    request_data = {
+        "symbol": "BTCUSDT",
+        "timeframe": "1h",
+        "market_data": {"price": 40000},
+        "context": "Market analysis",
+        "strategy_signals": {}
+    }
+
+    response = client.post("/llm/decision", json=request_data)
+    assert response.status_code == 500
+    assert "detail" in response.json()
 
 # Test database trades endpoint
 def test_database_trades(mock_db):
     # Mock the database response
-    mock_db.get_trades.return_value = [
+    mock_db.get_trade_records.return_value = [
         {
             "id": 1,
             "symbol": "BTCUSDT",
@@ -477,7 +475,7 @@ def test_database_trades(mock_db):
     assert "trades" in response.json()
     
     # Test filtering by symbol
-    mock_db.get_trades_by_symbol.return_value = [
+    mock_db.get_trade_records.return_value = [
         {
             "id": 1,
             "symbol": "ETHUSDT",
@@ -496,21 +494,19 @@ def test_database_trades(mock_db):
     
     assert response.status_code == 200
     assert "trades" in response.json()
-    mock_db.get_trades_by_symbol.assert_called_once_with("ETHUSDT", 10, 0)
+    mock_db.get_trade_records.assert_called_with(symbol="ETHUSDT", limit=10, offset=0)
     
     # Test error handling
-    mock_db.get_trades.side_effect = Exception("Database error")
+    mock_db.get_trade_records.side_effect = Exception("Database error")
     response = client.get("/database/trades?limit=10")
     
-    # Should return mock data
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "trades" in response.json()
+    assert response.status_code == 500
+    assert "detail" in response.json()
 
 # Test database signals endpoint
 def test_database_signals(mock_db):
     # Mock the database response
-    mock_db.get_signals.return_value = [
+    mock_db.get_signal_records.return_value = [
         {
             "id": 1,
             "symbol": "BTCUSDT",
@@ -534,16 +530,21 @@ def test_database_signals(mock_db):
     
     assert response.status_code == 200
     assert "signals" in response.json()
-    mock_db.get_signals.assert_called_with("BTCUSDT", "rsi", 10, 0)
+    mock_db.get_signal_records.assert_called_with(symbol="BTCUSDT", strategy="rsi", limit=10, offset=0)
     
     # Test error handling
-    mock_db.get_signals.side_effect = Exception("Database error")
+    mock_db.get_signal_records.side_effect = Exception("Database error")
     response = client.get("/database/signals?limit=10")
     
-    # Should return mock data
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-    assert "signals" in response.json()
+    assert response.status_code == 500
+    assert "detail" in response.json()
+
+def test_database_pagination_validation():
+    trades_response = client.get("/database/trades?limit=0")
+    assert trades_response.status_code == 422
+
+    signals_response = client.get("/database/signals?offset=-1")
+    assert signals_response.status_code == 422
 
 # Test starting the bot with LLM strategy
 def test_start_with_llm_strategy(mock_background_tasks):

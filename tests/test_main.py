@@ -65,6 +65,48 @@ def mock_order_manager():
         yield mock_manager
 
 class TestMain:
+    def test_initialize_bot_blocks_live_mode_without_explicit_enable(self):
+        """Live mode must be blocked unless explicitly enabled."""
+        with patch('bot.main.TESTNET', False), \
+             patch('bot.main.is_live_trading_enabled', return_value=False), \
+             patch('bot.main.synchronize_time') as mock_sync_time, \
+             patch('bot.main.client') as mock_client:
+            result = initialize_bot()
+
+        assert result is False
+        mock_sync_time.assert_not_called()
+        mock_client.get_server_time.assert_not_called()
+
+    @patch('bot.main.get_account_balance')
+    @patch('bot.main.synchronize_time')
+    @patch('bot.main.client')
+    def test_initialize_bot_allows_live_mode_with_explicit_enable(
+        self,
+        mock_client,
+        mock_sync_time,
+        mock_balances
+    ):
+        """Live mode can initialize only with explicit opt-in."""
+        with patch('bot.main.TESTNET', False), patch('bot.main.is_live_trading_enabled', return_value=True):
+            mock_sync_time.return_value = 100
+            mock_balances.return_value = {
+                "BTC": {"free": 1.0, "locked": 0.0},
+                "USDT": {"free": 5000.0, "locked": 0.0}
+            }
+            mock_client.get_server_time.return_value = {"serverTime": int(time.time() * 1000)}
+            mock_client.get_symbol_info.return_value = {"symbol": "BTCUSDT", "status": "TRADING"}
+            result = initialize_bot()
+
+        assert result is True
+        mock_sync_time.assert_called_once()
+        mock_client.get_server_time.assert_called_once()
+
+    def test_trading_loop_blocks_live_mode_without_explicit_enable(self):
+        """Trading loop should fail fast when live safety gate is not satisfied."""
+        with patch('bot.main.TESTNET', False), patch('bot.main.is_live_trading_enabled', return_value=False):
+            with pytest.raises(RuntimeError, match="safety gate"):
+                trading_loop()
+
     
     @patch('bot.main.get_account_balance')
     @patch('bot.main.synchronize_time')

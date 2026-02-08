@@ -162,6 +162,67 @@ def test_insert_and_get_signal(test_db):
     assert isinstance(signals_df.iloc[0]['indicators'], dict)
     assert signals_df.iloc[0]['indicators']['rsi'] == 28.5
 
+def test_get_trade_records_serialization_and_offset(test_db):
+    """Trade record API should return JSON-safe records and honor offset."""
+    base_time = datetime(2024, 1, 1, 12, 0, 0)
+    inserted_trade_ids = []
+
+    for i in range(3):
+        trade_id = str(uuid.uuid4())
+        inserted_trade_ids.append(trade_id)
+        test_db.insert_trade({
+            'trade_id': trade_id,
+            'symbol': 'BTCUSDT',
+            'side': 'BUY',
+            'quantity': 0.01 + i,
+            'price': 50000.0 + i,
+            'timestamp': (base_time + timedelta(minutes=i)).isoformat(),
+            'status': 'FILLED',
+            'strategy': 'TestStrategy',
+            'raw_data': {'source': 'unit-test', 'idx': i}
+        })
+
+    records = test_db.get_trade_records(symbol='BTCUSDT', limit=1, offset=1)
+
+    assert len(records) == 1
+    assert records[0]['trade_id'] == inserted_trade_ids[1]
+    assert isinstance(records[0]['timestamp'], str)
+    assert isinstance(records[0]['raw_data'], dict)
+    assert records[0]['raw_data']['source'] == 'unit-test'
+
+def test_get_signal_records_serialization_and_offset(test_db):
+    """Signal record API should return JSON-safe records and honor offset."""
+    base_time = datetime(2024, 1, 1, 12, 0, 0)
+    inserted_signal_ids = []
+
+    for i in range(2):
+        signal_id = test_db.insert_signal({
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'strategy': 'RSI_Strategy',
+            'signal': 'BUY' if i == 0 else 'SELL',
+            'timestamp': (base_time + timedelta(minutes=i)).isoformat(),
+            'indicators': {'rsi': 30 + i},
+            'price': 50000.0 + i
+        })
+        inserted_signal_ids.append(signal_id)
+
+    records = test_db.get_signal_records(symbol='BTCUSDT', strategy='RSI_Strategy', limit=1, offset=1)
+
+    assert len(records) == 1
+    assert records[0]['signal_id'] == inserted_signal_ids[0]
+    assert isinstance(records[0]['timestamp'], str)
+    assert isinstance(records[0]['indicators'], dict)
+    assert records[0]['indicators']['rsi'] == 30
+
+def test_record_method_pagination_validation(test_db):
+    """Record-list methods should validate pagination inputs."""
+    with pytest.raises(ValueError):
+        test_db.get_trade_records(limit=-1)
+
+    with pytest.raises(ValueError):
+        test_db.get_signal_records(offset=-1)
+
 
 def test_store_and_get_market_data(test_db):
     """Test storing and retrieving market data"""

@@ -3,9 +3,10 @@ import sqlite3
 import pandas as pd
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from typing import Dict, List, Any, Optional, Union
 import time
+import math
 
 logger = logging.getLogger("trading_bot")
 
@@ -147,6 +148,105 @@ class Database:
         except Exception as e:
             logger.error(f"Error initializing database: {e}")
             return False
+
+    @staticmethod
+    def _validate_pagination(limit: int, offset: int = 0) -> None:
+        """Validate pagination inputs for record-list APIs."""
+        if limit < 0:
+            raise ValueError("limit must be >= 0")
+        if offset < 0:
+            raise ValueError("offset must be >= 0")
+
+    @classmethod
+    def _to_json_safe(cls, value: Any) -> Any:
+        """Convert DB values to JSON-serializable Python primitives."""
+        if isinstance(value, dict):
+            return {key: cls._to_json_safe(val) for key, val in value.items()}
+        if isinstance(value, list):
+            return [cls._to_json_safe(item) for item in value]
+        if isinstance(value, tuple):
+            return [cls._to_json_safe(item) for item in value]
+        if isinstance(value, (datetime, date, pd.Timestamp)):
+            return value.isoformat()
+
+        if hasattr(value, "item"):
+            try:
+                value = value.item()
+            except Exception:
+                pass
+
+        if isinstance(value, float):
+            if math.isnan(value) or math.isinf(value):
+                return None
+            return value
+
+        try:
+            if pd.isna(value):
+                return None
+        except Exception:
+            pass
+
+        return value
+
+    @classmethod
+    def _records_from_dataframe(cls, data: Union[pd.DataFrame, List[Dict[str, Any]], None]) -> List[Dict[str, Any]]:
+        """Normalize DataFrame/list outputs to JSON-safe record lists."""
+        if data is None:
+            return []
+        if isinstance(data, list):
+            return [cls._to_json_safe(record) for record in data]
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(f"Unsupported record source type: {type(data)}")
+        records = data.to_dict(orient="records")
+        return [cls._to_json_safe(record) for record in records]
+
+    def get_trade_records(
+        self,
+        symbol: str = None,
+        strategy: str = None,
+        status: str = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve trades as JSON-safe record dictionaries.
+        """
+        self._validate_pagination(limit=limit, offset=offset)
+        trades_df = self.get_trades(
+            symbol=symbol,
+            strategy=strategy,
+            status=status,
+            limit=limit + offset
+        )
+        records = self._records_from_dataframe(trades_df)
+        if offset:
+            records = records[offset:]
+        records = records[:limit]
+        return records
+
+    def get_signal_records(
+        self,
+        symbol: str = None,
+        timeframe: str = None,
+        strategy: str = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve signals as JSON-safe record dictionaries.
+        """
+        self._validate_pagination(limit=limit, offset=offset)
+        signals_df = self.get_signals(
+            symbol=symbol,
+            timeframe=timeframe,
+            strategy=strategy,
+            limit=limit + offset
+        )
+        records = self._records_from_dataframe(signals_df)
+        if offset:
+            records = records[offset:]
+        records = records[:limit]
+        return records
     
     def insert_trade(self, trade_data: Dict[str, Any]) -> bool:
         """

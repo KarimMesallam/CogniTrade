@@ -9,7 +9,10 @@ API_KEY = os.getenv('API_KEY')
 API_SECRET = os.getenv('API_SECRET')
 
 # Basic configuration
-TESTNET = os.getenv('TESTNET', 'False').lower() in ('true', '1', 't')
+# Safe defaults: run on testnet unless explicitly disabled and never allow live
+# trading unless explicitly enabled.
+TESTNET = os.getenv('TESTNET', 'True').lower() in ('true', '1', 't')
+LIVE_TRADING_ENABLED = os.getenv('ENABLE_LIVE_TRADING', 'False').lower() in ('true', '1', 't')
 SYMBOL = os.getenv('SYMBOL', 'BTCUSDT')
 
 # Trading strategy configuration
@@ -68,7 +71,7 @@ TRADING_CONFIG = {
                 },
                 "secondary": {
                     "provider": os.getenv('LLM_SECONDARY_PROVIDER', 'openai'),
-                    "model": os.getenv('LLM_SECONDARY_MODEL', 'gpt-4o'),
+                    "model": os.getenv('LLM_SECONDARY_MODEL', 'gpt-5-mini'),
                     "api_key": os.getenv('OPENAI_API_KEY', ''),
                     "api_endpoint": os.getenv('OPENAI_API_ENDPOINT', 'https://api.openai.com/v1/chat/completions'),
                     "temperature": float(os.getenv('OPENAI_TEMPERATURE', '0.1'))
@@ -106,7 +109,8 @@ TRADING_CONFIG = {
     "operation": {
         "loop_interval_seconds": int(os.getenv('LOOP_INTERVAL_SECONDS', '60')),
         "max_consecutive_errors": int(os.getenv('MAX_CONSECUTIVE_ERRORS', '5')),
-        "max_backoff_seconds": int(os.getenv('MAX_BACKOFF_SECONDS', '3600'))
+        "max_backoff_seconds": int(os.getenv('MAX_BACKOFF_SECONDS', '3600')),
+        "enable_live_trading": LIVE_TRADING_ENABLED
     }
 }
 
@@ -167,3 +171,7 @@ def get_consensus_method():
 def get_loop_interval():
     """Get the interval between trading loop iterations in seconds."""
     return TRADING_CONFIG["operation"].get("loop_interval_seconds", 60)
+
+def is_live_trading_enabled():
+    """Check if explicit live-trading execution is enabled."""
+    return TRADING_CONFIG["operation"].get("enable_live_trading", False)

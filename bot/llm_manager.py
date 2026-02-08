@@ -70,7 +70,7 @@ class LLMManager:
         # Check if LLM decisions are enabled in config
         if not is_llm_enabled():
             logger.info("LLM-based decisions are disabled in config. Using rule-based decision.")
-            return self._make_rule_based_decision(market_data, strategy_signals)
+            return self.make_rule_based_decision(market_data, strategy_signals)
         
         # Prepare context string from input data
         prompt = self._prepare_prompt(market_data, symbol, timeframe, context, strategy_signals)
@@ -124,7 +124,7 @@ class LLMManager:
             # Rule-based fallback
             else:
                 logger.warning("No valid LLM API keys found. Falling back to rule-based decision.")
-                return self._make_rule_based_decision(market_data, strategy_signals)
+                return self.make_rule_based_decision(market_data, strategy_signals)
                 
             return {
                 "decision": decision.upper(),
@@ -603,6 +603,12 @@ class LLMManager:
         else:
             return 0.7  # Default moderate confidence
     
+    def make_rule_based_decision(self, market_data, strategy_signals=None):
+        """
+        Public rule-based decision API for callers that need deterministic fallback.
+        """
+        return self._make_rule_based_decision(market_data, strategy_signals)
+
     def _make_rule_based_decision(self, market_data, strategy_signals=None):
         """
         Make a rule-based trading decision without using an LLM.

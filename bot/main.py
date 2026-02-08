@@ -5,7 +5,7 @@ from binance.exceptions import BinanceAPIException, BinanceRequestException
 from bot.config import (
     SYMBOL, TESTNET, TRADING_CONFIG, 
     get_trading_parameter, get_loop_interval, 
-    get_consensus_method, is_llm_agreement_required
+    get_consensus_method, is_llm_agreement_required, is_live_trading_enabled
 )
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
@@ -72,9 +72,32 @@ def handle_testnet_balance(symbol='BTC'):
         logger.error(f"Error checking testnet balance: {e}")
         return False
 
+def enforce_live_trading_safety_gate():
+    """
+    Enforce explicit opt-in for live trading.
+
+    Returns:
+        bool: True when trading mode is allowed, otherwise False.
+    """
+    if TESTNET:
+        return True
+
+    if is_live_trading_enabled():
+        logger.warning("Live trading explicitly enabled (TESTNET=False and ENABLE_LIVE_TRADING=True).")
+        return True
+
+    logger.critical(
+        "Live trading safety gate blocked startup: TESTNET=False while ENABLE_LIVE_TRADING is not enabled."
+    )
+    logger.critical("Set ENABLE_LIVE_TRADING=True only after completing production readiness checks.")
+    return False
+
 def initialize_bot():
     """Initialize the trading bot and verify connectivity."""
     try:
+        if not enforce_live_trading_safety_gate():
+            return False
+
         # Synchronize time with Binance server
         synchronize_time()
         
@@ -323,6 +346,9 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
 
 def trading_loop():
     """Main trading loop."""
+    if not enforce_live_trading_safety_gate():
+        raise RuntimeError("Live trading safety gate blocked trading loop startup")
+
     logger.info("Starting trading loop...")
     
     # Initialize database integration
@@ -462,6 +488,10 @@ if __name__ == '__main__':
     logger.info("=== Starting trading bot ===")
     logger.info(f"Trading symbol: {SYMBOL}")
     logger.info(f"Mode: {'TESTNET' if TESTNET else 'LIVE'}")
+    logger.info(
+        "Live trading explicit enable flag: %s",
+        "enabled" if is_live_trading_enabled() else "disabled"
+    )
     
     if initialize_bot():
         try:

@@ -5,7 +5,7 @@ import json
 import asyncio
 import logging
 from typing import Dict, List, Optional, Any, Union
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
@@ -79,6 +79,87 @@ class LLMDecisionRequest(BaseModel):
     market_data: Dict[str, Any]
     context: str
     strategy_signals: Optional[Dict[str, Any]] = None
+
+
+def _records_from_query_result(query_result: Any) -> List[Dict[str, Any]]:
+    """Normalize DB query output to a JSON-serializable list of records."""
+    if query_result is None:
+        return []
+    if isinstance(query_result, list):
+        return query_result
+    if hasattr(query_result, "to_dict"):
+        return query_result.to_dict(orient="records")
+    raise TypeError(f"Unsupported query result type: {type(query_result)}")
+
+
+def _normalize_llm_decision_payload(decision: Any) -> Dict[str, Any]:
+    """Validate LLM decision payload shape for consistent API responses."""
+    if not isinstance(decision, dict):
+        raise ValueError("LLM decision must be a dictionary")
+
+    required_keys = ("decision", "confidence", "reasoning")
+    missing = [key for key in required_keys if key not in decision]
+    if missing:
+        raise ValueError(f"LLM decision missing required keys: {', '.join(missing)}")
+
+    return {
+        "decision": decision["decision"],
+        "confidence": decision["confidence"],
+        "reasoning": decision["reasoning"],
+    }
+
+
+def _build_sma_crossover_backtest_strategy(short_period: int, long_period: int, timeframe: str):
+    """Build a backtesting-compatible SMA crossover strategy function."""
+    def _strategy(data_dict, _symbol):
+        frame = data_dict.get(timeframe)
+        if frame is None or frame.empty or len(frame) < long_period + 1:
+            return "HOLD"
+
+        short_sma = frame["close"].rolling(window=short_period).mean()
+        long_sma = frame["close"].rolling(window=long_period).mean()
+        prev_short, curr_short = short_sma.iloc[-2], short_sma.iloc[-1]
+        prev_long, curr_long = long_sma.iloc[-2], long_sma.iloc[-1]
+
+        if any(value != value for value in [prev_short, curr_short, prev_long, curr_long]):
+            return "HOLD"
+        if prev_short <= prev_long and curr_short > curr_long:
+            return "BUY"
+        if prev_short >= prev_long and curr_short < curr_long:
+            return "SELL"
+        return "HOLD"
+
+    _strategy.__name__ = f"sma_crossover_{short_period}_{long_period}"
+    return _strategy
+
+
+def _build_rsi_backtest_strategy(period: int, overbought: int, oversold: int, timeframe: str):
+    """Build a backtesting-compatible RSI strategy function."""
+    def _strategy(data_dict, _symbol):
+        frame = data_dict.get(timeframe)
+        if frame is None or frame.empty or len(frame) < period + 2:
+            return "HOLD"
+
+        delta = frame["close"].diff()
+        gain = delta.where(delta > 0, 0.0)
+        loss = -delta.where(delta < 0, 0.0)
+        avg_gain = gain.rolling(window=period).mean()
+        avg_loss = loss.rolling(window=period).mean()
+        relative_strength = avg_gain / avg_loss.replace(0, float("nan"))
+        rsi = 100 - (100 / (1 + relative_strength))
+
+        previous_rsi = rsi.iloc[-2]
+        current_rsi = rsi.iloc[-1]
+        if previous_rsi != previous_rsi or current_rsi != current_rsi:
+            return "HOLD"
+        if previous_rsi < oversold and current_rsi > oversold:
+            return "BUY"
+        if previous_rsi > overbought and current_rsi < overbought:
+            return "SELL"
+        return "HOLD"
+
+    _strategy.__name__ = f"rsi_{period}_{overbought}_{oversold}"
+    return _strategy
 
 # Trading bot instance
 trading_bot = None
@@ -164,16 +245,8 @@ async def get_account_info():
             "balances": balances
         }
     except Exception as e:
-        # Return mock data for now
-        return {
-            "status": "success",
-            "account_type": "spot",
-            "balances": [
-                {"asset": "BTC", "free": 0.5, "locked": 0.0},
-                {"asset": "ETH", "free": 5.0, "locked": 0.0},
-                {"asset": "USDT", "free": 10000.0, "locked": 0.0}
-            ]
-        }
+        logger.error(f"Error getting account info: {e}")
+        raise HTTPException(status_code=502, detail="Failed to fetch account info from exchange")
 
 # Get available trading pairs
 @app.get("/market/symbols")
@@ -193,17 +266,8 @@ async def get_symbols():
         
         return {"status": "success", "symbols": symbols}
     except Exception as e:
-        # Return mock data for now
-        return {
-            "status": "success",
-            "symbols": [
-                {"symbol": "BTCUSDT", "baseAsset": "BTC", "quoteAsset": "USDT"},
-                {"symbol": "ETHUSDT", "baseAsset": "ETH", "quoteAsset": "USDT"},
-                {"symbol": "BNBUSDT", "baseAsset": "BNB", "quoteAsset": "USDT"},
-                {"symbol": "ADAUSDT", "baseAsset": "ADA", "quoteAsset": "USDT"},
-                {"symbol": "SOLUSDT", "baseAsset": "SOL", "quoteAsset": "USDT"}
-            ]
-        }
+        logger.error(f"Error getting exchange symbols: {e}")
+        raise HTTPException(status_code=502, detail="Failed to fetch symbols from exchange")
 
 # Get market data for a specific symbol
 @app.get("/market/data/{symbol}/{interval}")
@@ -226,31 +290,8 @@ async def get_market_data(symbol: str, interval: str, limit: int = 100):
         
         return {"status": "success", "candles": candles}
     except Exception as e:
-        # Return mock data for now
-        import time
-        import random
-        
-        current_time = int(time.time())
-        candles = []
-        close_price = 40000.0
-        
-        for i in range(limit):
-            open_price = close_price
-            high_price = open_price * (1 + random.uniform(0, 0.02))
-            low_price = open_price * (1 - random.uniform(0, 0.02))
-            close_price = open_price * (1 + random.uniform(-0.01, 0.01))
-            candle_time = current_time - ((limit - i) * 3600)  # Assuming 1h intervals
-            
-            candles.append({
-                "time": candle_time,
-                "open": open_price,
-                "high": high_price,
-                "low": low_price,
-                "close": close_price,
-                "volume": random.uniform(10, 100)
-            })
-        
-        return {"status": "success", "candles": candles}
+        logger.error(f"Error getting market data for {symbol} ({interval}): {e}")
+        raise HTTPException(status_code=502, detail="Failed to fetch market data from exchange")
 
 # Get available strategies
 @app.get("/strategies")
@@ -335,29 +376,26 @@ async def run_backtest_endpoint(config: BacktestConfig):
     try:
         # Get the requested strategy function
         strat_func = None
+        primary_timeframe = config.timeframes[0]
         if config.strategy_name == "sma_crossover":
-            # Check if custom parameters are provided
-            if config.strategy_params and "short_period" in config.strategy_params and "long_period" in config.strategy_params:
-                short_period = int(config.strategy_params["short_period"])
-                long_period = int(config.strategy_params["long_period"])
-                # Create a partial function with the custom parameters
-                from functools import partial
-                strat_func = partial(strategy.sma_crossover_strategy, short_period=short_period, long_period=long_period)
-            else:
-                # Use default parameters
-                strat_func = strategy.sma_crossover_strategy
+            short_period = int(config.strategy_params.get("short_period", 10)) if config.strategy_params else 10
+            long_period = int(config.strategy_params.get("long_period", 50)) if config.strategy_params else 50
+            if short_period <= 0 or long_period <= 0 or short_period >= long_period:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid SMA parameters: require 0 < short_period < long_period"
+                )
+            strat_func = _build_sma_crossover_backtest_strategy(short_period, long_period, primary_timeframe)
         elif config.strategy_name == "rsi":
-            # Check if custom parameters are provided
-            if config.strategy_params and "period" in config.strategy_params:
-                period = int(config.strategy_params["period"])
-                overbought = int(config.strategy_params.get("overbought", 70))
-                oversold = int(config.strategy_params.get("oversold", 30))
-                # Create a partial function with the custom parameters
-                from functools import partial
-                strat_func = partial(strategy.rsi_strategy, period=period, overbought=overbought, oversold=oversold)
-            else:
-                # Use default parameters
-                strat_func = strategy.rsi_strategy
+            period = int(config.strategy_params.get("period", 14)) if config.strategy_params else 14
+            overbought = int(config.strategy_params.get("overbought", 70)) if config.strategy_params else 70
+            oversold = int(config.strategy_params.get("oversold", 30)) if config.strategy_params else 30
+            if period <= 1 or not (0 < oversold < overbought < 100):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid RSI parameters: require period > 1 and 0 < oversold < overbought < 100"
+                )
+            strat_func = _build_rsi_backtest_strategy(period, overbought, oversold, primary_timeframe)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown strategy: {config.strategy_name}")
         
@@ -405,80 +443,58 @@ async def run_backtest_endpoint(config: BacktestConfig):
 
 # Get order history
 @app.get("/orders/history")
-async def get_order_history(symbol: Optional[str] = None, limit: int = 100):
+async def get_order_history(symbol: Optional[str] = None, limit: int = Query(default=100, ge=1, le=1000)):
     try:
-        # In a real implementation, this would fetch orders from the database
-        # For now, return mock data
-        import time
-        import random
-        
+        db_connection = database.Database()
+        trade_records = db_connection.get_trade_records(symbol=symbol, limit=limit, offset=0)
         orders = []
-        current_time = int(time.time())
-        
-        for i in range(limit):
-            # Generate a random order
-            order_time = current_time - random.randint(60, 86400 * 7)  # Within the past week
-            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
-            side = random.choice(["buy", "sell"])
-            qty = round(random.uniform(0.01, 1.0), 3)
-            price = round(symbol_to_use.startswith("BTC") and random.uniform(38000, 45000) or random.uniform(2000, 3000), 2)
-            
+        for trade in trade_records:
+            quantity = float(trade.get("quantity") or 0.0)
+            price = float(trade.get("price") or 0.0)
+            raw_data = trade.get("raw_data")
+            order_type = "market"
+            if isinstance(raw_data, dict):
+                order_type = str(raw_data.get("type", order_type)).lower()
             orders.append({
-                "id": 1000 + i,
-                "time": order_time,
-                "symbol": symbol_to_use,
-                "side": side,
-                "type": "market",
-                "quantity": qty,
+                "id": trade.get("order_id") or trade.get("trade_id"),
+                "time": trade.get("timestamp"),
+                "symbol": trade.get("symbol"),
+                "side": str(trade.get("side", "")).lower(),
+                "type": order_type,
+                "quantity": quantity,
                 "price": price,
-                "value": round(qty * price, 2),
-                "status": "filled"
+                "value": round(quantity * price, 8),
+                "status": str(trade.get("status", "")).lower()
             })
-        
-        # Sort by time descending
-        orders.sort(key=lambda x: x["time"], reverse=True)
-        
+
         return {"status": "success", "orders": orders}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        logger.error(f"Error fetching order history: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch order history")
 
 # Get signal history
 @app.get("/signals/history")
-async def get_signal_history(symbol: Optional[str] = None, limit: int = 100):
+async def get_signal_history(symbol: Optional[str] = None, limit: int = Query(default=100, ge=1, le=1000)):
     try:
-        # In a real implementation, this would fetch signals from the database
-        # For now, return mock data
-        import time
-        import random
-        
+        db_connection = database.Database()
+        signal_records = db_connection.get_signal_records(symbol=symbol, limit=limit, offset=0)
         signals = []
-        current_time = int(time.time())
-        
-        for i in range(limit):
-            # Generate a random signal
-            signal_time = current_time - random.randint(60, 86400 * 7)  # Within the past week
-            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
-            signal_type = random.choice(["buy", "sell", "hold"])
-            strategy = random.choice(["sma_crossover", "rsi", "llm_decision"])
-            strength = round(random.uniform(0.6, 1.0), 2)
-            
+        for signal in signal_records:
             signals.append({
-                "id": 1000 + i,
-                "time": signal_time,
-                "symbol": symbol_to_use,
-                "timeframe": random.choice(["1m", "5m", "15m", "1h", "4h"]),
-                "strategy": strategy,
-                "signal": signal_type,
-                "strength": strength,
-                "price": round(symbol_to_use.startswith("BTC") and random.uniform(38000, 45000) or random.uniform(2000, 3000), 2)
+                "id": signal.get("signal_id"),
+                "time": signal.get("timestamp"),
+                "symbol": signal.get("symbol"),
+                "timeframe": signal.get("timeframe"),
+                "strategy": signal.get("strategy"),
+                "signal": str(signal.get("signal", "")).lower(),
+                "strength": signal.get("strength", None),
+                "price": signal.get("price")
             })
-        
-        # Sort by time descending
-        signals.sort(key=lambda x: x["time"], reverse=True)
-        
+
         return {"status": "success", "signals": signals}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        logger.error(f"Error fetching signal history: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch signal history")
 
 # LLM Integration endpoints
 @app.post("/llm/decision")
@@ -506,88 +522,59 @@ async def get_llm_decision(request: LLMDecisionRequest):
                 market_data=market_data,
                 strategy_signals=request.strategy_signals
             )
+
+        normalized_decision = _normalize_llm_decision_payload(decision)
         
         return {
             "status": "success",
-            "decision": decision["decision"],
-            "confidence": decision["confidence"],
-            "reasoning": decision["reasoning"]
+            "decision": normalized_decision["decision"],
+            "confidence": normalized_decision["confidence"],
+            "reasoning": normalized_decision["reasoning"]
         }
     except Exception as e:
-        # Return a default decision in case of errors
-        return {
-            "status": "success",
-            "decision": "hold",
-            "confidence": 0.5,
-            "reasoning": f"Error getting LLM decision: {str(e)}. Using default 'hold' decision."
-        }
+        logger.error(f"Error getting LLM decision: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get LLM decision")
 
 # Database operations endpoints
 @app.get("/database/trades")
-async def get_trades(symbol: Optional[str] = None, limit: int = 100, offset: int = 0):
+async def get_trades(
+    symbol: Optional[str] = None,
+    limit: int = Query(default=100, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0)
+):
     try:
         # Get database connection
         db_connection = database.Database()
         
-        # Get trades
-        if symbol:
-            trades = db_connection.get_trades_by_symbol(symbol, limit, offset)
-        else:
-            trades = db_connection.get_trades(limit, offset)
-        
-        return {"status": "success", "trades": trades}
+        trade_records = db_connection.get_trade_records(symbol=symbol, limit=limit, offset=offset)
+
+        return {"status": "success", "trades": trade_records}
     except Exception as e:
-        # Return mock data for now
-        import random
-        
-        trades = []
-        for i in range(min(limit, 100)):
-            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
-            trades.append({
-                "id": i + offset + 1,
-                "symbol": symbol_to_use,
-                "entry_time": "2023-03-01T12:00:00",
-                "exit_time": "2023-03-02T14:30:00",
-                "entry_price": 40000.0,
-                "exit_price": 41000.0,
-                "quantity": 0.1,
-                "profit_loss": 100.0,
-                "profit_loss_percent": 2.5,
-                "strategy": "sma_crossover"
-            })
-        
-        return {"status": "success", "trades": trades}
+        logger.error(f"Error fetching trades: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch trades")
 
 @app.get("/database/signals")
-async def get_signals(symbol: Optional[str] = None, strategy: Optional[str] = None, limit: int = 100, offset: int = 0):
+async def get_signals(
+    symbol: Optional[str] = None,
+    strategy: Optional[str] = None,
+    limit: int = Query(default=100, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0)
+):
     try:
         # Get database connection
         db_connection = database.Database()
         
-        # Get signals
-        signals = db_connection.get_signals(symbol, strategy, limit, offset)
-        
-        return {"status": "success", "signals": signals}
+        signal_records = db_connection.get_signal_records(
+            symbol=symbol,
+            strategy=strategy,
+            limit=limit,
+            offset=offset
+        )
+
+        return {"status": "success", "signals": signal_records}
     except Exception as e:
-        # Return mock data for now
-        import random
-        
-        signals = []
-        for i in range(min(limit, 100)):
-            symbol_to_use = symbol if symbol else random.choice(["BTCUSDT", "ETHUSDT", "SOLUSDT"])
-            strategy_to_use = strategy if strategy else random.choice(["sma_crossover", "rsi", "llm_decision"])
-            signals.append({
-                "id": i + offset + 1,
-                "symbol": symbol_to_use,
-                "timestamp": "2023-03-01T12:00:00",
-                "strategy": strategy_to_use,
-                "timeframe": random.choice(["1m", "5m", "15m", "1h", "4h"]),
-                "signal": random.choice(["buy", "sell", "hold"]),
-                "strength": random.uniform(0.6, 1.0),
-                "price": 40000.0
-            })
-        
-        return {"status": "success", "signals": signals}
+        logger.error(f"Error fetching signals: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch signals")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 
