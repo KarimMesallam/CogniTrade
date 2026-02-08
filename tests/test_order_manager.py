@@ -398,3 +398,165 @@ class TestOrderManager:
         second_trade_id = order_filled["trade_id"]
 
         assert first_trade_id == second_trade_id
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty')
+    @patch('bot.order_manager.get_futures_mark_price')
+    @patch('bot.order_manager.calculate_futures_order_quantity')
+    def test_execute_market_short_success(
+        self,
+        mock_calc_futures_qty,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+        mock_order_data,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+            max_short_notional_usd=500.0,
+            default_futures_leverage=2.0,
+            max_short_leverage=5.0,
+            min_short_liquidation_buffer_pct=10.0,
+        )
+        mock_calc_futures_qty.return_value = 0.001
+        mock_futures_price.return_value = 50000.0
+        mock_futures_position_qty.return_value = 0.0
+        mock_place_futures_order.return_value = {
+            **mock_order_data,
+            "side": "SELL",
+            "origQty": "0.001",
+            "price": "50000.0",
+        }
+
+        result = manager.execute_market_short(quote_amount=25.0, leverage=2.0)
+
+        assert result is not None
+        mock_place_futures_order.assert_called_once_with(
+            symbol="BTCUSDT",
+            side="SELL",
+            quantity=0.001,
+            reduce_only=False,
+            leverage=2.0,
+        )
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=0.0)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_market_short_rejected_when_leverage_exceeds_max(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+            max_short_notional_usd=1000.0,
+            max_short_leverage=2.0,
+            min_short_liquidation_buffer_pct=5.0,
+        )
+
+        result = manager.execute_market_short(quantity=0.001, leverage=5.0)
+
+        assert result is None
+        assert "exceeds max" in manager.last_reject_reason
+        mock_place_futures_order.assert_not_called()
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=0.0)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_market_short_rejected_when_liquidation_buffer_too_small(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+            max_short_notional_usd=1000.0,
+            max_short_leverage=10.0,
+            min_short_liquidation_buffer_pct=30.0,
+        )
+
+        result = manager.execute_market_short(quantity=0.001, leverage=5.0)  # 100/5 = 20%
+
+        assert result is None
+        assert "liquidation buffer" in manager.last_reject_reason.lower()
+        mock_place_futures_order.assert_not_called()
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=0.0)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_market_short_rejected_when_notional_exceeds_short_cap(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+            max_short_notional_usd=20.0,
+            max_short_leverage=5.0,
+            min_short_liquidation_buffer_pct=5.0,
+        )
+
+        result = manager.execute_market_short(quantity=0.001, leverage=1.0)  # ~50 USDT notional
+
+        assert result is None
+        assert "Short order notional" in manager.last_reject_reason
+        mock_place_futures_order.assert_not_called()
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=-0.02)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_execute_market_cover_uses_reduce_only_buy(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+        mock_order_data,
+    ):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=2000.0,
+            max_position_exposure_usd=2000.0,
+            max_short_notional_usd=2000.0,
+        )
+        mock_place_futures_order.return_value = {
+            **mock_order_data,
+            "side": "BUY",
+            "origQty": "0.02",
+            "price": "50000.0",
+        }
+
+        result = manager.execute_market_cover(quantity=0.05)
+
+        assert result is not None
+        mock_place_futures_order.assert_called_once_with(
+            symbol="BTCUSDT",
+            side="BUY",
+            quantity=0.02,
+            reduce_only=True,
+        )

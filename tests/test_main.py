@@ -191,6 +191,78 @@ class TestMain:
         mock_log.assert_called_once()
         mock_balance.assert_called_once()
         mock_order_manager.execute_market_sell.assert_called_once_with(0.1)
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_short_open(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Futures mode should route SELL consensus to short entry when explicitly enabled."""
+        signals = {"simple": "SELL", "technical": "SELL"}
+        llm_decision = "SELL"
+        mock_order_manager.execute_market_short.return_value = {"orderId": 789, "status": "FILLED"}
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result == {"orderId": 789, "status": "FILLED"}
+        mock_order_manager.execute_market_short.assert_called_once_with(
+            quote_amount=10.0,
+            leverage=2.0,
+        )
+        mock_order_manager.execute_market_sell.assert_not_called()
+        mock_log.assert_called_once()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_short_cover(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Futures BUY consensus should cover an open short if one exists."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+        mock_order_manager.get_position_quantity.return_value = -0.25
+        mock_order_manager.execute_market_cover.return_value = {"orderId": 790, "status": "FILLED"}
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result == {"orderId": 790, "status": "FILLED"}
+        mock_order_manager.execute_market_cover.assert_called_once_with(0.25)
+        mock_order_manager.execute_market_buy.assert_not_called()
+        mock_log.assert_called_once()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=False)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_short_disabled_skips_execution(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Futures mode must not open shorts when short enable flag is false."""
+        signals = {"simple": "SELL", "technical": "SELL"}
+        llm_decision = "SELL"
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result is None
+        mock_order_manager.execute_market_short.assert_not_called()
+        mock_order_manager.execute_market_sell.assert_not_called()
+        mock_log.assert_called_once()
     
     @patch('bot.main.log_decision_with_context')
     def test_execute_trade_hold(self, mock_log, mock_order_manager, mock_market_data):

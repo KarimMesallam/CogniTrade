@@ -89,6 +89,8 @@ TRADING_CONFIG = {
     
     # Trading parameters
     "trading": {
+        "trade_mode": os.getenv('TRADE_MODE', 'SPOT').upper(),
+        "enable_futures_shorts": os.getenv('ENABLE_FUTURES_SHORTS', 'False').lower() in ('true', '1', 't'),
         "default_order_amount_usd": float(os.getenv('DEFAULT_ORDER_AMOUNT_USD', '10.0')),
         "max_order_amount_usd": float(os.getenv('MAX_ORDER_AMOUNT_USD', '100.0')),
         # Hard pre-trade risk limits
@@ -96,6 +98,10 @@ TRADING_CONFIG = {
             os.getenv('MAX_ORDER_NOTIONAL_USD', os.getenv('MAX_ORDER_AMOUNT_USD', '100.0'))
         ),
         "max_position_exposure_usd": float(os.getenv('MAX_POSITION_EXPOSURE_USD', '250.0')),
+        "max_short_notional_usd": float(os.getenv('MAX_SHORT_NOTIONAL_USD', '100.0')),
+        "default_futures_leverage": float(os.getenv('DEFAULT_FUTURES_LEVERAGE', '2.0')),
+        "max_short_leverage": float(os.getenv('MAX_SHORT_LEVERAGE', '3.0')),
+        "min_short_liquidation_buffer_pct": float(os.getenv('MIN_SHORT_LIQUIDATION_BUFFER_PCT', '20.0')),
         "risk_percentage": float(os.getenv('RISK_PERCENTAGE', '1.0')),
         "profit_target_percentage": float(os.getenv('PROFIT_TARGET_PERCENTAGE', '3.0')),
         "stop_loss_percentage": float(os.getenv('STOP_LOSS_PERCENTAGE', '2.0')),
@@ -166,6 +172,19 @@ def get_strategy_parameter(strategy_name, parameter_name, default=None):
 def get_trading_parameter(parameter_name, default=None):
     """Get a specific trading parameter."""
     return TRADING_CONFIG["trading"].get(parameter_name, default)
+
+
+def get_trade_mode() -> str:
+    """Get normalized trade mode (`SPOT` or `FUTURES`)."""
+    mode = str(TRADING_CONFIG["trading"].get("trade_mode", "SPOT")).upper()
+    if mode not in {"SPOT", "FUTURES"}:
+        return "SPOT"
+    return mode
+
+
+def is_futures_short_enabled() -> bool:
+    """Check if explicit futures shorting is enabled."""
+    return bool(TRADING_CONFIG["trading"].get("enable_futures_shorts", False))
 
 def is_llm_enabled():
     """Check if LLM-based decision making is enabled."""

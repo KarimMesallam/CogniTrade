@@ -21,8 +21,8 @@
 | P1-03 | Binance filter compliance pre-validation | `venv/bin/pytest tests/test_binance_api.py -v` | Must pass |
 | P1-04 | Timeout/retry/circuit-breaker behavior | `venv/bin/pytest tests/test_llm_manager.py -v` and `venv/bin/pytest tests/test_binance_api.py -k "retry and circuit" -v` | Must pass |
 | P1-05 | Backtesting short position lifecycle and PnL accuracy | `venv/bin/pytest tests/test_backtesting.py -k "short" -v` and `venv/bin/pytest tests/test_vectorized_backtesting.py -k "short" -v` | Must pass |
-| P1-06 | Futures short routing and trade-mode safety gating | `venv/bin/pytest tests/test_main.py -k "futures or short or trade_mode" -v` and `venv/bin/pytest tests/test_order_manager.py -k "futures or short" -v` | Must pass |
-| P1-07 | Short-specific risk controls and reject reasons | `venv/bin/pytest tests/test_order_manager.py -k "short and risk" -v` and `venv/bin/pytest tests/test_main.py -k "short and risk" -v` | Must pass |
+| P1-06 | Futures short routing and trade-mode safety gating | `venv/bin/pytest tests/test_main.py -k "futures or short" -v` and `venv/bin/pytest tests/test_order_manager.py -k "market_short or market_cover or futures" -v` | Must pass |
+| P1-07 | Short-specific risk controls and reject reasons | `venv/bin/pytest tests/test_order_manager.py -k "market_short_rejected or leverage_exceeds_max or liquidation_buffer or short_cap" -v` and `venv/bin/pytest tests/test_main.py -k "futures_short_disabled" -v` | Must pass |
 | P1-08 | Regime detection correctness and state persistence | `venv/bin/pytest tests/test_regime.py -v` and persistence-specific tests | Must pass |
 | P1-09 | Regime-based strategy policy routing and sizing | `venv/bin/pytest tests/test_policy.py -v` and `venv/bin/pytest tests/test_main.py -k "regime or policy" -v` | Must pass |
 | P1-10 | Switch-stability guards (hysteresis/cooldown/turnover limits) | `venv/bin/pytest tests/test_main.py -k "switch or hysteresis or cooldown" -v` and `venv/bin/pytest tests/test_order_manager.py -k "turnover" -v` | Must pass |

@@ -1,6 +1,6 @@
 import logging
 import time
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 from typing import Any, Dict, Optional, Tuple
 
 from binance.client import Client
@@ -354,6 +354,162 @@ def get_symbol_info(symbol):
         )
     except Exception as e:
         logger.error(f"Error getting symbol info: {e}")
+        return None
+
+
+def _get_futures_symbol_info(symbol: str) -> Optional[Dict[str, Any]]:
+    """Get futures symbol metadata from exchange info payload."""
+    try:
+        exchange_info = _execute_exchange_call(
+            "futures_exchange_info",
+            lambda: client.futures_exchange_info()
+        )
+        for symbol_info in exchange_info.get("symbols", []):
+            if symbol_info.get("symbol") == symbol:
+                return symbol_info
+        return None
+    except Exception as e:
+        logger.error("Error getting futures symbol info for %s: %s", symbol, e)
+        return None
+
+
+def get_futures_mark_price(symbol: str) -> Optional[float]:
+    """Get futures mark price for a symbol."""
+    try:
+        payload = _execute_exchange_call(
+            f"futures_mark_price:{symbol}",
+            lambda: client.futures_mark_price(symbol=symbol)
+        )
+        price = payload.get("markPrice") if payload else None
+        if price is None:
+            return None
+        return float(price)
+    except Exception as e:
+        logger.error("Error getting futures mark price for %s: %s", symbol, e)
+        return None
+
+
+def get_futures_position_qty(symbol: str) -> Optional[float]:
+    """Get signed futures position quantity for a symbol (negative indicates short)."""
+    try:
+        positions = _execute_exchange_call(
+            f"futures_position_information:{symbol}",
+            lambda: client.futures_position_information(symbol=symbol)
+        )
+        if not positions:
+            return 0.0
+
+        position = positions[0]
+        position_amt = position.get("positionAmt", "0")
+        return float(position_amt)
+    except Exception as e:
+        logger.error("Error getting futures position quantity for %s: %s", symbol, e)
+        return None
+
+
+def calculate_futures_order_quantity(symbol: str, quote_amount: float, leverage: float = 1.0) -> Optional[float]:
+    """
+    Calculate futures quantity from margin quote amount and leverage while respecting LOT_SIZE.
+    """
+    try:
+        mark_price = get_futures_mark_price(symbol)
+        if mark_price is None or mark_price <= 0:
+            logger.error("Could not determine futures mark price for %s", symbol)
+            return None
+
+        leverage_dec = Decimal(str(leverage))
+        if leverage_dec <= 0:
+            logger.error("Invalid leverage %s for %s", leverage, symbol)
+            return None
+
+        notional = Decimal(str(quote_amount)) * leverage_dec
+        raw_qty = notional / Decimal(str(mark_price))
+
+        symbol_info = _get_futures_symbol_info(symbol)
+        if not symbol_info:
+            logger.error("Futures symbol info not found for %s", symbol)
+            return None
+
+        lot_size_filter = next(
+            (f for f in symbol_info.get("filters", []) if f.get("filterType") == "LOT_SIZE"),
+            None
+        )
+        if not lot_size_filter:
+            logger.error("Futures LOT_SIZE filter not found for %s", symbol)
+            return None
+
+        min_qty = Decimal(str(lot_size_filter.get("minQty", "0")))
+        step_size = Decimal(str(lot_size_filter.get("stepSize", "0")))
+        if step_size <= 0:
+            logger.error("Invalid futures step size for %s", symbol)
+            return None
+
+        adjusted_steps = (raw_qty / step_size).to_integral_value(rounding=ROUND_DOWN)
+        adjusted_qty = adjusted_steps * step_size
+
+        if adjusted_qty < min_qty:
+            logger.warning(
+                "Calculated futures quantity %s is below minimum %s for %s",
+                adjusted_qty,
+                min_qty,
+                symbol,
+            )
+            return None
+
+        return float(adjusted_qty)
+    except Exception as e:
+        logger.error("Error calculating futures order quantity for %s: %s", symbol, e)
+        return None
+
+
+def place_futures_market_order(
+    symbol: str,
+    side: str,
+    quantity: float,
+    reduce_only: bool = False,
+    leverage: Optional[float] = None,
+) -> Optional[Dict[str, Any]]:
+    """Place a futures market order with optional leverage update and reduce-only mode."""
+    try:
+        side = str(side).upper()
+        if side not in {"BUY", "SELL"}:
+            logger.error("Invalid futures side %s for %s", side, symbol)
+            return None
+        if quantity <= 0:
+            logger.error("Invalid futures quantity %s for %s", quantity, symbol)
+            return None
+
+        if leverage is not None:
+            leverage_int = int(float(leverage))
+            if leverage_int <= 0:
+                logger.error("Invalid leverage %s for %s", leverage, symbol)
+                return None
+            _execute_exchange_call(
+                f"futures_change_leverage:{symbol}:{leverage_int}",
+                lambda: client.futures_change_leverage(symbol=symbol, leverage=leverage_int)
+            )
+
+        timestamp = int(time.time() * 1000) + time_offset
+        order = _execute_exchange_call(
+            f"futures_create_order:{symbol}:{side}",
+            lambda: client.futures_create_order(
+                symbol=symbol,
+                side=side,
+                type="MARKET",
+                quantity=quantity,
+                reduceOnly=reduce_only,
+                timestamp=timestamp,
+            )
+        )
+        return order
+    except Exception as e:
+        logger.error(
+            "Error placing futures market order for %s (side=%s, reduce_only=%s): %s",
+            symbol,
+            side,
+            reduce_only,
+            e,
+        )
         return None
 
 

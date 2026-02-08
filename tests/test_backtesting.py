@@ -960,6 +960,54 @@ def test_create_backtest_result(backtest_engine):
     assert float(result.metrics.total_return_pct) == pytest.approx(0.979, 0.001)  # 97.9 / 10000 * 100
     assert float(result.metrics.win_rate) == pytest.approx(100.0, 0.001)  # 1 out of 1 trades was profitable
 
+
+def test_short_backtest_lifecycle_and_pnl():
+    """Backtest engine should support opening and closing short positions with signed PnL."""
+    with patch('bot.backtesting.core.engine.BacktestEngine._load_market_data'):
+        engine = BacktestEngine(
+            symbol='BTCUSDT',
+            timeframes=['1h'],
+            start_date='2023-01-01',
+            end_date='2023-01-10',
+            allow_short_positions=True,
+        )
+
+    dates = pd.date_range(start='2023-01-01', periods=90, freq='1h')
+    prices = np.linspace(120.0, 80.0, len(dates))
+    df = pd.DataFrame({
+        'timestamp': dates,
+        'open': prices,
+        'high': prices * 1.01,
+        'low': prices * 0.99,
+        'close': prices,
+        'volume': np.random.normal(100, 20, len(dates)),
+    })
+    engine.market_data = {'1h': df}
+
+    def short_cycle_strategy(data_dict, symbol):
+        candles = len(data_dict['1h'])
+        if candles == 40:
+            return 'SELL'  # Open short
+        if candles == 60:
+            return 'BUY'   # Close short
+        return 'HOLD'
+
+    result = engine.run_backtest(short_cycle_strategy)
+
+    short_entries = [t for t in engine.trades if t.side == 'SELL' and t.position_side == 'SHORT']
+    short_exits = [
+        t for t in engine.trades
+        if t.side == 'BUY' and t.position_side == 'SHORT' and t.profit_loss is not None
+    ]
+
+    assert len(short_entries) >= 1
+    assert len(short_exits) >= 1
+    assert short_exits[0].profit_loss > Decimal('0')
+    assert engine.position_size == 0.0
+    assert result.total_trades >= 1
+    assert result.winning_trades >= 1
+
+
 def test_error_handling(backtest_engine):
     """Test error handling in the backtesting engine"""
     

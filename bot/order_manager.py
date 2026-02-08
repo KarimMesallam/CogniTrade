@@ -9,9 +9,11 @@ from bot.binance_api import (
     client, get_account_balance, get_order_status, get_open_orders, cancel_order,
     place_market_buy, place_market_sell,
     place_limit_buy, place_limit_sell,
-    calculate_order_quantity, validate_order_filters
+    calculate_order_quantity, validate_order_filters,
+    calculate_futures_order_quantity, get_futures_mark_price,
+    get_futures_position_qty, place_futures_market_order
 )
-from bot.config import get_trading_parameter
+from bot.config import get_trading_parameter, get_trade_mode, is_futures_short_enabled
 from bot.db_integration import DatabaseIntegration
 
 logger = logging.getLogger("trading_bot")
@@ -34,7 +36,13 @@ class OrderManager:
         risk_percentage=1.0,
         use_database=True,
         max_order_notional_usd: Optional[float] = None,
-        max_position_exposure_usd: Optional[float] = None
+        max_position_exposure_usd: Optional[float] = None,
+        trade_mode: Optional[str] = None,
+        enable_futures_shorts: Optional[bool] = None,
+        max_short_notional_usd: Optional[float] = None,
+        default_futures_leverage: Optional[float] = None,
+        max_short_leverage: Optional[float] = None,
+        min_short_liquidation_buffer_pct: Optional[float] = None,
     ):
         """
         Initialize the order manager.
@@ -52,6 +60,13 @@ class OrderManager:
         self.order_trade_ids = {}
         self.last_reject_reason = None
         self.base_asset, self.quote_asset = self._infer_assets(symbol)
+        resolved_trade_mode = (trade_mode or get_trade_mode()).upper()
+        self.trade_mode = resolved_trade_mode if resolved_trade_mode in {"SPOT", "FUTURES"} else "SPOT"
+        self.enable_futures_shorts = (
+            bool(enable_futures_shorts)
+            if enable_futures_shorts is not None
+            else bool(is_futures_short_enabled())
+        )
         resolved_max_order_notional = (
             max_order_notional_usd
             if max_order_notional_usd is not None
@@ -64,6 +79,30 @@ class OrderManager:
         )
         self.max_order_notional_usd = Decimal(str(resolved_max_order_notional))
         self.max_position_exposure_usd = Decimal(str(resolved_max_position_exposure))
+        resolved_max_short_notional = (
+            max_short_notional_usd
+            if max_short_notional_usd is not None
+            else get_trading_parameter("max_short_notional_usd", resolved_max_order_notional)
+        )
+        resolved_default_futures_leverage = (
+            default_futures_leverage
+            if default_futures_leverage is not None
+            else get_trading_parameter("default_futures_leverage", 2.0)
+        )
+        resolved_max_short_leverage = (
+            max_short_leverage
+            if max_short_leverage is not None
+            else get_trading_parameter("max_short_leverage", 3.0)
+        )
+        resolved_min_short_liq_buffer = (
+            min_short_liquidation_buffer_pct
+            if min_short_liquidation_buffer_pct is not None
+            else get_trading_parameter("min_short_liquidation_buffer_pct", 20.0)
+        )
+        self.max_short_notional_usd = Decimal(str(resolved_max_short_notional))
+        self.default_futures_leverage = Decimal(str(resolved_default_futures_leverage))
+        self.max_short_leverage = Decimal(str(resolved_max_short_leverage))
+        self.min_short_liquidation_buffer_pct = Decimal(str(resolved_min_short_liq_buffer))
         
         # Set Decimal precision
         getcontext().prec = 28
@@ -115,6 +154,12 @@ class OrderManager:
     def _get_reference_price(self) -> Optional[Decimal]:
         """Get best-effort current symbol price for pre-trade checks."""
         try:
+            if self.trade_mode == "FUTURES":
+                mark_price = get_futures_mark_price(self.symbol)
+                if mark_price is None:
+                    return None
+                return Decimal(str(mark_price))
+
             ticker = client.get_symbol_ticker(symbol=self.symbol)
             if not ticker or "price" not in ticker:
                 return None
@@ -126,6 +171,12 @@ class OrderManager:
     def _get_current_position_qty(self) -> Optional[Decimal]:
         """Fetch current base-asset position size for exposure checks."""
         try:
+            if self.trade_mode == "FUTURES":
+                position_qty = get_futures_position_qty(self.symbol)
+                if position_qty is None:
+                    return None
+                return Decimal(str(position_qty))
+
             balance = get_account_balance(self.base_asset)
             if not balance:
                 return None
@@ -137,22 +188,41 @@ class OrderManager:
             logger.error("Failed to fetch account balance for %s: %s", self.base_asset, e)
             return None
 
+    def get_position_quantity(self) -> Optional[Decimal]:
+        """Public accessor for current signed position quantity."""
+        return self._get_current_position_qty()
+
+    def _estimate_short_liquidation_buffer_pct(self, leverage: Decimal) -> Decimal:
+        """Estimate liquidation buffer percentage from leverage in one-way futures mode."""
+        if leverage <= Decimal("0"):
+            return Decimal("0")
+        return Decimal("100") / leverage
+
     def _check_pre_trade_limits(
         self,
         side: str,
         quantity: Decimal,
         price: Optional[Decimal] = None,
-        known_notional: Optional[Decimal] = None
+        known_notional: Optional[Decimal] = None,
+        leverage: Optional[Decimal] = None,
+        is_short_entry: bool = False,
+        enforce_exposure_limit: bool = True,
     ) -> bool:
         """Enforce configured pre-trade risk limits before any order placement."""
         if quantity <= Decimal("0"):
             self._set_reject_reason(f"Invalid order quantity {quantity}; quantity must be > 0.")
             return False
 
+        side = str(side).upper()
         reference_price = price
         requires_reference_price = (
             (known_notional is None and self.max_order_notional_usd > Decimal("0"))
-            or (side == "BUY" and self.max_position_exposure_usd > Decimal("0"))
+            or (
+                enforce_exposure_limit
+                and side == "BUY"
+                and self.max_position_exposure_usd > Decimal("0")
+            )
+            or (is_short_entry and (self.max_short_notional_usd > Decimal("0") or self.max_position_exposure_usd > Decimal("0")))
         )
         if reference_price is None and requires_reference_price:
             reference_price = self._get_reference_price()
@@ -175,8 +245,82 @@ class OrderManager:
             )
             return False
 
+        if is_short_entry:
+            if self.trade_mode != "FUTURES":
+                self._set_reject_reason("Short entry requires TRADE_MODE=FUTURES.")
+                return False
+            if not self.enable_futures_shorts:
+                self._set_reject_reason("Futures shorting is disabled by configuration.")
+                return False
+
+            leverage_dec = leverage if leverage is not None else self.default_futures_leverage
+            leverage_dec = Decimal(str(leverage_dec))
+            if leverage_dec <= Decimal("0"):
+                self._set_reject_reason(f"Invalid short leverage {leverage_dec}; leverage must be > 0.")
+                return False
+            if self.max_short_leverage > Decimal("0") and leverage_dec > self.max_short_leverage:
+                self._set_reject_reason(
+                    f"Requested short leverage {leverage_dec:.2f} exceeds max {self.max_short_leverage:.2f}."
+                )
+                return False
+
+            estimated_buffer_pct = self._estimate_short_liquidation_buffer_pct(leverage_dec)
+            if (
+                self.min_short_liquidation_buffer_pct > Decimal("0")
+                and estimated_buffer_pct < self.min_short_liquidation_buffer_pct
+            ):
+                self._set_reject_reason(
+                    "Estimated short liquidation buffer "
+                    f"{estimated_buffer_pct:.2f}% is below configured minimum "
+                    f"{self.min_short_liquidation_buffer_pct:.2f}%."
+                )
+                return False
+
+            if self.max_short_notional_usd > Decimal("0") and order_notional > self.max_short_notional_usd:
+                self._set_reject_reason(
+                    "Short order notional "
+                    f"{order_notional:.8f} {self.quote_asset or 'quote'} exceeds configured max "
+                    f"{self.max_short_notional_usd:.8f}."
+                )
+                return False
+
+            if reference_price is None:
+                reference_price = self._get_reference_price()
+                if reference_price is None:
+                    self._set_reject_reason("Unable to fetch reference price for short exposure validation.")
+                    return False
+
+            current_position_qty = self._get_current_position_qty()
+            if current_position_qty is None:
+                self._set_reject_reason("Unable to determine current futures position for short exposure validation.")
+                return False
+            if current_position_qty > Decimal("0"):
+                self._set_reject_reason("Cannot open a short while a long futures position is open.")
+                return False
+
+            current_short_qty = abs(min(current_position_qty, Decimal("0")))
+            projected_short_qty = current_short_qty + quantity
+            projected_short_exposure = projected_short_qty * reference_price
+            if (
+                self.max_position_exposure_usd > Decimal("0")
+                and projected_short_exposure > self.max_position_exposure_usd
+            ):
+                self._set_reject_reason(
+                    "Projected short exposure "
+                    f"{projected_short_exposure:.8f} {self.quote_asset or 'quote'} exceeds configured max "
+                    f"{self.max_position_exposure_usd:.8f}."
+                )
+                return False
+
+            return True
+
         # Exposure limits apply to buy-side accumulation in spot mode.
-        if side == "BUY" and self.max_position_exposure_usd > Decimal("0"):
+        if (
+            enforce_exposure_limit
+            and self.trade_mode == "SPOT"
+            and side == "BUY"
+            and self.max_position_exposure_usd > Decimal("0")
+        ):
             if reference_price is None:
                 reference_price = self._get_reference_price()
                 if reference_price is None:
@@ -331,6 +475,11 @@ class OrderManager:
         """
         try:
             self._clear_reject_reason()
+            if self.trade_mode == "FUTURES":
+                self._set_reject_reason(
+                    "Use execute_market_cover for futures short exits; spot market buys are disabled in FUTURES mode."
+                )
+                return None
             # If quantity is not provided, calculate it from quote_amount
             quote_amount_decimal = None
             if quantity is None and quote_amount is not None:
@@ -388,6 +537,11 @@ class OrderManager:
         """
         try:
             self._clear_reject_reason()
+            if self.trade_mode == "FUTURES":
+                self._set_reject_reason(
+                    "Use execute_market_short for futures shorts; spot market sells are disabled in FUTURES mode."
+                )
+                return None
             quantity_decimal = Decimal(str(quantity))
             if not self._check_pre_trade_limits("SELL", quantity_decimal):
                 return None
@@ -415,6 +569,136 @@ class OrderManager:
         except Exception as e:
             logger.error(f"Error executing market sell: {e}")
             return None
+
+    def execute_market_short(self, quantity=None, quote_amount=None, leverage=None):
+        """
+        Execute a futures market short (SELL) order.
+
+        Args:
+            quantity: Base-asset quantity to short.
+            quote_amount: Optional quote-asset margin amount used with leverage to derive quantity.
+            leverage: Optional leverage override.
+        """
+        try:
+            self._clear_reject_reason()
+            if self.trade_mode != "FUTURES":
+                self._set_reject_reason("Short execution requires TRADE_MODE=FUTURES.")
+                return None
+            if not self.enable_futures_shorts:
+                self._set_reject_reason("Futures shorting is disabled by configuration.")
+                return None
+
+            leverage_dec = Decimal(str(leverage)) if leverage is not None else self.default_futures_leverage
+            quote_amount_decimal = None
+            if quantity is None and quote_amount is not None:
+                quote_amount_decimal = Decimal(str(quote_amount))
+                quantity = calculate_futures_order_quantity(
+                    self.symbol,
+                    float(quote_amount_decimal),
+                    leverage=float(leverage_dec),
+                )
+                if quantity is None:
+                    self._set_reject_reason("Failed to calculate futures short quantity.")
+                    return None
+            elif quote_amount is not None:
+                quote_amount_decimal = Decimal(str(quote_amount))
+
+            if quantity is None:
+                self._set_reject_reason("Either quantity or quote_amount must be provided for futures short.")
+                return None
+
+            quantity_decimal = Decimal(str(quantity))
+            known_notional = None
+            if quote_amount_decimal is not None:
+                known_notional = quote_amount_decimal * leverage_dec
+
+            if not self._check_pre_trade_limits(
+                side="SELL",
+                quantity=quantity_decimal,
+                known_notional=known_notional,
+                leverage=leverage_dec,
+                is_short_entry=True,
+                enforce_exposure_limit=False,
+            ):
+                return None
+
+            logger.info(
+                "Executing futures market short: %s, quantity: %s, leverage: %s",
+                self.symbol,
+                quantity_decimal,
+                leverage_dec,
+            )
+            order = place_futures_market_order(
+                symbol=self.symbol,
+                side="SELL",
+                quantity=float(quantity_decimal),
+                reduce_only=False,
+                leverage=float(leverage_dec),
+            )
+            if order:
+                self._log_order(order, "SHORT", order.get("status", "UNKNOWN"))
+                logger.info("Futures short executed: %s", order.get("orderId"))
+                return order
+
+            logger.error("Futures short execution failed")
+            return None
+        except Exception as e:
+            logger.error("Error executing futures market short: %s", e)
+            return None
+
+    def execute_market_cover(self, quantity):
+        """
+        Close an existing futures short using a reduce-only market BUY.
+        """
+        try:
+            self._clear_reject_reason()
+            if self.trade_mode != "FUTURES":
+                self._set_reject_reason("Short cover requires TRADE_MODE=FUTURES.")
+                return None
+
+            quantity_decimal = Decimal(str(quantity))
+            if quantity_decimal <= Decimal("0"):
+                self._set_reject_reason(f"Invalid cover quantity {quantity_decimal}; quantity must be > 0.")
+                return None
+
+            current_position_qty = self._get_current_position_qty()
+            if current_position_qty is None:
+                self._set_reject_reason("Unable to determine current futures position for short cover.")
+                return None
+            if current_position_qty >= Decimal("0"):
+                self._set_reject_reason("No open short position to cover.")
+                return None
+
+            cover_quantity = min(abs(current_position_qty), quantity_decimal)
+            if cover_quantity <= Decimal("0"):
+                self._set_reject_reason("Computed cover quantity is zero.")
+                return None
+
+            if not self._check_pre_trade_limits(
+                side="BUY",
+                quantity=cover_quantity,
+                known_notional=Decimal("0"),
+                enforce_exposure_limit=False,
+            ):
+                return None
+
+            logger.info("Executing futures short cover: %s, quantity: %s", self.symbol, cover_quantity)
+            order = place_futures_market_order(
+                symbol=self.symbol,
+                side="BUY",
+                quantity=float(cover_quantity),
+                reduce_only=True,
+            )
+            if order:
+                self._log_order(order, "COVER", order.get("status", "UNKNOWN"))
+                logger.info("Futures short cover executed: %s", order.get("orderId"))
+                return order
+
+            logger.error("Futures short cover execution failed")
+            return None
+        except Exception as e:
+            logger.error("Error executing futures short cover: %s", e)
+            return None
     
     def execute_limit_buy(self, quantity, price):
         """
@@ -429,6 +713,9 @@ class OrderManager:
         """
         try:
             self._clear_reject_reason()
+            if self.trade_mode == "FUTURES":
+                self._set_reject_reason("Spot limit buys are disabled in FUTURES mode.")
+                return None
             quantity_decimal = Decimal(str(quantity))
             price_decimal = Decimal(str(price))
             if not self._check_pre_trade_limits("BUY", quantity_decimal, price=price_decimal):
@@ -472,6 +759,9 @@ class OrderManager:
         """
         try:
             self._clear_reject_reason()
+            if self.trade_mode == "FUTURES":
+                self._set_reject_reason("Spot limit sells are disabled in FUTURES mode.")
+                return None
             quantity_decimal = Decimal(str(quantity))
             price_decimal = Decimal(str(price))
             if not self._check_pre_trade_limits("SELL", quantity_decimal, price=price_decimal):

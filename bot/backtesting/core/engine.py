@@ -53,6 +53,7 @@ class BacktestEngine:
         commission_rate: float = None,
         db_path: str = None,
         position_size_pct: float = None,
+        allow_short_positions: Optional[bool] = None,
         execution_simulation: Optional[Dict[str, Any]] = None,
     ):
         """
@@ -84,6 +85,11 @@ class BacktestEngine:
         self.initial_capital = initial_capital or DEFAULT_BACKTEST_SETTINGS['initial_capital']
         self.commission_rate = commission_rate or DEFAULT_BACKTEST_SETTINGS['commission_rate']
         self.position_size_pct = position_size_pct or DEFAULT_BACKTEST_SETTINGS['position_size_pct']
+        self.allow_short_positions = (
+            bool(allow_short_positions)
+            if allow_short_positions is not None
+            else bool(DEFAULT_BACKTEST_SETTINGS.get('allow_short_positions', False))
+        )
 
         execution_config_values = dict(EXECUTION_SIMULATION_SETTINGS)
         if execution_simulation:
@@ -259,6 +265,11 @@ class BacktestEngine:
                     "Execution simulation is enabled; using traditional backtest mode for realistic fills."
                 )
                 use_vectorized = False
+            if self.allow_short_positions and use_vectorized:
+                logger.info(
+                    "Short-position simulation is enabled; using traditional backtest mode for signed position handling."
+                )
+                use_vectorized = False
             
             if use_vectorized and self._can_use_vectorized_backtest(strategy_func):
                 # Vectorized backtesting for better performance
@@ -276,6 +287,9 @@ class BacktestEngine:
             if self.position_size > 0:
                 self._execute_trade('SELL', primary_data['timestamp'].iloc[-1], 
                                    primary_data['close'].iloc[-1], self.position_size)
+            elif self.position_size < 0:
+                self._execute_trade('BUY', primary_data['timestamp'].iloc[-1],
+                                   primary_data['close'].iloc[-1], abs(self.position_size))
             
             # Calculate end time and duration
             duration = time.time() - start_time
@@ -439,6 +453,7 @@ class BacktestEngine:
                 # Create trade object
                 trade = self._create_vectorized_trade('BUY', timestamp, price, current_position, commission)
                 trade.entry_point = True
+                trade.position_side = "LONG"
                 trade.entry_time = timestamp
                 trade.market_indicators = self._get_market_indicators(timestamp)
                 trades.append(trade)
@@ -712,17 +727,21 @@ class BacktestEngine:
             TradeExecutionError: If trade execution fails
         """
         try:
-            if signal == 'BUY' and self.position_size == 0:
-                # Calculate position size based on position_size_pct setting
-                available_capital = self.current_capital * self.position_size_pct
-                position_size = available_capital / price
-                
-                # Execute the trade
-                self._execute_trade('BUY', timestamp, price, position_size)
-                
-            elif signal == 'SELL' and self.position_size > 0:
-                # Sell entire position
-                self._execute_trade('SELL', timestamp, price, self.position_size)
+            if signal == 'BUY':
+                if self.position_size == 0:
+                    available_capital = self.current_capital * self.position_size_pct
+                    position_size = available_capital / price
+                    self._execute_trade('BUY', timestamp, price, position_size)
+                elif self.allow_short_positions and self.position_size < 0:
+                    self._execute_trade('BUY', timestamp, price, abs(self.position_size))
+
+            elif signal == 'SELL':
+                if self.position_size > 0:
+                    self._execute_trade('SELL', timestamp, price, self.position_size)
+                elif self.allow_short_positions and self.position_size == 0:
+                    available_capital = self.current_capital * self.position_size_pct
+                    position_size = available_capital / price
+                    self._execute_trade('SELL', timestamp, price, position_size)
                 
         except Exception as e:
             logger.error(f"Error processing signal {signal}: {str(e)}", exc_info=True)
@@ -782,9 +801,15 @@ class BacktestEngine:
             )
             executed_price = execution_fill.executed_price
             executed_quantity = execution_fill.executed_quantity
+            current_position = Decimal(str(self.position_size))
 
-            if side == 'SELL':
-                executed_quantity = min(executed_quantity, Decimal(str(self.position_size)))
+            is_closing_long = side == "SELL" and current_position > 0
+            is_closing_short = side == "BUY" and current_position < 0
+
+            if is_closing_long:
+                executed_quantity = min(executed_quantity, current_position)
+            elif is_closing_short:
+                executed_quantity = min(executed_quantity, abs(current_position))
 
             if executed_quantity <= 0:
                 raise TradeExecutionError("Execution simulation produced zero filled quantity")
@@ -821,16 +846,17 @@ class BacktestEngine:
                 }
             )
 
-            if side == 'BUY':
+            if side == 'BUY' and current_position >= 0:
                 total_cost = trade_value + commission_amount
                 self.current_capital -= float(total_cost)
-                self.position_size = float(executed_quantity)
+                self.position_size = float(current_position + executed_quantity)
 
                 trade.entry_point = True
                 trade.entry_time = timestamp
                 trade.market_indicators = self._get_market_indicators(timestamp)
                 trade.raw_data["remaining_quantity"] = float(executed_quantity)
                 trade.raw_data["remaining_entry_commission"] = float(commission_amount)
+                trade.raw_data["position_side"] = "LONG"
                 self.trades.append(trade)
 
                 logger.debug(
@@ -842,10 +868,14 @@ class BacktestEngine:
                     float(total_cost),
                 )
 
-            elif side == 'SELL':
+            elif side == 'SELL' and current_position > 0:
                 entry_trade = None
                 for existing_trade in reversed(self.trades):
-                    if existing_trade.side == 'BUY' and existing_trade.entry_point:
+                    if (
+                        existing_trade.side == 'BUY'
+                        and existing_trade.entry_point
+                        and existing_trade.raw_data.get("position_side", "LONG") == "LONG"
+                    ):
                         entry_trade = existing_trade
                         break
 
@@ -895,6 +925,7 @@ class BacktestEngine:
                     trade.exit_price = executed_price
                     trade.profit_loss = profit_loss
                     trade.roi_pct = roi_pct
+                    trade.position_side = "LONG"
                     trade.entry_time = entry_trade.timestamp
                     trade.exit_time = timestamp
 
@@ -913,7 +944,7 @@ class BacktestEngine:
 
                 trade.market_indicators = self._get_market_indicators(timestamp)
                 self.current_capital += float(trade_value - commission_amount - funding_cost)
-                self.position_size = max(0.0, self.position_size - float(executed_quantity))
+                self.position_size = max(0.0, float(current_position - executed_quantity))
                 self.trades.append(trade)
 
                 logger.debug(
@@ -925,6 +956,126 @@ class BacktestEngine:
                     float(trade.profit_loss or Decimal('0')),
                     float(trade.roi_pct or Decimal('0')),
                 )
+
+            elif side == 'SELL' and current_position <= 0:
+                if not self.allow_short_positions:
+                    raise TradeExecutionError("Short entries are disabled for this backtest.")
+
+                proceeds = trade_value - commission_amount
+                self.current_capital += float(proceeds)
+                self.position_size = float(current_position - executed_quantity)
+
+                trade.entry_point = True
+                trade.position_side = "SHORT"
+                trade.entry_time = timestamp
+                trade.market_indicators = self._get_market_indicators(timestamp)
+                trade.raw_data["remaining_quantity"] = float(executed_quantity)
+                trade.raw_data["remaining_entry_commission"] = float(commission_amount)
+                trade.raw_data["position_side"] = "SHORT"
+                self.trades.append(trade)
+
+                logger.debug(
+                    "SELL (SHORT ENTRY): requested=%s filled=%s %s at %s (Proceeds: %.2f)",
+                    requested_quantity,
+                    executed_quantity,
+                    self.symbol,
+                    executed_price,
+                    float(proceeds),
+                )
+
+            elif side == 'BUY' and current_position < 0:
+                if not self.allow_short_positions:
+                    raise TradeExecutionError("Short exits are disabled for this backtest.")
+
+                entry_trade = None
+                for existing_trade in reversed(self.trades):
+                    if (
+                        existing_trade.side == 'SELL'
+                        and existing_trade.entry_point
+                        and existing_trade.raw_data.get("position_side") == "SHORT"
+                    ):
+                        entry_trade = existing_trade
+                        break
+
+                funding_cost = Decimal('0')
+                if entry_trade and entry_trade.timestamp and isinstance(timestamp, pd.Timestamp) and isinstance(entry_trade.timestamp, pd.Timestamp):
+                    holding_hours = (timestamp - entry_trade.timestamp).total_seconds() / 3600
+                    funding_cost = self.execution_simulator.estimate_funding_cost(
+                        notional=entry_trade.price * executed_quantity,
+                        holding_hours=holding_hours,
+                        position_side="SHORT",
+                    )
+                    trade.holding_period_hours = holding_hours
+                trade.funding_cost = funding_cost
+
+                if entry_trade:
+                    entry_price = entry_trade.price
+                    remaining_qty = Decimal(
+                        str(entry_trade.raw_data.get("remaining_quantity", entry_trade.quantity))
+                    )
+                    remaining_entry_commission = Decimal(
+                        str(entry_trade.raw_data.get("remaining_entry_commission", entry_trade.commission))
+                    )
+
+                    if remaining_qty > 0 and executed_quantity > remaining_qty:
+                        executed_quantity = remaining_qty
+                        trade.quantity = executed_quantity
+                        trade_value = executed_price * executed_quantity
+                        commission_amount = trade_value * commission_rate_dec
+                        trade.commission = commission_amount
+
+                    if remaining_qty > 0:
+                        entry_commission_alloc = remaining_entry_commission * (executed_quantity / remaining_qty)
+                    else:
+                        entry_commission_alloc = Decimal('0')
+
+                    profit_loss = (
+                        (entry_price - executed_price) * executed_quantity
+                    ) - (commission_amount + entry_commission_alloc + funding_cost)
+
+                    entry_value = entry_price * executed_quantity
+                    if entry_value > Decimal('0'):
+                        roi_pct = (profit_loss / entry_value) * Decimal('100')
+                    else:
+                        roi_pct = Decimal('0')
+
+                    trade.entry_price = entry_price
+                    trade.exit_price = executed_price
+                    trade.profit_loss = profit_loss
+                    trade.roi_pct = roi_pct
+                    trade.position_side = "SHORT"
+                    trade.entry_time = entry_trade.timestamp
+                    trade.exit_time = timestamp
+
+                    new_remaining_qty = max(Decimal('0'), remaining_qty - executed_quantity)
+                    new_remaining_commission = max(
+                        Decimal('0'),
+                        remaining_entry_commission - entry_commission_alloc
+                    )
+                    entry_trade.raw_data["remaining_quantity"] = float(new_remaining_qty)
+                    entry_trade.raw_data["remaining_entry_commission"] = float(new_remaining_commission)
+                    if new_remaining_qty <= Decimal('0'):
+                        entry_trade.entry_point = False
+                else:
+                    trade.profit_loss = -(commission_amount + funding_cost)
+                    trade.roi_pct = Decimal('0')
+
+                trade.market_indicators = self._get_market_indicators(timestamp)
+                self.current_capital -= float(trade_value + commission_amount + funding_cost)
+                self.position_size = min(0.0, float(current_position + executed_quantity))
+                self.trades.append(trade)
+
+                logger.debug(
+                    "BUY (SHORT EXIT): requested=%s filled=%s %s at %s (P/L: %.2f, ROI: %.2f%%)",
+                    requested_quantity,
+                    executed_quantity,
+                    self.symbol,
+                    executed_price,
+                    float(trade.profit_loss or Decimal('0')),
+                    float(trade.roi_pct or Decimal('0')),
+                )
+            else:
+                raise TradeExecutionError(f"Unsupported trade transition side={side} position={self.position_size}")
 
             self.equity_curve.append(EquityPoint(
                 timestamp=timestamp,
@@ -1010,8 +1161,8 @@ class BacktestEngine:
         # Set strategy name for reporting purposes
         strategy_name = getattr(strategy_func, '__name__', 'Custom_Strategy')
         
-        # Collect completed trades (SELL trades with profit_loss)
-        completed_trades = [t for t in self.trades if t.side == 'SELL' and t.profit_loss is not None]
+        # Collect completed trades (both long and short exits carry profit_loss).
+        completed_trades = [t for t in self.trades if t.profit_loss is not None]
         
         # Calculate win/loss statistics
         total_trades = len(completed_trades)

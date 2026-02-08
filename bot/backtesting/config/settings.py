@@ -21,6 +21,7 @@ DEFAULT_BACKTEST_SETTINGS = {
     "commission_rate": 0.001,  # 0.1%
     "min_candles_required": 30,  # Minimum candles needed for indicators
     "position_size_pct": 0.95,  # Use 95% of capital per trade
+    "allow_short_positions": False,
     "random_seed": 42,  # For reproducible random data in tests
 }
 

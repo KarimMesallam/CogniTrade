@@ -17,7 +17,9 @@ from bot.binance_api import (
     get_symbol_info, calculate_order_quantity, place_market_buy,
     place_market_sell, place_limit_buy, place_limit_sell,
     get_open_orders, cancel_order, get_order_status, time_offset,
-    validate_order_filters, reset_exchange_circuit_breaker
+    validate_order_filters, reset_exchange_circuit_breaker,
+    get_futures_mark_price, get_futures_position_qty,
+    calculate_futures_order_quantity, place_futures_market_order
 )
 import bot.binance_api as binance_api
 from bot.config import SYMBOL
@@ -93,6 +95,68 @@ def test_calculate_order_quantity():
     if quantity:
         assert isinstance(quantity, float)
         assert quantity > 0
+
+
+@patch('bot.binance_api.client')
+def test_get_futures_mark_price(mock_client):
+    """Test retrieving futures mark price."""
+    mock_client.futures_mark_price.return_value = {"symbol": SYMBOL, "markPrice": "50000.12"}
+    mark_price = get_futures_mark_price(SYMBOL)
+    assert mark_price == 50000.12
+
+
+@patch('bot.binance_api.client')
+def test_get_futures_position_qty(mock_client):
+    """Test retrieving signed futures position quantity."""
+    mock_client.futures_position_information.return_value = [{"symbol": SYMBOL, "positionAmt": "-0.015"}]
+    position_qty = get_futures_position_qty(SYMBOL)
+    assert position_qty == -0.015
+
+
+@patch('bot.binance_api.client')
+@patch('bot.binance_api.get_futures_mark_price')
+def test_calculate_futures_order_quantity_with_mock(mock_mark_price, mock_client):
+    """Futures quantity calculation should apply leverage and lot-size rounding."""
+    mock_mark_price.return_value = 50000.0
+    mock_client.futures_exchange_info.return_value = {
+        "symbols": [
+            {
+                "symbol": SYMBOL,
+                "filters": [
+                    {"filterType": "LOT_SIZE", "minQty": "0.001", "stepSize": "0.001"}
+                ],
+            }
+        ]
+    }
+
+    qty = calculate_futures_order_quantity(SYMBOL, quote_amount=25.0, leverage=2.0)
+    assert qty == 0.001
+
+
+@patch('bot.binance_api.client')
+def test_place_futures_market_order(mock_client):
+    """Futures market order should support leverage setup and reduce-only mode."""
+    mock_client.futures_change_leverage.return_value = {"leverage": 3}
+    mock_client.futures_create_order.return_value = {
+        "orderId": 123,
+        "symbol": SYMBOL,
+        "side": "SELL",
+        "type": "MARKET",
+        "origQty": "0.001",
+        "status": "FILLED",
+    }
+
+    order = place_futures_market_order(
+        symbol=SYMBOL,
+        side="SELL",
+        quantity=0.001,
+        reduce_only=False,
+        leverage=3.0,
+    )
+
+    assert order is not None
+    mock_client.futures_change_leverage.assert_called_once()
+    mock_client.futures_create_order.assert_called_once()
 
 # Add new tests below
 

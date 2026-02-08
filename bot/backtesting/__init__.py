@@ -30,7 +30,8 @@ def run_backtest(
     strategy_func: Callable,
     initial_capital: float = None,
     commission_rate: float = None,
-    db_path: str = None
+    db_path: str = None,
+    allow_short_positions: bool = None,
 ) -> BacktestResult:
     """
     Run a backtest with the given strategy and parameters.
@@ -44,6 +45,7 @@ def run_backtest(
         initial_capital: Initial capital to start with (uses default if None)
         commission_rate: Commission rate as a decimal (uses default if None)
         db_path: Optional custom path for the database
+        allow_short_positions: Whether short entries are allowed in simulation
         
     Returns:
         BacktestResult: Object containing backtest results
@@ -55,7 +57,8 @@ def run_backtest(
         end_date=end_date,
         initial_capital=initial_capital,
         commission_rate=commission_rate,
-        db_path=db_path
+        db_path=db_path,
+        allow_short_positions=allow_short_positions,
     )
     
     return engine.run_backtest(strategy_func)

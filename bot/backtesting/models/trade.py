@@ -41,6 +41,7 @@ class Trade:
     entry_time: Optional[datetime] = None
     exit_time: Optional[datetime] = None
     holding_period_hours: Optional[float] = None
+    position_side: Optional[str] = None  # LONG or SHORT lifecycle context
     strategy: Optional[str] = None
     timeframe: Optional[str] = None
     entry_signal: Optional[str] = None

@@ -7,7 +7,8 @@ import pandas as pd
 from bot.config import (
     SYMBOL, TESTNET, TRADING_CONFIG, 
     get_trading_parameter, get_loop_interval, 
-    get_consensus_method, is_llm_agreement_required, is_live_trading_enabled
+    get_consensus_method, is_llm_agreement_required, is_live_trading_enabled,
+    get_trade_mode, is_futures_short_enabled
 )
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
@@ -331,57 +332,112 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
         execute_buy = signal_consensus == "BUY" and (not llm_required or llm_decision == "BUY")
         execute_sell = signal_consensus == "SELL" and (not llm_required or llm_decision == "SELL")
         
-        # Get the default order amount from config
+        # Get execution mode and position sizing config.
+        trade_mode = get_trade_mode()
+        futures_shorts_enabled = is_futures_short_enabled()
         default_order_amount = get_trading_parameter("default_order_amount_usd", 10.0)
-        
-        if execute_buy:
-            logger.info(f"Executing BUY for {symbol}")
-            # Use the order manager to execute the buy with the configured USDT amount
-            order = order_manager.execute_market_buy(quote_amount=default_order_amount)
-            if order:
-                logger.info(f"Buy order executed successfully: {order['orderId']}")
-                
-                # Link signal to trade in database if available
-                if db_integration and 'trade_id' in order and signal_ids:
-                    for signal_id in signal_ids.values():
-                        if signal_id > 0:
-                            db_integration.link_signal_to_trade(signal_id, order['trade_id'])
-                
-                return order
+
+        def _link_signals_to_trade(order_payload):
+            if db_integration and order_payload and 'trade_id' in order_payload and signal_ids:
+                for signal_id in signal_ids.values():
+                    if signal_id > 0:
+                        db_integration.link_signal_to_trade(signal_id, order_payload['trade_id'])
+
+        if trade_mode == "FUTURES":
+            default_futures_leverage = get_trading_parameter("default_futures_leverage", 2.0)
+            if not futures_shorts_enabled:
+                logger.warning(
+                    "TRADE_MODE is FUTURES but ENABLE_FUTURES_SHORTS is false; no futures shorts will be executed."
+                )
+
+            if execute_sell:
+                logger.info("Executing futures SHORT for %s", symbol)
+                if not futures_shorts_enabled:
+                    return None
+
+                order = order_manager.execute_market_short(
+                    quote_amount=default_order_amount,
+                    leverage=default_futures_leverage,
+                )
+                if order:
+                    logger.info("Futures short executed successfully: %s", order.get('orderId'))
+                    _link_signals_to_trade(order)
+                    return order
+
+                reject_reason = getattr(order_manager, "last_reject_reason", None)
+                if reject_reason:
+                    logger.warning("Futures short rejected by risk checks: %s", reject_reason)
+                logger.warning("Futures short execution failed")
+
+            elif execute_buy:
+                logger.info("Executing futures SHORT cover for %s", symbol)
+                if not futures_shorts_enabled:
+                    return None
+
+                current_position = order_manager.get_position_quantity()
+                if current_position is None:
+                    logger.warning("Unable to determine current futures position for short cover.")
+                    return None
+                if current_position >= 0:
+                    logger.info("No open short position to cover for %s", symbol)
+                    return None
+
+                order = order_manager.execute_market_cover(abs(current_position))
+                if order:
+                    logger.info("Futures short cover executed successfully: %s", order.get('orderId'))
+                    _link_signals_to_trade(order)
+                    return order
+
+                reject_reason = getattr(order_manager, "last_reject_reason", None)
+                if reject_reason:
+                    logger.warning("Futures short cover rejected by risk checks: %s", reject_reason)
+                logger.warning("Futures short cover execution failed")
+
             else:
+                logger.info(
+                    "No trade executed. Signal consensus: %s, LLM decision: %s",
+                    signal_consensus,
+                    llm_decision,
+                )
+        else:
+            if execute_buy:
+                logger.info(f"Executing BUY for {symbol}")
+                order = order_manager.execute_market_buy(quote_amount=default_order_amount)
+                if order:
+                    logger.info(f"Buy order executed successfully: {order['orderId']}")
+                    _link_signals_to_trade(order)
+                    return order
+
                 reject_reason = getattr(order_manager, "last_reject_reason", None)
                 if reject_reason:
                     logger.warning(f"Buy order rejected by risk checks: {reject_reason}")
                 logger.warning("Buy order execution failed")
-                
-        elif execute_sell:
-            # For sell, we should check our current position and sell an appropriate amount
-            logger.info(f"Executing SELL for {symbol}")
-            balance = get_account_balance(symbol.replace('USDT', ''))  # Get BTC balance for BTCUSDT
-            
-            if balance and balance.get('free', 0) > 0:
-                quantity = balance['free']
-                order = order_manager.execute_market_sell(quantity)
-                if order:
-                    logger.info(f"Sell order executed successfully: {order['orderId']}")
-                    
-                    # Link signal to trade in database if available
-                    if db_integration and 'trade_id' in order and signal_ids:
-                        for signal_id in signal_ids.values():
-                            if signal_id > 0:
-                                db_integration.link_signal_to_trade(signal_id, order['trade_id'])
-                    
-                    return order
-                else:
+
+            elif execute_sell:
+                logger.info(f"Executing SELL for {symbol}")
+                balance = get_account_balance(symbol.replace('USDT', ''))
+
+                if balance and balance.get('free', 0) > 0:
+                    quantity = balance['free']
+                    order = order_manager.execute_market_sell(quantity)
+                    if order:
+                        logger.info(f"Sell order executed successfully: {order['orderId']}")
+                        _link_signals_to_trade(order)
+                        return order
+
                     reject_reason = getattr(order_manager, "last_reject_reason", None)
                     if reject_reason:
                         logger.warning(f"Sell order rejected by risk checks: {reject_reason}")
                     logger.warning("Sell order execution failed")
+                else:
+                    logger.warning(f"No balance available to sell for {symbol.replace('USDT', '')}")
+
             else:
-                logger.warning(f"No balance available to sell for {symbol.replace('USDT', '')}")
-                
-        else:
-            logger.info(f"No trade executed. Signal consensus: {signal_consensus}, LLM decision: {llm_decision}")
+                logger.info(
+                    "No trade executed. Signal consensus: %s, LLM decision: %s",
+                    signal_consensus,
+                    llm_decision,
+                )
         
         return None
     except (BinanceAPIException, BinanceRequestException) as e:
@@ -422,19 +478,36 @@ def trading_loop():
         get_trading_parameter("max_order_amount_usd", 100.0)
     )
     max_position_exposure_usd = get_trading_parameter("max_position_exposure_usd", 250.0)
+    trade_mode = get_trade_mode()
+    enable_futures_shorts = is_futures_short_enabled()
+    max_short_notional_usd = get_trading_parameter("max_short_notional_usd", max_order_notional_usd)
+    default_futures_leverage = get_trading_parameter("default_futures_leverage", 2.0)
+    max_short_leverage = get_trading_parameter("max_short_leverage", 3.0)
+    min_short_liquidation_buffer_pct = get_trading_parameter("min_short_liquidation_buffer_pct", 20.0)
     order_manager = OrderManager(
         SYMBOL,
         risk_percentage=risk_percentage,
         use_database=db_integration is not None,
         max_order_notional_usd=max_order_notional_usd,
         max_position_exposure_usd=max_position_exposure_usd,
+        trade_mode=trade_mode,
+        enable_futures_shorts=enable_futures_shorts,
+        max_short_notional_usd=max_short_notional_usd,
+        default_futures_leverage=default_futures_leverage,
+        max_short_leverage=max_short_leverage,
+        min_short_liquidation_buffer_pct=min_short_liquidation_buffer_pct,
     )
     logger.info(
-        "Order manager initialized for %s with risk percentage %s%%, max order notional %.2f, max exposure %.2f",
+        "Order manager initialized for %s | mode=%s | futures_shorts=%s | risk=%s%% | max order notional %.2f | max exposure %.2f | max short notional %.2f | max short leverage %.2f | min short liq buffer %.2f%%",
         SYMBOL,
+        trade_mode,
+        "enabled" if enable_futures_shorts else "disabled",
         risk_percentage,
         float(max_order_notional_usd),
         float(max_position_exposure_usd),
+        float(max_short_notional_usd),
+        float(max_short_leverage),
+        float(min_short_liquidation_buffer_pct),
     )
     
     # Initialize LLM manager

@@ -204,6 +204,59 @@ def test_vectorized_backtesting(backtest_engine):
         if hasattr(trade, 'entry_time') and hasattr(trade, 'exit_time'):
             assert trade.exit_time > trade.entry_time
 
+
+def test_short_mode_uses_traditional_path_and_tracks_short_exit():
+    """Short-enabled backtests should skip vectorized path and compute short PnL on BUY cover."""
+    with patch('bot.backtesting.core.engine.BacktestEngine._load_market_data'):
+        engine = BacktestEngine(
+            symbol='BTCUSDT',
+            timeframes=['1h'],
+            start_date='2023-01-01',
+            end_date='2023-01-31',
+            allow_short_positions=True,
+        )
+
+    dates = pd.date_range(start='2023-01-01', periods=90, freq='1h')
+    prices = np.linspace(120.0, 80.0, len(dates))
+    df = pd.DataFrame({
+        'timestamp': dates,
+        'open': prices,
+        'high': prices * 1.01,
+        'low': prices * 0.99,
+        'close': prices,
+        'volume': np.random.normal(100, 20, len(dates)),
+    })
+    engine.market_data = {'1h': df}
+
+    def vectorized_short_strategy(data_dict, symbol, vectorized=False):
+        if vectorized:
+            signals = ['HOLD'] * len(data_dict['1h'])
+            if len(signals) > 60:
+                signals[40] = 'SELL'
+                signals[60] = 'BUY'
+            return signals
+
+        candles = len(data_dict['1h'])
+        if candles == 40:
+            return 'SELL'
+        if candles == 60:
+            return 'BUY'
+        return 'HOLD'
+
+    vectorized_short_strategy.vectorized = True
+
+    with patch.object(engine, '_run_vectorized_backtest') as mock_vectorized:
+        result = engine.run_backtest(vectorized_short_strategy)
+
+    mock_vectorized.assert_not_called()
+    short_exits = [
+        t for t in engine.trades
+        if t.side == 'BUY' and t.position_side == 'SHORT' and t.profit_loss is not None
+    ]
+    assert len(short_exits) >= 1
+    assert short_exits[0].profit_loss > 0
+    assert result.total_trades >= 1
+
 def test_get_market_indicators(backtest_engine):
     """Test the _get_market_indicators method to extract market indicators at a specific timestamp"""
     # Create sample data with indicators

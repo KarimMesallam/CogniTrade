@@ -2,6 +2,79 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-08 (Session 15)
+
+- Session objective: execute `P1-05`, `P1-06`, and `P1-07` with implementation and test-backed evidence.
+- Completed:
+1. Implemented short-capable backtesting lifecycle in `BacktestEngine` with signed positions (`long`/`short`), short entry/cover routing, end-of-run short close handling, and short PnL/ROI/funding computation.
+2. Added short-mode safety in backtesting by forcing traditional execution path when short simulation is enabled.
+3. Extended trade model metadata with `position_side` for explicit long/short auditability.
+4. Added explicit trade-mode configuration in `bot/config.py` and `.env.example`:
+   - `TRADE_MODE` (`SPOT`/`FUTURES`)
+   - `ENABLE_FUTURES_SHORTS`
+   - `MAX_SHORT_NOTIONAL_USD`
+   - `DEFAULT_FUTURES_LEVERAGE`
+   - `MAX_SHORT_LEVERAGE`
+   - `MIN_SHORT_LIQUIDATION_BUFFER_PCT`
+5. Implemented futures primitives in `bot/binance_api.py`:
+   - mark price fetch
+   - signed futures position quantity fetch
+   - leveraged futures quantity calculation
+   - futures market order placement with optional reduce-only and leverage set.
+6. Extended `OrderManager` with explicit futures short methods:
+   - `execute_market_short(...)`
+   - `execute_market_cover(...)`
+   and mode-aware position/reference-price lookups.
+7. Added short-specific risk controls in `OrderManager`:
+   - max short leverage
+   - minimum estimated liquidation buffer
+   - max short notional cap
+   - explicit reject reasons for all short-risk rejections.
+8. Updated `execute_trade(...)` and trading-loop wiring in `bot/main.py`:
+   - spot behavior unchanged
+   - futures `SELL` routes to short entry
+   - futures `BUY` routes to short cover
+   - short execution blocked unless explicitly enabled.
+9. Added regression tests for:
+   - short backtesting lifecycle and PnL
+   - short-mode vectorized fallback behavior
+   - futures short open/cover execution routing
+   - futures exchange helper functions
+   - short-risk rejection paths (leverage, liquidation buffer, notional).
+10. Updated tracker statuses for `P1-05`, `P1-06`, and `P1-07` to `done`.
+- Files changed:
+1. `bot/config.py`
+2. `.env.example`
+3. `bot/binance_api.py`
+4. `bot/order_manager.py`
+5. `bot/main.py`
+6. `bot/backtesting/config/settings.py`
+7. `bot/backtesting/core/engine.py`
+8. `bot/backtesting/models/trade.py`
+9. `bot/backtesting/__init__.py`
+10. `tests/test_backtesting.py`
+11. `tests/test_vectorized_backtesting.py`
+12. `tests/test_order_manager.py`
+13. `tests/test_main.py`
+14. `tests/test_binance_api.py`
+15. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+16. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_backtesting.py -k "short" -v`
+2. `venv/bin/pytest tests/test_vectorized_backtesting.py -k "short" -v`
+3. `venv/bin/pytest tests/test_order_manager.py -k "market_short or market_cover or futures" -v`
+4. `venv/bin/pytest tests/test_main.py -k "futures or short" -v`
+5. `venv/bin/pytest tests/test_binance_api.py -k "futures" -v`
+6. `venv/bin/pytest -q`
+- Result summary:
+1. Backtesting short-path suites passed (`1 passed` + `1 passed` targeted).
+2. Futures/short order-manager suite passed (`5 passed` targeted).
+3. Futures/short main execution suite passed (`3 passed` targeted).
+4. Futures exchange-helper suite passed (`4 passed` targeted).
+5. Full regression passed (`198 passed, 3 skipped`).
+- Open blockers:
+1. None for `P1-05`, `P1-06`, and `P1-07`.
+
 ## 2026-02-08 (Session 14)
 
 - Session objective: fix live API trading lifecycle bug discovered during runtime demo (`/trading/start` and `/trading/stop` behavior).
