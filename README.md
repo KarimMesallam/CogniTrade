@@ -7,7 +7,7 @@ A scalable Python project for automated trading that combines traditional tradin
 CogniTrade aims to take you from basic trading bot functionality to a robust system that leverages AI:
 - **Paper Trading:** Start with simulated trades using Binance Testnet.
 - **Scalable Architecture:** Modular design to support multiple strategies and future integration with various LLMs.
-- **AI Orchestration:** A dedicated module to incorporate LLMs (e.g., DeepSeek R1, GPT-4o, o3-mini, Claude 3.7 Sonnet) for enhanced decision making.
+- **AI Orchestration:** A dedicated module to incorporate LLMs (DeepSeek primary + OpenAI secondary) for enhanced decision making.
 - **Extensible:** Easily add new exchanges, trading strategies, and real-time data streams.
 - **Custom Strategies:** Plug-and-play system for adding your own trading strategies without modifying core code.
 - **Comprehensive Configuration:** Highly configurable through environment variables or JSON configuration files.
@@ -20,6 +20,7 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
 
 - **Binance API Integration:** Uses the official Binance API (via python-binance) for fetching market data, placing orders, and managing accounts.
 - **Paper Trading Mode:** Safely test strategies on Binance Testnet before going live.
+- **Live Trading Safety Gate:** Live mode is blocked by default and requires explicit opt-in (`ENABLE_LIVE_TRADING=True`) when `TESTNET=False`.
 - **Strategy Module:** Contains logic for trading signals (e.g., based on technical indicators) with an abstract layer for future enhancements.
 - **Custom Strategy Support:** Create your own strategies that can be dynamically loaded and configured without changing core code.
 - **Enhanced Configuration System:**
@@ -28,8 +29,8 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
   - Direct access to configuration values through helper functions
   - Type-safe parameter retrieval
 - **Advanced LLM Integration:** 
-  - DeepSeek R1 integration for reasoning-based trading decisions
-  - GPT-4o structured output processing for improved confidence estimation and reasoning
+  - DeepSeek reasoning-model integration for primary analysis
+  - OpenAI `gpt-5-mini` structured output processing for confidence estimation and reasoning
   - Support for multiple LLM providers with configurable parameters
   - Fallback to rule-based decisions when LLM services are unavailable
   - Detailed confidence scores for decision making
@@ -63,6 +64,7 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
   - Vectorized operations for high-speed strategy testing
   - Precise arithmetic validation for profit/loss calculations
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
+- **Production P0 Hardening:** API error semantics, backtest strategy binding, LLM payload validation, DB serialization contracts, and non-mock endpoint integration tests.
 
 ## CogniTrade Project Structure
 
@@ -109,6 +111,7 @@ trading_bot/
 │   ├── test_database.py       # Tests for database operations
 │   ├── test_db_integration.py # Tests for database integration layer
 │   ├── test_main_db_integration.py # Integration tests for main and database
+│   ├── test_api_integration.py # Non-mock API contract integration tests
 │   ├── conftests.py           # Pytest configuration and fixtures
 │   └── __init__.py            # Test package initialization
 ├── examples/                  # Example scripts
@@ -159,6 +162,7 @@ trading_bot/
    API_KEY=your_binance_testnet_api_key
    API_SECRET=your_binance_testnet_api_secret
    TESTNET=True
+   ENABLE_LIVE_TRADING=False
    SYMBOL=BTCUSDT
    
    # Strategy Configuration
@@ -189,8 +193,9 @@ python -m bot.main
 
 CogniTrade will:
 1. Initialize the Binance connection using your API keys
-2. Check account balances and verify that the configured symbol can be traded
-3. Enter a continuous trading loop that:
+2. Enforce live-trading safety gate (`TESTNET=False` requires `ENABLE_LIVE_TRADING=True`)
+3. Check account balances and verify that the configured symbol can be traded
+4. Enter a continuous trading loop that:
    - Retrieves current market data
    - Generates signals from enabled strategies (simple, technical, and custom)
    - Uses LLM (or rule-based fallback) for decision support
@@ -199,6 +204,14 @@ CogniTrade will:
    - Implements exponential backoff for error handling
 
 All activity is logged to both the console and a file named `trading_bot.log`.
+
+### Live Trading Safety
+
+Live trading is intentionally disabled by default.
+
+- `TESTNET=True` is the safe default.
+- If you set `TESTNET=False`, the bot will refuse to start trading unless `ENABLE_LIVE_TRADING=True`.
+- This guard is enforced in both initialization and trading loop startup paths.
 
 ### Configuration Options
 
@@ -394,6 +407,13 @@ uvicorn main:app --reload
 
 The API will be available at http://localhost:8000 with automatic API documentation at http://localhost:8000/docs.
 
+#### API Contract Notes (P0)
+
+- `/backtest/run` now binds to real strategy implementations (`sma_crossover`, `rsi`) with parameter validation and explicit `400` errors for invalid or unknown strategies.
+- `/llm/decision` uses the public rule-based fallback path when `llm_model` is omitted or set to `rule_based`, and validates response schema (`decision`, `confidence`, `reasoning`).
+- `/database/trades` and `/database/signals` return normalized JSON-safe records with pagination validation (`limit >= 1`, `offset >= 0`).
+- API handlers return explicit failure status codes for upstream/internal errors instead of mock success payloads.
+
 ### Backtesting Strategies
 
 #### Using the New Backtesting Module
@@ -567,26 +587,39 @@ See the example scripts in the `examples/` directory for comprehensive demonstra
 
 ### Running Tests
 
-The project uses pytest for unit testing with a focus on high code coverage. To run the tests:
+The project uses pytest for unit and integration testing with a focus on high code coverage. To run the tests:
 
 ```bash
 # Run all tests
-python -m pytest
+venv/bin/pytest
 
 # Run tests with verbose output
-python -m pytest -v
+venv/bin/pytest -v
 
 # Run tests in a specific file
-python -m pytest tests/test_strategy.py
+venv/bin/pytest tests/test_strategy.py -v
 
 # Run tests for the backtesting module
-python -m pytest tests/test_backtesting/
+venv/bin/pytest tests/test_backtesting/ -v
+
+# Run API integration contract tests (non-mock)
+venv/bin/pytest tests/test_api_integration.py -v
+
+# Run P0 gate commands
+venv/bin/pytest tests/test_api.py -k "error or fallback or database or llm or backtest" -v
+venv/bin/pytest tests/test_api.py -k "backtest" -v
+venv/bin/pytest tests/test_api.py -k "llm" -v
+venv/bin/pytest tests/test_llm_manager.py -v
+venv/bin/pytest tests/test_api.py -k "database_trades or database_signals" -v
+venv/bin/pytest tests/test_database.py -v
+venv/bin/pytest tests/test_main.py -v
+venv/bin/pytest tests/test_api_integration.py -v
 
 # Generate test coverage report
-python -m pytest --cov=bot tests/
+venv/bin/pytest --cov=bot --cov=api
 
 # Generate coverage for a specific module
-python -m pytest tests/test_backtesting/ --cov=bot.backtesting
+venv/bin/pytest tests/test_backtesting/ --cov=bot.backtesting
 ```
 
 Test categories:
@@ -600,7 +633,9 @@ Test categories:
 - **Arithmetic Validation tests:** Ensures accurate profit/loss calculations using controlled datasets
 - **Database tests:** Tests for database operations and data persistence
 - **Database Integration tests:** Tests for the database integration layer that connects trading functions with data storage
-- **Integration tests:** Tests for the integration between main trading functions and the database system
+- **Integration tests:** Tests for:
+  - Integration between main trading functions and the database system
+  - Non-mock FastAPI endpoint contracts (`tests/test_api_integration.py`)
 
 ## Enhanced Configuration System
 
@@ -651,9 +686,9 @@ CogniTrade's enhanced LLM integration now supports multiple language models for 
 
 The LLM Manager integrates multiple language models with a configurable setup:
 
-1. **Primary Model** (e.g., DeepSeek R1) - Used for in-depth market analysis and initial trading recommendations.
+1. **Primary Model** (DeepSeek `deepseek-reasoner`) - Used for in-depth market analysis and initial trading recommendations.
 
-2. **Secondary Model** (e.g., GPT-4o) - Processes the primary model's output to produce structured responses with:
+2. **Secondary Model** (OpenAI `gpt-5-mini`) - Processes the primary model's output to produce structured responses with:
    - A decisive trading action (BUY, SELL, or HOLD)
    - A confidence score (0.5-1.0) indicating certainty level
    - A concise reasoning summary
@@ -678,16 +713,16 @@ Configure the LLM integration through your `.env` file or JSON configuration:
 ENABLE_LLM_DECISIONS=True
 LLM_REQUIRED_CONFIDENCE=0.6
 
-# Primary LLM (DeepSeek R1)
+# Primary LLM (DeepSeek latest reasoning alias)
 LLM_PRIMARY_PROVIDER=deepseek
 LLM_PRIMARY_MODEL=deepseek-reasoner
 LLM_API_KEY=your_deepseek_api_key
 LLM_API_ENDPOINT=https://api.deepseek.com/v1/chat/completions
 LLM_TEMPERATURE=0.3
 
-# Secondary LLM (OpenAI GPT-4o)
+# Secondary LLM (OpenAI latest cost-effective tier)
 LLM_SECONDARY_PROVIDER=openai
-LLM_SECONDARY_MODEL=gpt-4o
+LLM_SECONDARY_MODEL=gpt-5-mini
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_API_ENDPOINT=https://api.openai.com/v1/chat/completions
 OPENAI_TEMPERATURE=0.1
