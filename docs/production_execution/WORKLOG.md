@@ -2,6 +2,37 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-08 (Session 14)
+
+- Session objective: fix live API trading lifecycle bug discovered during runtime demo (`/trading/start` and `/trading/stop` behavior).
+- Completed:
+1. Removed the premature global reset in `api/main.py` (`run_trading_bot`) so `trading_bot` state remains valid until explicit stop.
+2. Added deterministic API lifecycle tests in `tests/test_api.py`:
+   - `test_start_trading_rejects_when_already_running`
+   - `test_stop_trading_when_not_running_returns_400`
+3. Added an autouse fixture in `tests/test_api.py` to isolate `trading_bot`/`trading_task` globals between tests.
+4. Re-ran live endpoint demo to verify behavior:
+   - `start` => `200`
+   - second `start` => `400` already running
+   - `stop` => `200`
+   - second `stop` => `400` not running
+- Files changed:
+1. `api/main.py`
+2. `tests/test_api.py`
+3. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_api.py -v`
+2. `venv/bin/pytest tests/test_api_integration.py -v`
+3. `venv/bin/pytest -q`
+4. Live runtime recheck script (`uvicorn` + HTTP calls for `/trading/start`/`/trading/stop` lifecycle)
+- Result summary:
+1. API unit suite passed (`20 passed`).
+2. API integration suite passed (`7 passed`).
+3. Full regression passed (`184 passed, 3 skipped`).
+4. Live lifecycle behavior now matches expected semantics.
+- Open blockers:
+1. None for this fix.
+
 ## 2026-02-08 (Session 13)
 
 - Session objective: execute `P2-03` and `P2-04` with implementation and test-backed evidence.

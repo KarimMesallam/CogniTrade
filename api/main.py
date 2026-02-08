@@ -203,10 +203,7 @@ async def run_trading_bot(bot):
         # Start the bot
         await bot.start()
     except Exception as e:
-        print(f"Error running trading bot: {e}")
-    finally:
-        global trading_bot
-        trading_bot = None
+        logger.error(f"Error running trading bot: {e}")
 
 # Stop trading
 @app.post("/trading/stop")

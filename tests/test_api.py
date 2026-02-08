@@ -14,9 +14,20 @@ from api.main import app
 from bot import binance_api, strategy, order_manager, database, config, llm_manager
 from bot.backtesting import run_backtest, generate_report, optimize_strategy
 from bot.backtesting.models.results import BacktestResult, PerformanceMetrics
+import api.main as api_main
 
 # Create test client - updated for newer FastAPI/starlette versions
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def reset_trading_state():
+    """Ensure trading bot global state is isolated between API tests."""
+    api_main.trading_bot = None
+    api_main.trading_task = None
+    yield
+    api_main.trading_bot = None
+    api_main.trading_task = None
 
 # Fixture for mocking the database
 @pytest.fixture
@@ -80,6 +91,28 @@ def test_start_trading(mock_background_tasks):
     assert response.json()["message"] == "Trading bot started"
     mock_background_tasks.assert_called_once()
 
+
+def test_start_trading_rejects_when_already_running():
+    trading_config = {
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "trade_amount": 100.0,
+        "strategies": [
+            {
+                "name": "sma_crossover",
+                "params": {"short_period": 10, "long_period": 50},
+                "active": True
+            }
+        ]
+    }
+
+    first = client.post("/trading/start", json=trading_config)
+    second = client.post("/trading/start", json=trading_config)
+
+    assert first.status_code == 200
+    assert second.status_code == 400
+    assert second.json()["detail"] == "Trading bot is already running"
+
 # Test stop trading endpoint
 def test_stop_trading():
     # First we need to start the bot
@@ -107,6 +140,12 @@ def test_stop_trading():
     assert response.status_code == 200
     assert response.json()["status"] == "success"
     assert response.json()["message"] == "Trading bot stopped"
+
+
+def test_stop_trading_when_not_running_returns_400():
+    response = client.post("/trading/stop")
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Trading bot is not running"
 
 # Test get account info endpoint
 def test_get_account_info(mock_binance_client):
