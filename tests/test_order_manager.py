@@ -4,7 +4,7 @@ import json
 import uuid
 import pytest
 from unittest.mock import patch, mock_open
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Add the parent directory to the path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -560,3 +560,101 @@ class TestOrderManager:
             quantity=0.02,
             reduce_only=True,
         )
+
+    def test_get_recent_turnover_notional_includes_recent_filled_orders(self):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0,
+        )
+        now = datetime.now()
+        manager.order_history = [
+            {
+                "timestamp": (now - timedelta(minutes=10)).isoformat(),
+                "status": "FILLED",
+                "quantity": "0.10",
+                "price": "50000",
+                "fills": [],
+            },
+            {
+                "timestamp": (now - timedelta(minutes=5)).isoformat(),
+                "status": "FILLED",
+                "quantity": "0.05",
+                "price": "51000",
+                "fills": [],
+            },
+            {
+                "timestamp": (now - timedelta(hours=2)).isoformat(),
+                "status": "FILLED",
+                "quantity": "0.10",
+                "price": "52000",
+                "fills": [],
+            },
+            {
+                "timestamp": now.isoformat(),
+                "status": "NEW",
+                "quantity": "0.20",
+                "price": "53000",
+                "fills": [],
+            },
+        ]
+
+        recent_turnover = manager.get_recent_turnover_notional(window_seconds=3600)
+        # 0.10*50000 + 0.05*51000 = 7550
+        assert float(recent_turnover) == pytest.approx(7550.0, rel=1e-6)
+
+    def test_exceeds_turnover_limit_sets_reject_reason_when_cap_breached(self):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0,
+        )
+        now = datetime.now()
+        manager.order_history = [
+            {
+                "timestamp": (now - timedelta(minutes=3)).isoformat(),
+                "status": "FILLED",
+                "quantity": "0.10",
+                "price": "50000",
+                "fills": [],
+            }
+        ]
+
+        exceeds = manager.exceeds_turnover_limit(
+            projected_notional=1000.0,
+            capital_base_usd=5000.0,
+            max_turnover_ratio=1.0,
+            window_seconds=3600,
+        )
+
+        assert exceeds is True
+        assert "Turnover cap exceeded" in manager.last_reject_reason
+
+    def test_exceeds_turnover_limit_returns_false_when_within_cap(self):
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            max_order_notional_usd=0,
+            max_position_exposure_usd=0,
+        )
+        now = datetime.now()
+        manager.order_history = [
+            {
+                "timestamp": (now - timedelta(minutes=3)).isoformat(),
+                "status": "FILLED",
+                "quantity": "0.02",
+                "price": "50000",
+                "fills": [],
+            }
+        ]
+
+        exceeds = manager.exceeds_turnover_limit(
+            projected_notional=500.0,
+            capital_base_usd=5000.0,
+            max_turnover_ratio=1.0,
+            window_seconds=3600,
+        )
+
+        assert exceeds is False

@@ -65,6 +65,17 @@ CogniTrade aims to take you from basic trading bot functionality to a robust sys
   - Precise arithmetic validation for profit/loss calculations
 - **Backend API:** RESTful API for interacting with trading bot functions and accessing historical data.
 - **Production P0 Hardening:** API error semantics, backtest strategy binding, LLM payload validation, DB serialization contracts, and non-mock endpoint integration tests.
+- **Production P1 Hardening:**
+  - Pre-trade risk limits for max order notional and max position exposure
+  - Deterministic UUID trade IDs and idempotent trade upserts
+  - Full Binance pre-trade filter validation before order placement
+  - Exchange/LLM retry-backoff and circuit-breaker resilience controls
+  - Short-capable backtesting with signed PnL and short lifecycle support
+  - Explicit `SPOT`/`FUTURES` trade mode with futures short execution path (disabled by default)
+  - Short-specific risk controls (max leverage, liquidation buffer, short notional caps)
+  - Regime detection (`BULL`, `BEAR`, `SIDEWAYS`, `HIGH_VOLATILITY`) persisted to DB
+  - Regime-based strategy policy routing (enable/disable, weight multipliers, size multipliers)
+  - Safe switching controls (hysteresis, cooldown, turnover cap, shadow mode)
 
 ## CogniTrade Project Structure
 
@@ -75,6 +86,8 @@ trading_bot/
 │   ├── config.py              # Enhanced configuration loader with multiple sources
 │   ├── binance_api.py         # Binance API wrapper (using python-binance)
 │   ├── strategy.py            # Trading strategy interface and built-in strategies
+│   ├── regime.py              # Market regime detection logic
+│   ├── policy.py              # Regime-based strategy policy and switch controls
 │   ├── custom_strategies/     # Directory for user-defined custom strategies
 │   │   ├── __init__.py        # Package initialization
 │   │   └── my_strategy.py     # Example custom strategy implementation
@@ -108,6 +121,8 @@ trading_bot/
 │   ├── test_backtesting/      # Tests for the new backtesting modules
 │   ├── test_vectorized_backtesting.py # Tests for vectorized backtesting performance
 │   ├── test_arithmetic_validation.py  # Validation of profit/loss calculations
+│   ├── test_regime.py         # Regime detection behavior and determinism tests
+│   ├── test_policy.py         # Regime policy/switching behavior tests
 │   ├── test_database.py       # Tests for database operations
 │   ├── test_db_integration.py # Tests for database integration layer
 │   ├── test_main_db_integration.py # Integration tests for main and database
@@ -198,12 +213,14 @@ CogniTrade will:
 4. Enter a continuous trading loop that:
    - Retrieves current market data
    - Generates signals from enabled strategies (simple, technical, and custom)
+   - Detects and persists the current market regime with confidence
+   - Applies regime policy routing to active strategies, consensus weights, and position size
    - Uses LLM (or rule-based fallback) for decision support
    - Applies the configured consensus method to determine final trading action
    - Executes trades based on the consensus and configured parameters
    - Implements exponential backoff for error handling
 
-All activity is logged to both the console and a file named `trading_bot.log`.
+All activity is logged to both the console and a file named `cognitrade.log`.
 
 ### Live Trading Safety
 
@@ -212,6 +229,36 @@ Live trading is intentionally disabled by default.
 - `TESTNET=True` is the safe default.
 - If you set `TESTNET=False`, the bot will refuse to start trading unless `ENABLE_LIVE_TRADING=True`.
 - This guard is enforced in both initialization and trading loop startup paths.
+
+### Futures and Shorting Safety (P1)
+
+- Use `TRADE_MODE=SPOT` for standard spot behavior (default).
+- Switch to `TRADE_MODE=FUTURES` only when you explicitly want futures execution.
+- Futures shorting still requires explicit opt-in: `ENABLE_FUTURES_SHORTS=True`.
+- Additional short risk controls:
+  - `MAX_SHORT_NOTIONAL_USD`
+  - `DEFAULT_FUTURES_LEVERAGE`
+  - `MAX_SHORT_LEVERAGE`
+  - `MIN_SHORT_LIQUIDATION_BUFFER_PCT`
+
+### Regime and Policy Controls (P1)
+
+- Regime detection controls:
+  - `ENABLE_REGIME_DETECTION`
+  - `REGIME_LOOKBACK_CANDLES`
+  - `REGIME_TREND_THRESHOLD_PCT`
+  - `REGIME_SIDEWAYS_THRESHOLD_PCT`
+  - `REGIME_HIGH_VOLATILITY_THRESHOLD_PCT`
+- Policy routing and safe-switch controls:
+  - `ENABLE_REGIME_POLICY`
+  - `POLICY_DEFAULT_REGIME`
+  - `POLICY_DEFAULT_SIZE_MULTIPLIER`
+  - `POLICY_MIN_SWITCH_CONFIDENCE`
+  - `POLICY_SWITCH_HYSTERESIS_CONFIRMATIONS`
+  - `POLICY_SWITCH_COOLDOWN_SECONDS`
+  - `POLICY_MAX_STRATEGY_TURNOVER_RATIO`
+  - `POLICY_SWITCH_SHADOW_MODE`
+  - `POLICY_REGIME_CONFIG_JSON` (optional per-regime override)
 
 ### Configuration Options
 

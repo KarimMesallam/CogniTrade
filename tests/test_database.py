@@ -56,6 +56,7 @@ def test_database_initialization():
         assert "performance" in tables
         assert "market_data" in tables
         assert "alerts" in tables
+        assert "regime_state" in tables
     
     # Cleanup
     if os.path.exists(TEST_DB_PATH):
@@ -251,6 +252,43 @@ def test_record_method_pagination_validation(test_db):
 
     with pytest.raises(ValueError):
         test_db.get_signal_records(offset=-1)
+
+
+def test_insert_and_get_latest_regime_state(test_db):
+    """Regime snapshots should persist and latest record should be retrievable."""
+    base_ts = datetime(2026, 2, 8, 12, 0, 0)
+
+    first = test_db.insert_regime_state({
+        "symbol": "BTCUSDT",
+        "timeframe": "1m",
+        "regime": "SIDEWAYS",
+        "confidence": 0.61,
+        "trend_pct": 0.002,
+        "volatility_pct": 0.004,
+        "lookback_candles": 50,
+        "timestamp": base_ts.isoformat(),
+        "details": {"source": "unit-test", "iteration": 1},
+    })
+    second = test_db.insert_regime_state({
+        "symbol": "BTCUSDT",
+        "timeframe": "1m",
+        "regime": "BEAR",
+        "confidence": 0.78,
+        "trend_pct": -0.031,
+        "volatility_pct": 0.009,
+        "lookback_candles": 50,
+        "timestamp": (base_ts + timedelta(minutes=1)).isoformat(),
+        "details": {"source": "unit-test", "iteration": 2},
+    })
+
+    assert first is True
+    assert second is True
+
+    latest = test_db.get_latest_regime_state("BTCUSDT", "1m")
+    assert latest is not None
+    assert latest["regime"] == "BEAR"
+    assert latest["confidence"] == 0.78
+    assert latest["details"]["iteration"] == 2
 
 
 def test_store_and_get_market_data(test_db):

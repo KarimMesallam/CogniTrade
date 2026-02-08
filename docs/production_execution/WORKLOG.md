@@ -2,6 +2,69 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-08 (Session 16)
+
+- Session objective: finalize `P1-08`, `P1-09`, and `P1-10` with implementation, persistence, policy routing, and switch-stability safeguards.
+- Completed:
+1. Added deterministic market-regime detection module `bot/regime.py` with `BULL`/`BEAR`/`SIDEWAYS`/`HIGH_VOLATILITY`/`UNKNOWN` classification and confidence scoring from current candle window only.
+2. Added persisted regime-state storage in `bot/database.py` (`regime_state` table + insert/get-latest methods).
+3. Added integration methods in `bot/db_integration.py` to save and retrieve latest regime snapshots.
+4. Added regime-policy engine `bot/policy.py` for:
+   - regime-specific strategy enable/disable
+   - per-strategy weight multipliers
+   - per-regime position-size multipliers.
+5. Added switch-stability controls in policy flow:
+   - hysteresis confirmations
+   - cooldown window
+   - max strategy-turnover cap
+   - shadow-mode switch blocking with audit reasons.
+6. Wired regime + policy into `bot/main.py` trading loop:
+   - detect/persist regime each loop
+   - apply policy-routed strategy set before LLM + execution
+   - pass weight overrides and size multiplier into `execute_trade(...)`
+   - log auditable switch/policy events.
+7. Extended `execute_trade(...)`/`get_signal_consensus(...)` to support dynamic policy weights and size multipliers.
+8. Added turnover-cap utility methods to `bot/order_manager.py` (`get_recent_turnover_notional`, `exceeds_turnover_limit`) for bounded-churn guardrails.
+9. Added/updated tests:
+   - `tests/test_regime.py`
+   - `tests/test_policy.py`
+   - regime persistence in `tests/test_database.py` and `tests/test_db_integration.py`
+   - policy/switch behavior and policy-weight/size execution checks in `tests/test_main.py`
+   - turnover tests in `tests/test_order_manager.py`.
+10. Marked `P1-08`, `P1-09`, and `P1-10` as `done` and updated matrix commands for `P1-08`.
+- Files changed:
+1. `bot/regime.py`
+2. `bot/policy.py`
+3. `bot/config.py`
+4. `bot/main.py`
+5. `bot/database.py`
+6. `bot/db_integration.py`
+7. `bot/order_manager.py`
+8. `.env.example`
+9. `tests/test_regime.py`
+10. `tests/test_policy.py`
+11. `tests/test_main.py`
+12. `tests/test_order_manager.py`
+13. `tests/test_database.py`
+14. `tests/test_db_integration.py`
+15. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+16. `docs/production_execution/TEST_MATRIX.md`
+17. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_regime.py -v`
+2. `venv/bin/pytest tests/test_policy.py -v`
+3. `venv/bin/pytest tests/test_database.py -k "regime" -v`
+4. `venv/bin/pytest tests/test_db_integration.py -k "regime" -v`
+5. `venv/bin/pytest tests/test_main.py -k "regime or policy" -v`
+6. `venv/bin/pytest tests/test_main.py -k "switch or hysteresis or cooldown" -v`
+7. `venv/bin/pytest tests/test_order_manager.py -k "turnover" -v`
+8. `venv/bin/pytest -q`
+- Result summary:
+1. All targeted `P1-08/09/10` suites passed.
+2. Full regression passed (`222 passed, 3 skipped`).
+- Open blockers:
+1. None for `P1-08`, `P1-09`, or `P1-10`.
+
 ## 2026-02-08 (Session 15)
 
 - Session objective: execute `P1-05`, `P1-06`, and `P1-07` with implementation and test-backed evidence.

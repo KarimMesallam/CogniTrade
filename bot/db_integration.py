@@ -247,6 +247,64 @@ class DatabaseIntegration:
             logger.error(f"Error adding alert to database: {e}")
             return -1
 
+    def save_regime_state(
+        self,
+        symbol: str,
+        timeframe: str,
+        regime: str,
+        confidence: float,
+        trend_pct: float = None,
+        volatility_pct: float = None,
+        lookback_candles: int = None,
+        timestamp: str = None,
+        details: Dict[str, Any] = None,
+    ) -> bool:
+        """
+        Persist a market regime classification snapshot.
+        """
+        try:
+            payload = {
+                "symbol": symbol,
+                "timeframe": timeframe,
+                "regime": regime,
+                "confidence": confidence,
+                "trend_pct": trend_pct,
+                "volatility_pct": volatility_pct,
+                "lookback_candles": lookback_candles,
+                "timestamp": timestamp or datetime.now().isoformat(),
+                "details": details,
+            }
+            success = self.db.insert_regime_state(payload)
+            if success:
+                logger.info(
+                    "Saved regime state for %s %s: %s (confidence=%.2f)",
+                    symbol,
+                    timeframe,
+                    regime,
+                    float(confidence),
+                )
+            else:
+                logger.warning(
+                    "Failed to save regime state for %s %s: %s",
+                    symbol,
+                    timeframe,
+                    regime,
+                )
+            return success
+        except Exception as e:
+            logger.error(f"Error saving regime state: {e}")
+            return False
+
+    def get_latest_regime_state(self, symbol: str, timeframe: str) -> Optional[Dict[str, Any]]:
+        """
+        Get the most recent persisted regime state.
+        """
+        try:
+            return self.db.get_latest_regime_state(symbol, timeframe)
+        except Exception as e:
+            logger.error(f"Error retrieving latest regime state: {e}")
+            return None
+
     def _get_connection(self):
         """Proxy method to get a database connection for custom queries."""
         return self.db._get_connection() 

@@ -23,7 +23,7 @@
 | P1-05 | Backtesting short position lifecycle and PnL accuracy | `venv/bin/pytest tests/test_backtesting.py -k "short" -v` and `venv/bin/pytest tests/test_vectorized_backtesting.py -k "short" -v` | Must pass |
 | P1-06 | Futures short routing and trade-mode safety gating | `venv/bin/pytest tests/test_main.py -k "futures or short" -v` and `venv/bin/pytest tests/test_order_manager.py -k "market_short or market_cover or futures" -v` | Must pass |
 | P1-07 | Short-specific risk controls and reject reasons | `venv/bin/pytest tests/test_order_manager.py -k "market_short_rejected or leverage_exceeds_max or liquidation_buffer or short_cap" -v` and `venv/bin/pytest tests/test_main.py -k "futures_short_disabled" -v` | Must pass |
-| P1-08 | Regime detection correctness and state persistence | `venv/bin/pytest tests/test_regime.py -v` and persistence-specific tests | Must pass |
+| P1-08 | Regime detection correctness and state persistence | `venv/bin/pytest tests/test_regime.py -v` and `venv/bin/pytest tests/test_database.py -k "regime" -v` and `venv/bin/pytest tests/test_db_integration.py -k "regime" -v` | Must pass |
 | P1-09 | Regime-based strategy policy routing and sizing | `venv/bin/pytest tests/test_policy.py -v` and `venv/bin/pytest tests/test_main.py -k "regime or policy" -v` | Must pass |
 | P1-10 | Switch-stability guards (hysteresis/cooldown/turnover limits) | `venv/bin/pytest tests/test_main.py -k "switch or hysteresis or cooldown" -v` and `venv/bin/pytest tests/test_order_manager.py -k "turnover" -v` | Must pass |
 | P2-01 | Point-in-time data integrity and leakage prevention | `venv/bin/pytest tests/test_data_pipeline.py -v` and leakage-specific checks | Must pass |

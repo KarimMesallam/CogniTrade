@@ -4,6 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv() 
 
+
+def _parse_json_env(var_name: str, default):
+    """Best-effort parse of JSON config from env var."""
+    raw = os.getenv(var_name, "").strip()
+    if not raw:
+        return default
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        print(f"Warning: invalid JSON in {var_name}, ignoring override")
+        return default
+
 # API credentials
 API_KEY = os.getenv('API_KEY')
 API_SECRET = os.getenv('API_SECRET')
@@ -108,6 +120,28 @@ TRADING_CONFIG = {
         "enable_stop_loss": os.getenv('ENABLE_STOP_LOSS', 'True').lower() in ('true', '1', 't'),
         "enable_take_profit": os.getenv('ENABLE_TAKE_PROFIT', 'True').lower() in ('true', '1', 't')
     },
+
+    # Market regime detection
+    "regime": {
+        "enabled": os.getenv('ENABLE_REGIME_DETECTION', 'True').lower() in ('true', '1', 't'),
+        "lookback_candles": int(os.getenv('REGIME_LOOKBACK_CANDLES', '50')),
+        "trend_threshold_pct": float(os.getenv('REGIME_TREND_THRESHOLD_PCT', '0.02')),
+        "sideways_threshold_pct": float(os.getenv('REGIME_SIDEWAYS_THRESHOLD_PCT', '0.01')),
+        "high_volatility_threshold_pct": float(os.getenv('REGIME_HIGH_VOLATILITY_THRESHOLD_PCT', '0.015')),
+    },
+
+    # Regime-based strategy policy and switch controls
+    "policy": {
+        "enabled": os.getenv('ENABLE_REGIME_POLICY', 'True').lower() in ('true', '1', 't'),
+        "default_regime": os.getenv('POLICY_DEFAULT_REGIME', 'SIDEWAYS').upper(),
+        "default_size_multiplier": float(os.getenv('POLICY_DEFAULT_SIZE_MULTIPLIER', '1.0')),
+        "min_switch_confidence": float(os.getenv('POLICY_MIN_SWITCH_CONFIDENCE', '0.55')),
+        "switch_hysteresis_confirmations": int(os.getenv('POLICY_SWITCH_HYSTERESIS_CONFIRMATIONS', '2')),
+        "switch_cooldown_seconds": int(os.getenv('POLICY_SWITCH_COOLDOWN_SECONDS', '900')),
+        "max_strategy_turnover_ratio": float(os.getenv('POLICY_MAX_STRATEGY_TURNOVER_RATIO', '1.0')),
+        "switch_shadow_mode": os.getenv('POLICY_SWITCH_SHADOW_MODE', 'False').lower() in ('true', '1', 't'),
+        "regimes": _parse_json_env('POLICY_REGIME_CONFIG_JSON', {}),
+    },
     
     # Timeframe configuration for market data
     "timeframes": {
@@ -172,6 +206,16 @@ def get_strategy_parameter(strategy_name, parameter_name, default=None):
 def get_trading_parameter(parameter_name, default=None):
     """Get a specific trading parameter."""
     return TRADING_CONFIG["trading"].get(parameter_name, default)
+
+
+def get_regime_config():
+    """Get regime detection configuration."""
+    return TRADING_CONFIG.get("regime", {})
+
+
+def get_policy_config():
+    """Get regime-based strategy policy configuration."""
+    return TRADING_CONFIG.get("policy", {})
 
 
 def get_trade_mode() -> str:

@@ -878,3 +878,81 @@ class OrderManager:
         if limit:
             return self.order_history[-limit:]
         return self.order_history 
+
+    def get_recent_turnover_notional(self, window_seconds: int = 3600) -> Decimal:
+        """
+        Estimate filled-order turnover notional over a recent time window.
+        """
+        if window_seconds <= 0:
+            return Decimal("0")
+
+        cutoff_ts = datetime.now().timestamp() - float(window_seconds)
+        turnover = Decimal("0")
+
+        for entry in self.order_history:
+            try:
+                status = str(entry.get("status", "")).upper()
+                if status != "FILLED":
+                    continue
+
+                timestamp_raw = entry.get("timestamp")
+                if not timestamp_raw:
+                    continue
+                order_ts = datetime.fromisoformat(str(timestamp_raw)).timestamp()
+                if order_ts < cutoff_ts:
+                    continue
+
+                quantity = Decimal(str(entry.get("quantity", "0")))
+                if quantity <= Decimal("0"):
+                    continue
+
+                price_raw = entry.get("price")
+                if price_raw in (None, "", "0", "0.0", "0.00000000"):
+                    fills = entry.get("fills") or []
+                    total_cost = Decimal("0")
+                    total_qty = Decimal("0")
+                    for fill in fills:
+                        fill_qty = Decimal(str(fill.get("qty", "0")))
+                        fill_price = Decimal(str(fill.get("price", "0")))
+                        total_cost += fill_qty * fill_price
+                        total_qty += fill_qty
+                    if total_qty <= Decimal("0"):
+                        continue
+                    price = total_cost / total_qty
+                else:
+                    price = Decimal(str(price_raw))
+
+                if price <= Decimal("0"):
+                    continue
+                turnover += quantity * price
+            except Exception:
+                continue
+
+        return turnover
+
+    def exceeds_turnover_limit(
+        self,
+        projected_notional: float,
+        capital_base_usd: float,
+        max_turnover_ratio: float,
+        window_seconds: int = 3600,
+    ) -> bool:
+        """
+        Check if recent turnover plus projected notional breaches configured cap.
+        """
+        if max_turnover_ratio <= 0 or capital_base_usd <= 0:
+            return False
+
+        projected = Decimal(str(projected_notional))
+        if projected <= Decimal("0"):
+            return False
+
+        recent_turnover = self.get_recent_turnover_notional(window_seconds=window_seconds)
+        turnover_cap = Decimal(str(capital_base_usd)) * Decimal(str(max_turnover_ratio))
+        if recent_turnover + projected > turnover_cap:
+            self._set_reject_reason(
+                "Turnover cap exceeded: "
+                f"recent {recent_turnover:.8f} + projected {projected:.8f} > cap {turnover_cap:.8f}"
+            )
+            return True
+        return False

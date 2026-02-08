@@ -3,7 +3,7 @@ import sys
 import pytest
 import time
 from unittest.mock import patch, MagicMock, call
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Add the parent directory to the path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -13,6 +13,8 @@ from bot.main import (
     trading_loop
 )
 from bot.config import SYMBOL
+from bot.policy import RegimePolicyEngine
+from bot.regime import RegimeState, REGIME_BULL, REGIME_BEAR, REGIME_SIDEWAYS
 
 @pytest.fixture
 def mock_client():
@@ -161,6 +163,18 @@ class TestMain:
         # Test HOLD consensus (all HOLD)
         signals = {"strategy1": "HOLD", "strategy2": "HOLD", "strategy3": "HOLD"}
         assert get_signal_consensus(signals) == "HOLD"
+
+    @patch('bot.main.get_consensus_method', return_value='weighted_majority')
+    def test_get_signal_consensus_policy_weight_overrides(self, _mock_consensus_method):
+        """Policy-provided weights should override static config in weighted consensus."""
+        signals = {"simple": "BUY", "technical": "SELL"}
+
+        # Simulate policy boost for simple strategy to flip consensus to BUY.
+        decision = get_signal_consensus(
+            signals,
+            strategy_weights={"simple": 3.0, "technical": 1.0},
+        )
+        assert decision == "BUY"
     
     @patch('bot.main.log_decision_with_context')
     @patch('bot.main.get_account_balance')
@@ -277,20 +291,174 @@ class TestMain:
         mock_log.assert_called_once()
         mock_order_manager.execute_market_buy.assert_not_called()
         mock_order_manager.execute_market_sell.assert_not_called()
-        
+
         # Reset mocks
         mock_log.reset_mock()
-        
-        # LLM agrees but signals disagree
+
+        # LLM agrees but weighted consensus is SELL
         signals = {"simple": "BUY", "technical": "SELL"}
         llm_decision = "BUY"
-        
         result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
-        
+
         assert result is None
         mock_log.assert_called_once()
         mock_order_manager.execute_market_buy.assert_not_called()
         mock_order_manager.execute_market_sell.assert_not_called()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.get_consensus_method', return_value='weighted_majority')
+    def test_execute_trade_policy_weights_change_consensus(
+        self,
+        _mock_consensus_method,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Policy weight overrides should affect execution routing."""
+        signals = {"simple": "BUY", "technical": "SELL"}
+        llm_decision = "BUY"
+
+        result = execute_trade(
+            signals,
+            llm_decision,
+            SYMBOL,
+            mock_market_data,
+            mock_order_manager,
+            strategy_weights={"simple": 4.0, "technical": 1.0},
+        )
+
+        assert result == {"orderId": 123, "status": "FILLED"}
+        mock_order_manager.execute_market_buy.assert_called_once_with(quote_amount=10.0)
+        mock_order_manager.execute_market_sell.assert_not_called()
+
+    @patch('bot.main.log_decision_with_context')
+    def test_execute_trade_policy_size_multiplier_applies_to_buy_amount(
+        self,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Policy size multiplier should scale quote amount for entry orders."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+
+        result = execute_trade(
+            signals,
+            llm_decision,
+            SYMBOL,
+            mock_market_data,
+            mock_order_manager,
+            position_size_multiplier=0.5,
+        )
+
+        assert result == {"orderId": 123, "status": "FILLED"}
+        mock_order_manager.execute_market_buy.assert_called_once_with(quote_amount=5.0)
+
+    @patch('bot.main.log_decision_with_context')
+    def test_execute_trade_policy_size_multiplier_zero_skips_buy_execution(
+        self,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """Zero size multiplier should suppress new BUY entries."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+
+        result = execute_trade(
+            signals,
+            llm_decision,
+            SYMBOL,
+            mock_market_data,
+            mock_order_manager,
+            position_size_multiplier=0.0,
+        )
+
+        assert result is None
+        mock_order_manager.execute_market_buy.assert_not_called()
+
+    def test_regime_policy_switch_hysteresis_behavior(self):
+        """Switch hysteresis should delay regime flips until confirmations are met."""
+        engine = RegimePolicyEngine(
+            strategy_config={
+                "simple": {"enabled": True, "weight": 1.0},
+                "technical": {"enabled": True, "weight": 2.0},
+            },
+            policy_config={
+                "enabled": True,
+                "default_regime": REGIME_SIDEWAYS,
+                "switch_hysteresis_confirmations": 2,
+                "switch_cooldown_seconds": 0,
+            },
+        )
+        signals = {"simple": "BUY", "technical": "SELL"}
+
+        bull_state = RegimeState(REGIME_BULL, 0.8, 0.02, 0.005, 50, datetime.utcnow().isoformat(), {})
+        bear_state = RegimeState(REGIME_BEAR, 0.8, -0.03, 0.006, 50, datetime.utcnow().isoformat(), {})
+
+        first = engine.evaluate(signals, bull_state)
+        assert first.active_regime == REGIME_BULL
+
+        second = engine.evaluate(signals, bear_state)
+        assert second.active_regime == REGIME_BULL
+        assert "hysteresis" in second.switch_reason
+
+        third = engine.evaluate(signals, bear_state)
+        assert third.active_regime == REGIME_BEAR
+        assert third.switch_applied is True
+
+    def test_regime_policy_switch_cooldown_behavior(self):
+        """Switch cooldown should prevent immediate regime reversals."""
+        engine = RegimePolicyEngine(
+            strategy_config={
+                "simple": {"enabled": True, "weight": 1.0},
+                "technical": {"enabled": True, "weight": 2.0},
+            },
+            policy_config={
+                "enabled": True,
+                "default_regime": REGIME_SIDEWAYS,
+                "switch_hysteresis_confirmations": 1,
+                "switch_cooldown_seconds": 300,
+            },
+        )
+        signals = {"simple": "BUY", "technical": "SELL"}
+        now = datetime(2026, 2, 8, 12, 0, 0)
+
+        bull_state = RegimeState(REGIME_BULL, 0.8, 0.02, 0.005, 50, now.isoformat(), {})
+        bear_state = RegimeState(REGIME_BEAR, 0.8, -0.03, 0.006, 50, (now + timedelta(seconds=1)).isoformat(), {})
+
+        engine.evaluate(signals, bull_state, now=now)
+        engine.evaluate(signals, bear_state, now=now + timedelta(seconds=1))
+        cooldown_blocked = engine.evaluate(signals, bull_state, now=now + timedelta(seconds=10))
+
+        assert cooldown_blocked.active_regime == REGIME_BEAR
+        assert "cooldown" in cooldown_blocked.switch_reason
+
+    def test_regime_policy_switch_shadow_mode_behavior(self):
+        """Switch shadow mode should keep active regime unchanged while reporting attempted switches."""
+        engine = RegimePolicyEngine(
+            strategy_config={
+                "simple": {"enabled": True, "weight": 1.0},
+                "technical": {"enabled": True, "weight": 2.0},
+            },
+            policy_config={
+                "enabled": True,
+                "default_regime": REGIME_SIDEWAYS,
+                "switch_hysteresis_confirmations": 1,
+                "switch_cooldown_seconds": 0,
+                "switch_shadow_mode": True,
+            },
+        )
+        signals = {"simple": "BUY", "technical": "SELL"}
+        bull_state = RegimeState(REGIME_BULL, 0.8, 0.02, 0.005, 50, datetime.utcnow().isoformat(), {})
+        bear_state = RegimeState(REGIME_BEAR, 0.8, -0.03, 0.006, 50, datetime.utcnow().isoformat(), {})
+
+        engine.evaluate(signals, bull_state)
+        shadow = engine.evaluate(signals, bear_state)
+
+        assert shadow.active_regime == REGIME_BULL
+        assert shadow.switch_applied is False
+        assert "shadow_mode" in shadow.switch_reason
     
     @patch('bot.main.get_market_data')
     @patch('bot.main.get_all_strategy_signals')

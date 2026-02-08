@@ -8,7 +8,7 @@ from bot.config import (
     SYMBOL, TESTNET, TRADING_CONFIG, 
     get_trading_parameter, get_loop_interval, 
     get_consensus_method, is_llm_agreement_required, is_live_trading_enabled,
-    get_trade_mode, is_futures_short_enabled
+    get_trade_mode, is_futures_short_enabled, get_regime_config, get_policy_config
 )
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import place_market_buy, place_market_sell, client, get_recent_closes, synchronize_time, get_account_balance
@@ -16,6 +16,8 @@ from bot.llm_manager import get_decision_from_llm, log_decision_with_context, LL
 from bot.order_manager import OrderManager
 from bot.db_integration import DatabaseIntegration
 from bot.portfolio import PortfolioOptimizer, PortfolioConstraints, PortfolioAllocationResult
+from bot.regime import MarketRegimeDetector, RegimeState, REGIME_UNKNOWN
+from bot.policy import RegimePolicyEngine, PolicyDecision
 import json
 import uuid
 import asyncio
@@ -216,7 +218,7 @@ def get_market_data(symbol, interval='1m'):
         logger.error(f"Unexpected error fetching market data: {e}")
         return None
 
-def get_signal_consensus(signals):
+def get_signal_consensus(signals, strategy_weights: Optional[Dict[str, float]] = None):
     """
     Determine a consensus signal from multiple strategies.
     
@@ -226,6 +228,9 @@ def get_signal_consensus(signals):
     Returns:
         String: 'BUY', 'SELL', or 'HOLD'
     """
+    if not signals:
+        return "HOLD"
+
     # Get consensus method from config
     consensus_method = get_consensus_method()
     
@@ -249,9 +254,12 @@ def get_signal_consensus(signals):
         hold_weight = 0
         
         for strategy_name, signal in signals.items():
-            # Get the weight for this strategy from config
-            strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
-            weight = strategy_config.get("weight", 1.0)
+            # Allow policy to provide dynamic weight overrides per strategy.
+            if strategy_weights and strategy_name in strategy_weights:
+                weight = float(strategy_weights.get(strategy_name, 1.0))
+            else:
+                strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
+                weight = float(strategy_config.get("weight", 1.0))
             
             if signal == "BUY":
                 buy_weight += weight
@@ -290,11 +298,20 @@ def get_signal_consensus(signals):
         else:
             return "HOLD"
 
-def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_integration=None):
+def execute_trade(
+    signals,
+    llm_decision,
+    symbol,
+    market_data,
+    order_manager,
+    db_integration=None,
+    strategy_weights: Optional[Dict[str, float]] = None,
+    position_size_multiplier: float = 1.0,
+):
     """Execute a trade based on signals and decisions."""
     try:
         # Get consensus from signals
-        signal_consensus = get_signal_consensus(signals)
+        signal_consensus = get_signal_consensus(signals, strategy_weights=strategy_weights)
         logger.info(f"Signal consensus: {signal_consensus}")
         
         # Log the decision with full context for later analysis
@@ -335,7 +352,22 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
         # Get execution mode and position sizing config.
         trade_mode = get_trade_mode()
         futures_shorts_enabled = is_futures_short_enabled()
-        default_order_amount = get_trading_parameter("default_order_amount_usd", 10.0)
+        default_order_amount = float(get_trading_parameter("default_order_amount_usd", 10.0))
+        multiplier = max(0.0, float(position_size_multiplier))
+        effective_order_amount = default_order_amount * multiplier
+        logger.info(
+            "Effective order amount: base=%.4f multiplier=%.4f effective=%.4f",
+            default_order_amount,
+            multiplier,
+            effective_order_amount,
+        )
+
+        if execute_buy and effective_order_amount <= 0:
+            logger.info("Skipping BUY execution because effective order amount is zero after policy sizing.")
+            return None
+        if execute_sell and trade_mode == "FUTURES" and effective_order_amount <= 0:
+            logger.info("Skipping futures short execution because effective order amount is zero after policy sizing.")
+            return None
 
         def _link_signals_to_trade(order_payload):
             if db_integration and order_payload and 'trade_id' in order_payload and signal_ids:
@@ -356,7 +388,7 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
                     return None
 
                 order = order_manager.execute_market_short(
-                    quote_amount=default_order_amount,
+                    quote_amount=effective_order_amount,
                     leverage=default_futures_leverage,
                 )
                 if order:
@@ -402,7 +434,7 @@ def execute_trade(signals, llm_decision, symbol, market_data, order_manager, db_
         else:
             if execute_buy:
                 logger.info(f"Executing BUY for {symbol}")
-                order = order_manager.execute_market_buy(quote_amount=default_order_amount)
+                order = order_manager.execute_market_buy(quote_amount=effective_order_amount)
                 if order:
                     logger.info(f"Buy order executed successfully: {order['orderId']}")
                     _link_signals_to_trade(order)
@@ -512,6 +544,19 @@ def trading_loop():
     
     # Initialize LLM manager
     llm_manager = LLMManager()
+
+    # Initialize regime detector and regime-policy engine.
+    regime_config = get_regime_config()
+    regime_detector = MarketRegimeDetector(
+        lookback_candles=regime_config.get("lookback_candles", 50),
+        trend_threshold_pct=regime_config.get("trend_threshold_pct", 0.02),
+        sideways_threshold_pct=regime_config.get("sideways_threshold_pct", 0.01),
+        high_volatility_threshold_pct=regime_config.get("high_volatility_threshold_pct", 0.015),
+    )
+    policy_engine = RegimePolicyEngine(
+        strategy_config=TRADING_CONFIG.get("strategies", {}),
+        policy_config=get_policy_config(),
+    )
     
     # Track consecutive errors to implement exponential backoff
     consecutive_errors = 0
@@ -541,27 +586,120 @@ def trading_loop():
             # Get signals from all enabled strategies
             signals = get_all_strategy_signals(SYMBOL)
             logger.info(f"Strategy signals: {signals}")
+
+            # Detect current market regime from the same candle window used in this loop.
+            if regime_config.get("enabled", True):
+                regime_state = regime_detector.detect_from_candles(
+                    market_data.get("candles", []),
+                    timestamp=market_data.get("timestamp"),
+                )
+            else:
+                regime_state = RegimeState(
+                    regime=REGIME_UNKNOWN,
+                    confidence=0.0,
+                    trend_pct=0.0,
+                    realized_volatility_pct=0.0,
+                    lookback_candles=0,
+                    timestamp=market_data.get("timestamp", datetime.utcnow().isoformat()),
+                    details={"reason": "regime_detection_disabled"},
+                )
+            logger.info(
+                "Market regime: %s (confidence=%.2f trend=%.2f%% vol=%.2f%% lookback=%s)",
+                regime_state.regime,
+                float(regime_state.confidence),
+                float(regime_state.trend_pct) * 100.0,
+                float(regime_state.realized_volatility_pct) * 100.0,
+                regime_state.lookback_candles,
+            )
+
+            if db_integration:
+                db_integration.save_regime_state(
+                    symbol=SYMBOL,
+                    timeframe=primary_timeframe,
+                    regime=regime_state.regime,
+                    confidence=regime_state.confidence,
+                    trend_pct=regime_state.trend_pct,
+                    volatility_pct=regime_state.realized_volatility_pct,
+                    lookback_candles=regime_state.lookback_candles,
+                    timestamp=regime_state.timestamp,
+                    details=regime_state.details,
+                )
+
+            # Apply regime policy routing (strategy enable/disable, weights, and sizing).
+            policy_decision = policy_engine.evaluate(
+                signals=signals,
+                regime_state=regime_state,
+                now=market_data.get("timestamp"),
+            )
+            policy_signals = policy_decision.signals
+            if not policy_signals and signals:
+                logger.warning(
+                    "Policy disabled all active strategy signals for regime %s; forcing HOLD behavior.",
+                    policy_decision.active_regime,
+                )
+            logger.info(
+                "Policy routing: detected=%s active=%s enabled=%s size_multiplier=%.2f switch=%s reason=%s",
+                policy_decision.detected_regime,
+                policy_decision.active_regime,
+                policy_decision.enabled_strategies,
+                float(policy_decision.size_multiplier),
+                policy_decision.switch_applied,
+                policy_decision.switch_reason or "none",
+            )
+
+            if db_integration and policy_decision.switch_reason:
+                if policy_decision.switch_applied or (
+                    "hysteresis" in policy_decision.switch_reason
+                    or "cooldown" in policy_decision.switch_reason
+                    or "turnover" in policy_decision.switch_reason
+                    or "shadow" in policy_decision.switch_reason
+                ):
+                    db_integration.add_system_alert(
+                        message=(
+                            f"Regime policy event: detected={policy_decision.detected_regime}, "
+                            f"active={policy_decision.active_regime}, reason={policy_decision.switch_reason}"
+                        ),
+                        alert_type="info",
+                        severity="low",
+                        data={
+                            "detected_regime": policy_decision.detected_regime,
+                            "active_regime": policy_decision.active_regime,
+                            "switch_applied": policy_decision.switch_applied,
+                            "switch_reason": policy_decision.switch_reason,
+                            "candidate_regime": policy_decision.candidate_regime,
+                            "candidate_count": policy_decision.candidate_count,
+                            "turnover_ratio": policy_decision.turnover_ratio,
+                            "shadow_mode": policy_decision.shadow_mode,
+                        },
+                    )
             
             # Create a detailed prompt for the LLM with market context
             prompt = (
-                f"Current signals for {SYMBOL}: {signals}.\n"
+                f"Current signals for {SYMBOL}: {policy_signals}.\n"
             )
             
             # Add each strategy's signal and timeframe
-            for strategy_name, signal in signals.items():
+            for strategy_name, signal in policy_signals.items():
                 strategy_config = TRADING_CONFIG["strategies"].get(strategy_name, {})
                 timeframe = strategy_config.get("timeframe", "1m")
                 prompt += f"{strategy_name.capitalize()} strategy signal ({timeframe} timeframe): {signal}\n"
             
-            prompt += f"Given these signals and the latest market data, should we BUY, SELL, or HOLD?"
+            prompt += (
+                f"Detected market regime: {policy_decision.active_regime} "
+                f"(confidence {regime_state.confidence:.2f}). "
+                "Given these signals and the latest market data, should we BUY, SELL, or HOLD?"
+            )
             
             # Use LLM for decision support (with detailed market data and context)
             llm_result = llm_manager.make_llm_decision(
                 market_data=market_data,
                 symbol=SYMBOL,
                 timeframe=primary_timeframe,
-                context=f"Trading {SYMBOL} with {len(signals)} active strategies",
-                strategy_signals=signals
+                context=(
+                    f"Trading {SYMBOL} with {len(policy_signals)} policy-routed strategies | "
+                    f"regime={policy_decision.active_regime} confidence={regime_state.confidence:.2f}"
+                ),
+                strategy_signals=policy_signals
             )
             
             llm_decision = llm_result.get("decision", "HOLD")
@@ -573,9 +711,32 @@ def trading_loop():
             
             # Add LLM result to market data for database storage
             market_data['llm_result'] = llm_result
+            market_data['regime_state'] = {
+                "regime": regime_state.regime,
+                "confidence": regime_state.confidence,
+                "trend_pct": regime_state.trend_pct,
+                "volatility_pct": regime_state.realized_volatility_pct,
+            }
+            market_data['policy_decision'] = {
+                "detected_regime": policy_decision.detected_regime,
+                "active_regime": policy_decision.active_regime,
+                "enabled_strategies": policy_decision.enabled_strategies,
+                "size_multiplier": policy_decision.size_multiplier,
+                "switch_applied": policy_decision.switch_applied,
+                "switch_reason": policy_decision.switch_reason,
+            }
             
             # Execute trade if appropriate
-            order = execute_trade(signals, llm_decision, SYMBOL, market_data, order_manager, db_integration)
+            order = execute_trade(
+                policy_signals,
+                llm_decision,
+                SYMBOL,
+                market_data,
+                order_manager,
+                db_integration,
+                strategy_weights=policy_decision.strategy_weight_overrides,
+                position_size_multiplier=policy_decision.size_multiplier,
+            )
             
             # Reset error counter on success
             consecutive_errors = 0

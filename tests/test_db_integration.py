@@ -361,6 +361,38 @@ class TestDatabaseIntegration:
             alert_id = db_integration.add_system_alert("Test alert")
             assert alert_id == -1
 
+    def test_save_and_get_latest_regime_state(self, db_integration):
+        """Regime state should be persisted and retrievable from integration layer."""
+        success = db_integration.save_regime_state(
+            symbol="BTCUSDT",
+            timeframe="1m",
+            regime="BULL",
+            confidence=0.81,
+            trend_pct=0.025,
+            volatility_pct=0.006,
+            lookback_candles=50,
+            timestamp="2026-02-08T12:00:00",
+            details={"source": "test_db_integration"},
+        )
+        assert success is True
+
+        latest = db_integration.get_latest_regime_state("BTCUSDT", "1m")
+        assert latest is not None
+        assert latest["regime"] == "BULL"
+        assert latest["confidence"] == 0.81
+        assert latest["details"]["source"] == "test_db_integration"
+
+    def test_save_regime_state_error(self, db_integration):
+        """Errors in regime persistence should be handled safely."""
+        with patch.object(db_integration.db, 'insert_regime_state', side_effect=Exception("Test error")):
+            success = db_integration.save_regime_state(
+                symbol="BTCUSDT",
+                timeframe="1m",
+                regime="SIDEWAYS",
+                confidence=0.5,
+            )
+            assert success is False
+
     # Mock tests
     def test_save_signal_with_mock(self, mock_db):
         """Test saving a signal using a mock database."""

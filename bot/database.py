@@ -130,6 +130,23 @@ class Database:
                     related_data TEXT
                 )
                 ''')
+
+                # Create regime_state table
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS regime_state (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol TEXT NOT NULL,
+                    timeframe TEXT NOT NULL,
+                    regime TEXT NOT NULL,
+                    confidence REAL NOT NULL,
+                    trend_pct REAL,
+                    volatility_pct REAL,
+                    lookback_candles INTEGER,
+                    timestamp TEXT NOT NULL,
+                    details TEXT,
+                    UNIQUE(symbol, timeframe, timestamp)
+                )
+                ''')
                 
                 # Create trade_signal_link table for many-to-many relationship
                 cursor.execute('''
@@ -247,6 +264,102 @@ class Database:
             records = records[offset:]
         records = records[:limit]
         return records
+
+    def insert_regime_state(self, regime_data: Dict[str, Any]) -> bool:
+        """
+        Insert or replace a regime state snapshot.
+        """
+        required_fields = ['symbol', 'timeframe', 'regime', 'confidence', 'timestamp']
+        for field in required_fields:
+            if field not in regime_data:
+                raise ValueError(f"Missing required field: {field}")
+
+        details = regime_data.get("details")
+        if details is not None and not isinstance(details, str):
+            details = json.dumps(details)
+
+        payload = {
+            "symbol": regime_data["symbol"],
+            "timeframe": regime_data["timeframe"],
+            "regime": regime_data["regime"],
+            "confidence": float(regime_data["confidence"]),
+            "trend_pct": regime_data.get("trend_pct"),
+            "volatility_pct": regime_data.get("volatility_pct"),
+            "lookback_candles": regime_data.get("lookback_candles"),
+            "timestamp": regime_data["timestamp"],
+            "details": details,
+        }
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    INSERT OR REPLACE INTO regime_state
+                    (symbol, timeframe, regime, confidence, trend_pct, volatility_pct, lookback_candles, timestamp, details)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        payload["symbol"],
+                        payload["timeframe"],
+                        payload["regime"],
+                        payload["confidence"],
+                        payload["trend_pct"],
+                        payload["volatility_pct"],
+                        payload["lookback_candles"],
+                        payload["timestamp"],
+                        payload["details"],
+                    ),
+                )
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error inserting regime state: {e}")
+            return False
+
+    def get_latest_regime_state(self, symbol: str, timeframe: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve the most recent regime state for symbol/timeframe.
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    '''
+                    SELECT symbol, timeframe, regime, confidence, trend_pct, volatility_pct, lookback_candles, timestamp, details
+                    FROM regime_state
+                    WHERE symbol = ? AND timeframe = ?
+                    ORDER BY timestamp DESC
+                    LIMIT 1
+                    ''',
+                    (symbol, timeframe),
+                )
+                row = cursor.fetchone()
+                if not row:
+                    return None
+
+                details = row[8]
+                parsed_details = None
+                if details:
+                    try:
+                        parsed_details = json.loads(details)
+                    except json.JSONDecodeError:
+                        parsed_details = details
+
+                return {
+                    "symbol": row[0],
+                    "timeframe": row[1],
+                    "regime": row[2],
+                    "confidence": row[3],
+                    "trend_pct": row[4],
+                    "volatility_pct": row[5],
+                    "lookback_candles": row[6],
+                    "timestamp": row[7],
+                    "details": parsed_details,
+                }
+        except Exception as e:
+            logger.error(f"Error fetching latest regime state: {e}")
+            return None
 
     @staticmethod
     def _prepare_trade_data(trade_data: Dict[str, Any]) -> Dict[str, Any]:
