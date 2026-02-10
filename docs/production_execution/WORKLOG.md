@@ -2,6 +2,208 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-09 (Session 22)
+
+- Session objective: produce a comprehensive recommendations plan to close current production blockers and move from `NO-GO` to controlled `GO`.
+- Completed:
+1. Added comprehensive gap-remediation plan at `docs/production_execution/GAP_CLOSURE_PLAN.md`:
+   - explicit non-P3 task phases (`G0-*`, `G1-*`, `G2-*`)
+   - industry-standard tooling recommendations (`vectorbt`, `backtrader`, `quantstats`)
+   - measurable exit criteria and dated targets.
+2. Extended execution tracking with new non-P3 gap-closure task IDs in `docs/production_execution/IMPLEMENTATION_TRACKER.md`.
+3. Extended test/evidence mapping and added `Gap Closure Gate (Non-P3)` in `docs/production_execution/TEST_MATRIX.md`.
+4. Updated index and checklist references:
+   - `docs/production_execution/README.md`
+   - `docs/production_execution/GO_NO_GO_CHECKLIST.md`.
+- Files changed:
+1. `docs/production_execution/GAP_CLOSURE_PLAN.md`
+2. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+3. `docs/production_execution/TEST_MATRIX.md`
+4. `docs/production_execution/README.md`
+5. `docs/production_execution/GO_NO_GO_CHECKLIST.md`
+6. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `sed -n '1,240p' docs/production_execution/GO_NO_GO_CHECKLIST.md`
+2. `sed -n '1,260p' docs/production_execution/IMPLEMENTATION_TRACKER.md`
+3. `tail -n 140 docs/production_execution/TEST_MATRIX.md`
+- Result summary:
+1. Comprehensive plan is now documented and linked into tracker/matrix workflow.
+2. Gap closure can be executed using the existing `Execute: <TASK_ID[,TASK_ID]>` cycle with concrete evidence gates.
+- Open blockers:
+1. Plan is documented; implementation work for `G0-*` onward remains pending.
+
+## 2026-02-09 (Session 21)
+
+- Session objective: run one more live-like API demo with seeded data and export a current production go/no-go checklist.
+- Completed:
+1. Ran a live-like API demo with isolated seeded data, auth enabled, and rollout gates enabled.
+2. Exercised endpoint flow:
+   - `/health`
+   - `/observability/events` (unauthorized and authorized read path)
+   - `/backtest/run` with `FUTURES` + short simulation + execution simulation + validation outputs
+   - `/rollout/quality/evaluate`
+   - `/rollout/evaluate/shadow`
+   - `/rollout/evaluate/canary`
+   - `/rollout/evaluate/production`
+   - `/rollout/status/{rollout_id}`
+   - `/observability/dashboard`
+3. Saved demo artifact at `output/live_api_demo_seeded_latest.json`.
+4. Exported concise go/no-go checklist to `docs/production_execution/GO_NO_GO_CHECKLIST.md`.
+5. Re-ran full regression gate.
+- Files changed:
+1. `docs/production_execution/GO_NO_GO_CHECKLIST.md`
+2. `docs/production_execution/WORKLOG.md`
+3. `output/live_api_demo_seeded_latest.json`
+- Commands run:
+1. `venv/bin/python - <<'PY' ...` (live-like seeded API demo + artifact export)
+2. `venv/bin/pytest -q`
+- Result summary:
+1. Demo backtest returned `200` and produced validation/quality payloads.
+2. Quality gate failed for demo strategy on seeded bearish data; production rollout evaluation returned `approved=false` with quality-gate reasons.
+3. Full regression passed (`296 passed, 3 skipped`).
+- Open blockers:
+1. Strategy quality gate pass evidence is still required for a true production `GO`.
+
+## 2026-02-09 (Session 20)
+
+- Session objective: remediate production-readiness blockers discovered in demo and add regression tests.
+- Completed:
+1. Hardened `/backtest/run` response serialization in `api/main.py` with JSON-safe numeric sanitization:
+   - non-finite numeric values (for example `Decimal('Infinity')`, `NaN`) are now converted to `null` instead of causing 500 responses.
+2. Added strict typed request validation for `execution_simulation` in `api/main.py`:
+   - introduced `ExecutionSimulationConfigRequest` with `extra = "forbid"` to reject unknown fields at request-validation time (`422`) instead of runtime failure (`500`).
+3. Improved rollout-state durability in `bot/deploy_policy.py`:
+   - atomic state persistence using temp-file + `os.replace`.
+   - corrupt JSON state recovery with automatic quarantine (`*.corrupt.<timestamp>`) and safe empty-state fallback.
+4. Strengthened live-profile defaults in `bot/config.py` and `.env.example`:
+   - dynamic default `ROLLOUT_ENFORCE_PRODUCTION_GATE=True` when `TESTNET=False`.
+   - `.env.example` now defaults `API_AUTH_ENABLED=True` and `ROLLOUT_ENFORCE_PRODUCTION_GATE=True`.
+5. Added regression tests:
+   - `tests/test_api.py`:
+     - `test_run_backtest_sanitizes_non_finite_metric_values`
+     - `test_run_backtest_rejects_unknown_execution_simulation_fields`
+   - `tests/test_deploy_policy.py`:
+     - `test_rollout_state_save_is_atomic_and_json_parseable`
+     - `test_rollout_state_load_recovers_from_corrupt_json`
+   - new `tests/test_config_defaults.py`:
+     - live default enablement assertions + explicit override behavior.
+- Files changed:
+1. `api/main.py`
+2. `bot/deploy_policy.py`
+3. `bot/config.py`
+4. `.env.example`
+5. `tests/test_api.py`
+6. `tests/test_deploy_policy.py`
+7. `tests/test_config_defaults.py`
+8. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_api.py -k "run_backtest_sanitizes_non_finite_metric_values or run_backtest_rejects_unknown_execution_simulation_fields or run_backtest_supports_short_execution_and_validation" -v`
+2. `venv/bin/pytest tests/test_deploy_policy.py -k "rollout_state_save_is_atomic_and_json_parseable or rollout_state_load_recovers_from_corrupt_json or rollout_state_roundtrip_to_file" -v`
+3. `venv/bin/pytest tests/test_config_defaults.py -v`
+4. `venv/bin/pytest tests/test_api.py tests/test_deploy_policy.py tests/test_config_defaults.py tests/test_main.py -q`
+5. `venv/bin/pytest -q`
+- Result summary:
+1. Targeted new-regression suites passed.
+2. Broader API/deploy/main/config suites passed (`71 passed`).
+3. Full regression passed (`296 passed, 3 skipped`).
+- Open blockers:
+1. None for this remediation scope.
+
+## 2026-02-09 (Session 19)
+
+- Session objective: execute all remaining non-`P3` fixes and re-verify production-execution readiness evidence.
+- Completed:
+1. Audited `docs/production_execution/IMPLEMENTATION_TRACKER.md` and confirmed all non-`P3` items are `done`:
+   - all `P0-*`, `P1-*`, and `P2-*` tasks
+   - all post-audit remediation tasks `R0-01` through `R0-05`.
+2. Ran targeted non-`P3` verification suites for API security, rollout controls, observability persistence, edge monitoring, validation, research, and runtime gates.
+3. Ran full regression gate to validate no cross-module regressions.
+4. Updated `docs/production_execution/TEST_MATRIX.md` to include:
+   - explicit `R0-01` to `R0-05` task-to-test mappings
+   - explicit `Phase 2 Gate`
+   - explicit `Remediation Gate (Non-P3)`.
+- Files changed:
+1. `docs/production_execution/TEST_MATRIX.md`
+2. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_api.py tests/test_main.py tests/test_deploy_policy.py tests/test_observability.py tests/test_monitoring.py tests/test_validation.py tests/test_research.py -q`
+2. `venv/bin/pytest -q`
+- Result summary:
+1. Targeted non-`P3` verification passed (`86 passed`).
+2. Full regression passed (`290 passed, 3 skipped`).
+3. Non-`P3` implementation status remains complete; only `P3-*` work is outstanding.
+- Open blockers:
+1. None for non-`P3` scope.
+
+## 2026-02-08 (Session 18)
+
+- Session objective: execute `P2-02`, `P2-08`, `P2-09`, `P2-07`, and `P2-10` in order with implementation + test-backed validation.
+- Completed:
+1. Implemented advanced validation framework (`P2-02`) in `bot/backtesting/validation.py`:
+   - walk-forward split generator
+   - purged K-fold CV with embargo/purge windows
+   - regime-sliced evaluation
+   - fold-level framework with metric aggregation.
+2. Implemented production observability stack (`P2-08`):
+   - new telemetry/tracing manager in `bot/observability/telemetry.py`
+   - latency/error alerting thresholds and dashboard snapshots
+   - API request-ID middleware and telemetry endpoints in `api/main.py`
+   - runtime observability wiring in `bot/main.py` for loop, market, LLM, execution, and error paths.
+3. Implemented mandatory shadow/canary rollout gating (`P2-09`) in `bot/deploy_policy.py`:
+   - strict stage progression (`shadow -> canary -> production`)
+   - threshold-based pass/fail reasons
+   - rollout history and status tracking
+   - observability-dashboard-to-rollout metrics adapter.
+4. Implemented edge-decay monitoring with auto de-risk/disable (`P2-07`):
+   - new `bot/monitoring.py` with rolling directional-edge scoring
+   - automatic strategy state transitions (`healthy`/`derisked`/`disabled`)
+   - integrated de-risk sizing + disable filtering into `bot/main.py` policy execution flow.
+5. Implemented research velocity system (`P2-10`):
+   - persistent dataset + experiment registry in `research/registry.py`
+   - deterministic dataset fingerprints for reproducibility
+   - experiment idempotency + leaderboard ranking + reproducibility checks
+   - backtesting integration helpers in `bot/backtesting/research.py`.
+6. Added configuration surfaces and environment controls for observability + edge monitoring in `bot/config.py` and `.env.example`.
+7. Marked `P2-02`, `P2-07`, `P2-08`, `P2-09`, and `P2-10` as `done` in `IMPLEMENTATION_TRACKER.md`.
+- Files changed:
+1. `bot/backtesting/validation.py`
+2. `tests/test_validation.py`
+3. `bot/observability/__init__.py`
+4. `bot/observability/telemetry.py`
+5. `tests/test_observability.py`
+6. `api/main.py`
+7. `tests/test_api.py`
+8. `bot/deploy_policy.py`
+9. `tests/test_deploy_policy.py`
+10. `bot/monitoring.py`
+11. `tests/test_monitoring.py`
+12. `research/__init__.py`
+13. `research/registry.py`
+14. `bot/backtesting/research.py`
+15. `tests/test_research.py`
+16. `bot/backtesting/__init__.py`
+17. `bot/config.py`
+18. `.env.example`
+19. `bot/main.py`
+20. `docs/production_execution/IMPLEMENTATION_TRACKER.md`
+21. `docs/production_execution/WORKLOG.md`
+- Commands run:
+1. `venv/bin/pytest tests/test_validation.py -v`
+2. `venv/bin/pytest tests/test_observability.py -v`
+3. `venv/bin/pytest tests/test_api.py -k "request_id or telemetry" -v`
+4. `venv/bin/pytest tests/test_deploy_policy.py -v`
+5. `venv/bin/pytest tests/test_monitoring.py -v`
+6. `venv/bin/pytest tests/test_main.py -k "policy or risk_engine or execute_trade or trading_loop" -v`
+7. `venv/bin/pytest tests/test_research.py -v`
+8. `venv/bin/pytest tests/test_validation.py tests/test_observability.py tests/test_deploy_policy.py tests/test_monitoring.py tests/test_research.py -v`
+9. `venv/bin/pytest -q`
+- Result summary:
+1. All targeted `P2-02/07/08/09/10` test suites passed.
+2. API request-ID/telemetry endpoint tests passed.
+3. Full regression passed (`274 passed, 3 skipped`).
+- Open blockers:
+1. None for `P2-02`, `P2-07`, `P2-08`, `P2-09`, or `P2-10`.
+
 ## 2026-02-08 (Session 17)
 
 - Session objective: execute `P2-01`, `P2-05`, and `P2-06` with implementation + full test-backed validation.

@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.main import (
     initialize_bot, get_market_data, execute_trade, get_signal_consensus,
-    trading_loop
+    trading_loop, enforce_rollout_production_gate
 )
 from bot.config import SYMBOL
 from bot.policy import RegimePolicyEngine
@@ -68,6 +68,44 @@ def mock_order_manager():
         yield mock_manager
 
 class TestMain:
+    def test_enforce_rollout_production_gate_blocks_when_unapproved(self):
+        with patch(
+            "bot.main.get_rollout_config",
+            return_value={
+                "enabled": True,
+                "enforce_production_gate": True,
+                "required_rollout_id": "rollout-1",
+                "state_store_path": "data/test_rollout_state.json",
+            },
+        ), patch("bot.main.ShadowCanaryRolloutGate") as mock_gate_cls:
+            gate = MagicMock()
+            gate.get_rollout_status.return_value = {"production_passed": False}
+            mock_gate_cls.return_value = gate
+
+            allowed = enforce_rollout_production_gate()
+
+        assert allowed is False
+        gate.load_from_file.assert_called_once()
+        gate.get_rollout_status.assert_called_once_with("rollout-1")
+
+    def test_enforce_rollout_production_gate_allows_when_approved(self):
+        with patch(
+            "bot.main.get_rollout_config",
+            return_value={
+                "enabled": True,
+                "enforce_production_gate": True,
+                "required_rollout_id": "rollout-2",
+                "state_store_path": "data/test_rollout_state.json",
+            },
+        ), patch("bot.main.ShadowCanaryRolloutGate") as mock_gate_cls:
+            gate = MagicMock()
+            gate.get_rollout_status.return_value = {"production_passed": True}
+            mock_gate_cls.return_value = gate
+
+            allowed = enforce_rollout_production_gate()
+
+        assert allowed is True
+
     def test_initialize_bot_blocks_live_mode_without_explicit_enable(self):
         """Live mode must be blocked unless explicitly enabled."""
         with patch('bot.main.TESTNET', False), \

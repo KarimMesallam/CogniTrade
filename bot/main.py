@@ -9,7 +9,8 @@ from bot.config import (
     get_trading_parameter, get_loop_interval, 
     get_consensus_method, is_llm_agreement_required, is_live_trading_enabled,
     get_trade_mode, is_futures_short_enabled, get_regime_config, get_policy_config,
-    get_data_pipeline_config, get_risk_engine_config, get_reconciliation_config
+    get_data_pipeline_config, get_risk_engine_config, get_reconciliation_config,
+    get_observability_config, get_monitoring_config, get_rollout_config,
 )
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import (
@@ -29,6 +30,9 @@ from bot.regime import MarketRegimeDetector, RegimeState, REGIME_UNKNOWN
 from bot.policy import RegimePolicyEngine, PolicyDecision
 from bot.data_pipeline import PointInTimeDataPipeline, find_lookahead_violations
 from bot.risk_engine import LiveRiskEngine
+from bot.observability import get_observability_manager
+from bot.monitoring import EdgeDecayMonitor
+from bot.deploy_policy import ShadowCanaryRolloutGate, thresholds_from_config
 import json
 import uuid
 import asyncio
@@ -208,10 +212,47 @@ def enforce_live_trading_safety_gate():
     logger.critical("Set ENABLE_LIVE_TRADING=True only after completing production readiness checks.")
     return False
 
+
+def enforce_rollout_production_gate():
+    """
+    Enforce mandatory rollout-gate approval before runtime trading when configured.
+    """
+    rollout_config = get_rollout_config()
+    if not rollout_config.get("enabled", True):
+        return True
+    if not rollout_config.get("enforce_production_gate", False):
+        return True
+
+    required_rollout_id = str(rollout_config.get("required_rollout_id", "")).strip()
+    if not required_rollout_id:
+        logger.critical("Rollout gate enforcement enabled but ROLLOUT_REQUIRED_ID is empty.")
+        return False
+
+    gate = ShadowCanaryRolloutGate(thresholds=thresholds_from_config(rollout_config))
+    state_store_path = str(rollout_config.get("state_store_path", "data/rollout_gate_state.json"))
+    try:
+        gate.load_from_file(state_store_path)
+    except Exception as exc:
+        logger.critical("Failed to load rollout state from %s: %s", state_store_path, exc)
+        return False
+
+    status = gate.get_rollout_status(required_rollout_id)
+    if not bool(status.get("production_passed", False)):
+        logger.critical(
+            "Production rollout gate blocked startup for rollout_id=%s. "
+            "Run shadow/canary/production gate workflow first.",
+            required_rollout_id,
+        )
+        return False
+    return True
+
+
 def initialize_bot():
     """Initialize the trading bot and verify connectivity."""
     try:
         if not enforce_live_trading_safety_gate():
+            return False
+        if not enforce_rollout_production_gate():
             return False
 
         # Synchronize time with Binance server
@@ -225,7 +266,17 @@ def initialize_bot():
         # Get account information
         balances = get_account_balance()
         if balances:
-            logger.info(f"Account balances: {balances}")
+            non_zero_assets = [
+                asset
+                for asset, payload in balances.items()
+                if float(payload.get("total", payload.get("free", 0.0)) or 0.0) > 0
+            ]
+            preview = sorted(non_zero_assets)[:10]
+            logger.info(
+                "Account balance snapshot received | non_zero_assets=%s preview=%s",
+                len(non_zero_assets),
+                preview,
+            )
         else:
             logger.warning("Could not retrieve account balances")
         
@@ -597,6 +648,8 @@ def trading_loop():
     """Main trading loop."""
     if not enforce_live_trading_safety_gate():
         raise RuntimeError("Live trading safety gate blocked trading loop startup")
+    if not enforce_rollout_production_gate():
+        raise RuntimeError("Rollout production gate blocked trading loop startup")
 
     logger.info("Starting trading loop...")
     
@@ -721,6 +774,64 @@ def trading_loop():
                     "details": startup_report,
                 }
             )
+
+    observability_config = get_observability_config()
+    observability = None
+    if observability_config.get("enabled", True):
+        observability = get_observability_manager(
+            max_events=observability_config.get("max_events", 4000),
+            latency_alert_ms=observability_config.get("latency_alert_ms", 2500.0),
+            error_rate_alert_threshold=observability_config.get("error_rate_alert_threshold", 0.25),
+            error_rate_min_events=observability_config.get("error_rate_min_events", 20),
+            persistence_enabled=observability_config.get("persistence_enabled", True),
+            persistence_db_url=observability_config.get("persistence_db_url", "sqlite:///data/observability.db"),
+        )
+        logger.info(
+            "Observability enabled | max_events=%s latency_alert_ms=%.2f error_rate_threshold=%.2f min_events=%s",
+            int(observability_config.get("max_events", 4000)),
+            float(observability_config.get("latency_alert_ms", 2500.0)),
+            float(observability_config.get("error_rate_alert_threshold", 0.25)),
+            int(observability_config.get("error_rate_min_events", 20)),
+        )
+
+    monitoring_config = get_monitoring_config()
+    edge_monitor = None
+    if monitoring_config.get("enabled", True):
+        edge_monitor = EdgeDecayMonitor(
+            window_size=monitoring_config.get("window_size", 50),
+            min_samples=monitoring_config.get("min_samples", 20),
+            derisk_hit_rate_threshold=monitoring_config.get("derisk_hit_rate_threshold", 0.45),
+            disable_hit_rate_threshold=monitoring_config.get("disable_hit_rate_threshold", 0.35),
+            derisk_mean_return_threshold=monitoring_config.get("derisk_mean_return_threshold", -0.0002),
+            derisk_size_multiplier=monitoring_config.get("derisk_size_multiplier", 0.5),
+            disable_sticky=monitoring_config.get("disable_sticky", True),
+        )
+        logger.info(
+            "Edge monitor enabled | window=%s min_samples=%s derisk<=%.2f disable<=%.2f derisk_multiplier=%.2f",
+            int(monitoring_config.get("window_size", 50)),
+            int(monitoring_config.get("min_samples", 20)),
+            float(monitoring_config.get("derisk_hit_rate_threshold", 0.45)),
+            float(monitoring_config.get("disable_hit_rate_threshold", 0.35)),
+            float(monitoring_config.get("derisk_size_multiplier", 0.5)),
+        )
+
+    def _flush_observability_alerts() -> None:
+        if not observability or not db_integration:
+            return
+        for alert in observability.drain_pending_alerts(limit=50):
+            severity = str(alert.get("severity", "medium")).lower()
+            if severity not in {"low", "medium", "high", "critical"}:
+                severity = "medium"
+            db_integration.add_system_alert(
+                message=f"[observability] {alert.get('message', 'telemetry alert')}",
+                alert_type=str(alert.get("alert_type", "warning")),
+                severity=severity,
+                data=alert.get("details", {}),
+            )
+
+    previous_policy_signals: Dict[str, str] = {}
+    previous_reference_price: Optional[float] = None
+    last_edge_states: Dict[str, str] = {}
     
     # Track consecutive errors to implement exponential backoff
     consecutive_errors = 0
@@ -732,12 +843,29 @@ def trading_loop():
     loop_count = 0
     
     while True:
+        loop_trace = None
         try:
             loop_count += 1
+            if observability:
+                loop_trace = observability.start_trace(
+                    component="trading_loop",
+                    operation="iteration",
+                    metadata={"symbol": SYMBOL, "loop_count": loop_count},
+                )
             if reconciliation_enabled and loop_count % reconciliation_interval_loops == 0:
+                reconciliation_start = time.perf_counter()
                 reconciliation_report = order_manager.reconcile_with_exchange(
                     position_tolerance=reconciliation_position_tolerance,
                 )
+                reconciliation_latency_ms = (time.perf_counter() - reconciliation_start) * 1000.0
+                if observability:
+                    observability.record_latency(
+                        component="reconciliation",
+                        operation="loop_reconcile",
+                        latency_ms=reconciliation_latency_ms,
+                        success="error" not in reconciliation_report,
+                        trace_id=loop_trace.trace_id if loop_trace else None,
+                    )
                 logger.info("Periodic reconciliation report: %s", reconciliation_report)
                 if db_integration and "error" not in reconciliation_report:
                     db_integration.save_reconciliation_event(reconciliation_report)
@@ -751,6 +879,16 @@ def trading_loop():
                         severity="medium",
                         data=reconciliation_report,
                     )
+                if observability and reconciliation_report.get("position_mismatch"):
+                    observability.record_error(
+                        component="reconciliation",
+                        error_type="position_mismatch",
+                        message=(
+                            f"{SYMBOL} position delta={reconciliation_report.get('position_delta')}"
+                        ),
+                        severity="medium",
+                        metadata={"report": reconciliation_report},
+                    )
 
             # Update statuses of existing orders
             updated_orders = order_manager.update_order_statuses()
@@ -759,9 +897,46 @@ def trading_loop():
             
             # Get current market data
             primary_timeframe = TRADING_CONFIG["timeframes"].get("primary", "1m")
+            market_data_start = time.perf_counter()
             market_data = get_market_data(SYMBOL, primary_timeframe)
+            if observability:
+                observability.record_latency(
+                    component="market_data",
+                    operation="fetch",
+                    latency_ms=(time.perf_counter() - market_data_start) * 1000.0,
+                    success=market_data is not None,
+                    trace_id=loop_trace.trace_id if loop_trace else None,
+                )
             if not market_data:
                 raise Exception("Failed to get market data")
+
+            current_reference_price = _extract_last_price_from_market_data(market_data, SYMBOL) or 0.0
+            edge_status_by_strategy = {}
+            if edge_monitor and previous_policy_signals and previous_reference_price and previous_reference_price > 0:
+                realized_return = (float(current_reference_price) / float(previous_reference_price)) - 1.0
+                edge_status_by_strategy = edge_monitor.record_outcomes(
+                    previous_policy_signals,
+                    realized_return,
+                    timestamp=market_data.get("timestamp"),
+                )
+                if observability:
+                    observability.record_trade_decision(
+                        symbol=SYMBOL,
+                        signal_consensus="N/A",
+                        llm_decision="N/A",
+                        executed=False,
+                        trade_mode=trade_mode,
+                        strategies=list(previous_policy_signals.keys()),
+                        trace_id=loop_trace.trace_id if loop_trace else None,
+                        metadata={
+                            "monitoring_update_only": True,
+                            "realized_return": float(realized_return),
+                        },
+                    )
+            elif edge_monitor:
+                edge_status_by_strategy = edge_monitor.get_all_statuses(
+                    timestamp=market_data.get("timestamp"),
+                )
             
             # Save market data to database if available
             if db_integration:
@@ -902,18 +1077,80 @@ def trading_loop():
                 regime_state=regime_state,
                 now=market_data.get("timestamp"),
             )
-            policy_signals = policy_decision.signals
+            policy_signals = dict(policy_decision.signals)
+            effective_size_multiplier = float(policy_decision.size_multiplier)
+            edge_size_multiplier = 1.0
+            edge_disabled_strategies = []
+
+            if edge_monitor and policy_signals:
+                for strategy_name in list(policy_signals.keys()):
+                    edge_status = edge_status_by_strategy.get(strategy_name)
+                    if edge_status is None:
+                        continue
+                    previous_state = last_edge_states.get(strategy_name)
+                    last_edge_states[strategy_name] = edge_status.state
+
+                    if edge_status.disable_trading:
+                        edge_disabled_strategies.append(strategy_name)
+                        policy_signals.pop(strategy_name, None)
+                    else:
+                        edge_size_multiplier = min(
+                            edge_size_multiplier,
+                            float(edge_status.size_multiplier),
+                        )
+
+                    if previous_state != edge_status.state and edge_status.state in {"derisked", "disabled"}:
+                        logger.warning(
+                            "Edge monitor action for %s: state=%s win_rate=%.2f mean_edge=%.6f",
+                            strategy_name,
+                            edge_status.state,
+                            float(edge_status.win_rate),
+                            float(edge_status.mean_edge_return),
+                        )
+                        if db_integration:
+                            severity = "high" if edge_status.state == "disabled" else "medium"
+                            db_integration.add_system_alert(
+                                message=(
+                                    f"Edge monitor {edge_status.state} strategy {strategy_name}: "
+                                    f"win_rate={edge_status.win_rate:.2f} mean_edge={edge_status.mean_edge_return:.6f}"
+                                ),
+                                alert_type="warning",
+                                severity=severity,
+                                data=edge_status.to_dict(),
+                            )
+                        if observability:
+                            observability.record_error(
+                                component="edge_monitor",
+                                error_type=f"strategy_{edge_status.state}",
+                                message=(
+                                    f"{strategy_name} moved to {edge_status.state} "
+                                    f"(win_rate={edge_status.win_rate:.2f})"
+                                ),
+                                severity="medium",
+                                metadata=edge_status.to_dict(),
+                            )
+
+            effective_size_multiplier = max(
+                0.0,
+                float(effective_size_multiplier) * float(edge_size_multiplier),
+            )
             if not policy_signals and signals:
                 logger.warning(
                     "Policy disabled all active strategy signals for regime %s; forcing HOLD behavior.",
                     policy_decision.active_regime,
                 )
             logger.info(
-                "Policy routing: detected=%s active=%s enabled=%s size_multiplier=%.2f switch=%s reason=%s",
+                (
+                    "Policy routing: detected=%s active=%s enabled=%s "
+                    "base_size_multiplier=%.2f edge_multiplier=%.2f edge_disabled=%s "
+                    "switch=%s reason=%s"
+                ),
                 policy_decision.detected_regime,
                 policy_decision.active_regime,
                 policy_decision.enabled_strategies,
                 float(policy_decision.size_multiplier),
+                float(edge_size_multiplier),
+                edge_disabled_strategies,
                 policy_decision.switch_applied,
                 policy_decision.switch_reason or "none",
             )
@@ -962,6 +1199,7 @@ def trading_loop():
             )
             
             # Use LLM for decision support (with detailed market data and context)
+            llm_start = time.perf_counter()
             llm_result = llm_manager.make_llm_decision(
                 market_data=market_data,
                 symbol=SYMBOL,
@@ -972,6 +1210,14 @@ def trading_loop():
                 ),
                 strategy_signals=policy_signals
             )
+            if observability:
+                observability.record_latency(
+                    component="llm",
+                    operation="decision",
+                    latency_ms=(time.perf_counter() - llm_start) * 1000.0,
+                    success=True,
+                    trace_id=loop_trace.trace_id if loop_trace else None,
+                )
             
             llm_decision = llm_result.get("decision", "HOLD")
             llm_confidence = llm_result.get("confidence", 0.5)
@@ -992,12 +1238,18 @@ def trading_loop():
                 "detected_regime": policy_decision.detected_regime,
                 "active_regime": policy_decision.active_regime,
                 "enabled_strategies": policy_decision.enabled_strategies,
-                "size_multiplier": policy_decision.size_multiplier,
+                "size_multiplier": effective_size_multiplier,
                 "switch_applied": policy_decision.switch_applied,
                 "switch_reason": policy_decision.switch_reason,
             }
+            if edge_monitor:
+                market_data["edge_monitoring"] = {
+                    strategy_name: status.to_dict()
+                    for strategy_name, status in edge_status_by_strategy.items()
+                }
             
             # Execute trade if appropriate
+            execution_start = time.perf_counter()
             order = execute_trade(
                 policy_signals,
                 llm_decision,
@@ -1006,12 +1258,69 @@ def trading_loop():
                 order_manager,
                 db_integration,
                 strategy_weights=policy_decision.strategy_weight_overrides,
-                position_size_multiplier=policy_decision.size_multiplier,
+                position_size_multiplier=effective_size_multiplier,
                 risk_engine=risk_engine,
             )
+            execution_latency_ms = (time.perf_counter() - execution_start) * 1000.0
+            signal_consensus = get_signal_consensus(
+                policy_signals,
+                strategy_weights=policy_decision.strategy_weight_overrides,
+            )
+            if observability:
+                observability.record_latency(
+                    component="execution",
+                    operation="execute_trade",
+                    latency_ms=execution_latency_ms,
+                    success=True,
+                    trace_id=loop_trace.trace_id if loop_trace else None,
+                )
+                observability.record_trade_decision(
+                    symbol=SYMBOL,
+                    signal_consensus=signal_consensus,
+                    llm_decision=llm_decision,
+                    executed=order is not None,
+                    trade_mode=trade_mode,
+                    strategies=list(policy_signals.keys()),
+                    trace_id=loop_trace.trace_id if loop_trace else None,
+                    metadata={
+                        "policy_regime": policy_decision.active_regime,
+                        "size_multiplier": float(effective_size_multiplier),
+                        "edge_multiplier": float(edge_size_multiplier),
+                        "edge_disabled_strategies": list(edge_disabled_strategies),
+                    },
+                )
+                if risk_engine:
+                    strategy_pnl = {}
+                    if policy_signals:
+                        per_strategy = float(risk_snapshot.daily_pnl_usd) / max(1, len(policy_signals))
+                        strategy_pnl = {
+                            strategy_name: float(per_strategy)
+                            for strategy_name in policy_signals.keys()
+                        }
+                    observability.record_pnl_attribution(
+                        symbol=SYMBOL,
+                        strategy_pnl=strategy_pnl,
+                        total_pnl=float(risk_snapshot.daily_pnl_usd),
+                        regime=policy_decision.active_regime,
+                        timestamp=market_data.get("timestamp"),
+                        metadata={"confidence": float(regime_state.confidence)},
+                    )
             
             # Reset error counter on success
             consecutive_errors = 0
+
+            if observability and loop_trace:
+                observability.end_trace(
+                    loop_trace,
+                    status="ok",
+                    metadata={"trade_executed": bool(order), "loop_count": loop_count},
+                )
+                _flush_observability_alerts()
+
+            if edge_monitor:
+                previous_policy_signals = dict(policy_signals)
+                if float(current_reference_price) > 0.0:
+                    previous_reference_price = float(current_reference_price)
             
             # Wait before next iteration
             logger.debug(f"Waiting {loop_interval} seconds for next iteration...")
@@ -1023,6 +1332,22 @@ def trading_loop():
             backoff_time = min(loop_interval * 2 ** min(consecutive_errors, max_consecutive_errors), max_backoff_seconds)
             logger.error(f"Binance API error: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
+            if observability:
+                observability.record_error(
+                    component="trading_loop",
+                    error_type="binance_api",
+                    message=str(e),
+                    severity="medium",
+                    metadata={"retry_in_seconds": backoff_time, "loop_count": loop_count},
+                )
+                if loop_trace:
+                    observability.end_trace(
+                        loop_trace,
+                        status="error",
+                        error=str(e),
+                        metadata={"retry_in_seconds": backoff_time},
+                    )
+                _flush_observability_alerts()
             
             # Log error to database if available
             if db_integration:
@@ -1041,6 +1366,22 @@ def trading_loop():
             backoff_time = min(loop_interval * 2 ** min(consecutive_errors, max_consecutive_errors), max_backoff_seconds)
             logger.error(f"Unexpected error in trading loop: {e}")
             logger.info(f"Retrying in {backoff_time} seconds...")
+            if observability:
+                observability.record_error(
+                    component="trading_loop",
+                    error_type="system_error",
+                    message=str(e),
+                    severity="high",
+                    metadata={"retry_in_seconds": backoff_time, "loop_count": loop_count},
+                )
+                if loop_trace:
+                    observability.end_trace(
+                        loop_trace,
+                        status="error",
+                        error=str(e),
+                        metadata={"retry_in_seconds": backoff_time},
+                    )
+                _flush_observability_alerts()
             
             # Log error to database if available
             if db_integration:

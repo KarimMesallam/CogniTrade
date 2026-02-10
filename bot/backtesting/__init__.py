@@ -11,6 +11,19 @@ import pandas as pd  # Import pandas at the top level
 from bot.backtesting.core.engine import BacktestEngine, MultiSymbolBacktester
 from bot.backtesting.data.market_data import MarketData
 from bot.backtesting.models.results import BacktestResult, OptimizationResult
+from bot.backtesting.validation import (
+    AdvancedValidationFramework,
+    FoldEvaluation,
+    ValidationFold,
+    generate_purged_kfold_splits,
+    generate_walk_forward_splits,
+    regime_sliced_evaluation,
+)
+from bot.backtesting.research import (
+    backtest_metrics_payload,
+    dataset_fingerprint_from_market_data,
+    register_backtest_experiment,
+)
 from bot.backtesting.visualization.charts import ChartGenerator
 from bot.backtesting.config.settings import get_config, update_config
 
@@ -32,6 +45,7 @@ def run_backtest(
     commission_rate: float = None,
     db_path: str = None,
     allow_short_positions: bool = None,
+    execution_simulation: Optional[Dict[str, Any]] = None,
 ) -> BacktestResult:
     """
     Run a backtest with the given strategy and parameters.
@@ -46,6 +60,7 @@ def run_backtest(
         commission_rate: Commission rate as a decimal (uses default if None)
         db_path: Optional custom path for the database
         allow_short_positions: Whether short entries are allowed in simulation
+        execution_simulation: Optional execution simulation override config
         
     Returns:
         BacktestResult: Object containing backtest results
@@ -59,6 +74,7 @@ def run_backtest(
         commission_rate=commission_rate,
         db_path=db_path,
         allow_short_positions=allow_short_positions,
+        execution_simulation=execution_simulation,
     )
     
     return engine.run_backtest(strategy_func)

@@ -16,6 +16,14 @@ def _parse_json_env(var_name: str, default):
         print(f"Warning: invalid JSON in {var_name}, ignoring override")
         return default
 
+
+def _parse_csv_env(var_name: str, default: str = ""):
+    """Parse comma-separated env values into a trimmed list."""
+    raw = os.getenv(var_name, default)
+    if raw is None:
+        return []
+    return [item.strip() for item in str(raw).split(",") if item.strip()]
+
 # API credentials
 API_KEY = os.getenv('API_KEY')
 API_SECRET = os.getenv('API_SECRET')
@@ -26,6 +34,8 @@ API_SECRET = os.getenv('API_SECRET')
 TESTNET = os.getenv('TESTNET', 'True').lower() in ('true', '1', 't')
 LIVE_TRADING_ENABLED = os.getenv('ENABLE_LIVE_TRADING', 'False').lower() in ('true', '1', 't')
 SYMBOL = os.getenv('SYMBOL', 'BTCUSDT')
+DEFAULT_API_AUTH_ENABLED = "False" if TESTNET else "True"
+DEFAULT_ROLLOUT_ENFORCE_PRODUCTION_GATE = "False" if TESTNET else "True"
 
 # Trading strategy configuration
 TRADING_CONFIG = {
@@ -171,6 +181,81 @@ TRADING_CONFIG = {
         "interval_loops": int(os.getenv('RECONCILIATION_INTERVAL_LOOPS', '5')),
         "position_tolerance": float(os.getenv('RECONCILIATION_POSITION_TOLERANCE', '0.000001')),
     },
+
+    # Observability stack controls (P2-08)
+    "observability": {
+        "enabled": os.getenv('ENABLE_OBSERVABILITY', 'True').lower() in ('true', '1', 't'),
+        "max_events": int(os.getenv('OBS_MAX_EVENTS', '4000')),
+        "latency_alert_ms": float(os.getenv('OBS_LATENCY_ALERT_MS', '2500.0')),
+        "error_rate_alert_threshold": float(os.getenv('OBS_ERROR_RATE_ALERT_THRESHOLD', '0.25')),
+        "error_rate_min_events": int(os.getenv('OBS_ERROR_RATE_MIN_EVENTS', '20')),
+        "persistence_enabled": os.getenv('OBS_PERSISTENCE_ENABLED', 'True').lower() in ('true', '1', 't'),
+        "persistence_db_url": os.getenv('OBS_PERSISTENCE_DB_URL', 'sqlite:///data/observability.db'),
+    },
+
+    # Edge-decay monitoring (P2-07)
+    "monitoring": {
+        "enabled": os.getenv('ENABLE_EDGE_MONITORING', 'True').lower() in ('true', '1', 't'),
+        "window_size": int(os.getenv('EDGE_MONITOR_WINDOW_SIZE', '50')),
+        "min_samples": int(os.getenv('EDGE_MONITOR_MIN_SAMPLES', '20')),
+        "derisk_hit_rate_threshold": float(os.getenv('EDGE_MONITOR_DERISK_HIT_RATE', '0.45')),
+        "disable_hit_rate_threshold": float(os.getenv('EDGE_MONITOR_DISABLE_HIT_RATE', '0.35')),
+        "derisk_mean_return_threshold": float(os.getenv('EDGE_MONITOR_DERISK_MEAN_RETURN', '-0.0002')),
+        "derisk_size_multiplier": float(os.getenv('EDGE_MONITOR_DERISK_MULTIPLIER', '0.5')),
+        "disable_sticky": os.getenv('EDGE_MONITOR_DISABLE_STICKY', 'True').lower() in ('true', '1', 't'),
+    },
+
+    # API security controls
+    "api_security": {
+        "auth_enabled": os.getenv('API_AUTH_ENABLED', DEFAULT_API_AUTH_ENABLED).lower() in ('true', '1', 't'),
+        "allow_public_health": os.getenv('API_ALLOW_PUBLIC_HEALTH', 'True').lower() in ('true', '1', 't'),
+        "read_api_keys": _parse_csv_env('API_READ_KEYS', ''),
+        "admin_api_keys": _parse_csv_env('API_ADMIN_KEYS', ''),
+        "allowed_origins": _parse_csv_env(
+            'API_ALLOWED_ORIGINS',
+            'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+        ),
+        "allow_credentials": os.getenv('API_CORS_ALLOW_CREDENTIALS', 'False').lower() in ('true', '1', 't'),
+        "allow_methods": _parse_csv_env('API_CORS_ALLOW_METHODS', 'GET,POST,PUT,DELETE,OPTIONS'),
+        "allow_headers": _parse_csv_env(
+            'API_CORS_ALLOW_HEADERS',
+            'Authorization,Content-Type,X-API-Key,X-Request-ID',
+        ),
+        "rate_limit_enabled": os.getenv('API_RATE_LIMIT_ENABLED', 'True').lower() in ('true', '1', 't'),
+        "rate_limit_requests": int(os.getenv('API_RATE_LIMIT_REQUESTS', '120')),
+        "rate_limit_window_seconds": int(os.getenv('API_RATE_LIMIT_WINDOW_SECONDS', '60')),
+    },
+
+    # Rollout gate configuration
+    "rollout": {
+        "enabled": os.getenv('ENABLE_ROLLOUT_GATES', 'True').lower() in ('true', '1', 't'),
+        "state_store_path": os.getenv('ROLLOUT_STATE_STORE_PATH', 'data/rollout_gate_state.json'),
+        "enforce_production_gate": os.getenv(
+            'ROLLOUT_ENFORCE_PRODUCTION_GATE',
+            DEFAULT_ROLLOUT_ENFORCE_PRODUCTION_GATE,
+        ).lower() in ('true', '1', 't'),
+        "required_rollout_id": os.getenv('ROLLOUT_REQUIRED_ID', ''),
+        "min_shadow_samples": int(os.getenv('ROLLOUT_MIN_SHADOW_SAMPLES', '50')),
+        "max_shadow_error_rate": float(os.getenv('ROLLOUT_MAX_SHADOW_ERROR_RATE', '0.20')),
+        "min_canary_samples": int(os.getenv('ROLLOUT_MIN_CANARY_SAMPLES', '30')),
+        "max_canary_error_rate": float(os.getenv('ROLLOUT_MAX_CANARY_ERROR_RATE', '0.15')),
+        "max_canary_drawdown_pct": float(os.getenv('ROLLOUT_MAX_CANARY_DRAWDOWN_PCT', '8.0')),
+        "min_canary_total_return_pct": float(os.getenv('ROLLOUT_MIN_CANARY_RETURN_PCT', '-1.0')),
+        "max_canary_latency_p95_ms": float(os.getenv('ROLLOUT_MAX_CANARY_LATENCY_P95_MS', '3000.0')),
+        "require_quality_gate": os.getenv('ROLLOUT_REQUIRE_QUALITY_GATE', 'True').lower() in ('true', '1', 't'),
+    },
+
+    # Strategy quality gate thresholds
+    "quality_gate": {
+        "enabled": os.getenv('ENABLE_STRATEGY_QUALITY_GATE', 'True').lower() in ('true', '1', 't'),
+        "min_walk_forward_folds": int(os.getenv('QUALITY_MIN_WALK_FORWARD_FOLDS', '3')),
+        "min_sharpe_ratio": float(os.getenv('QUALITY_MIN_SHARPE_RATIO', '0.20')),
+        "min_calmar_ratio": float(os.getenv('QUALITY_MIN_CALMAR_RATIO', '0.10')),
+        "max_drawdown_pct": float(os.getenv('QUALITY_MAX_DRAWDOWN_PCT', '25.0')),
+        "min_regime_samples": int(os.getenv('QUALITY_MIN_REGIME_SAMPLES', '20')),
+        "min_regime_win_rate": float(os.getenv('QUALITY_MIN_REGIME_WIN_RATE', '0.45')),
+        "min_regimes_passing": int(os.getenv('QUALITY_MIN_REGIMES_PASSING', '2')),
+    },
     
     # Timeframe configuration for market data
     "timeframes": {
@@ -260,6 +345,31 @@ def get_risk_engine_config():
 def get_reconciliation_config():
     """Get exchange reconciliation configuration."""
     return TRADING_CONFIG.get("reconciliation", {})
+
+
+def get_observability_config():
+    """Get observability stack configuration."""
+    return TRADING_CONFIG.get("observability", {})
+
+
+def get_monitoring_config():
+    """Get edge-decay monitoring configuration."""
+    return TRADING_CONFIG.get("monitoring", {})
+
+
+def get_api_security_config():
+    """Get API security configuration."""
+    return TRADING_CONFIG.get("api_security", {})
+
+
+def get_rollout_config():
+    """Get rollout gate configuration."""
+    return TRADING_CONFIG.get("rollout", {})
+
+
+def get_quality_gate_config():
+    """Get strategy quality-gate configuration."""
+    return TRADING_CONFIG.get("quality_gate", {})
 
 
 def get_trade_mode() -> str:

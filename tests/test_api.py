@@ -3,6 +3,8 @@ import os
 import sys
 import pytest
 import json
+from decimal import Decimal
+import pandas as pd
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 
@@ -25,9 +27,23 @@ def reset_trading_state():
     """Ensure trading bot global state is isolated between API tests."""
     api_main.trading_bot = None
     api_main.trading_task = None
+    if hasattr(api_main, "observability"):
+        api_main.observability.reset()
+    if hasattr(api_main, "api_security"):
+        api_main.api_security.update_config(config.get_api_security_config())
+        api_main.api_security.reset_runtime_state()
+    if hasattr(api_main, "rollout_gate"):
+        api_main.rollout_gate.load_state({})
     yield
     api_main.trading_bot = None
     api_main.trading_task = None
+    if hasattr(api_main, "observability"):
+        api_main.observability.reset()
+    if hasattr(api_main, "api_security"):
+        api_main.api_security.update_config(config.get_api_security_config())
+        api_main.api_security.reset_runtime_state()
+    if hasattr(api_main, "rollout_gate"):
+        api_main.rollout_gate.load_state({})
 
 # Fixture for mocking the database
 @pytest.fixture
@@ -65,6 +81,235 @@ def test_health_check():
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
     assert "version" in response.json()
+
+
+def test_cors_defaults_do_not_use_wildcard_origin():
+    cors_middlewares = [entry for entry in app.user_middleware if entry.cls.__name__ == "CORSMiddleware"]
+    assert cors_middlewares
+    allow_origins = cors_middlewares[0].kwargs.get("allow_origins", [])
+    assert "*" not in allow_origins
+
+
+def test_request_id_header_is_set_and_propagated():
+    generated = client.get("/health")
+    assert generated.status_code == 200
+    assert "X-Request-ID" in generated.headers
+    assert generated.headers["X-Request-ID"]
+
+    provided = client.get("/health", headers={"X-Request-ID": "req-123"})
+    assert provided.status_code == 200
+    assert provided.headers["X-Request-ID"] == "req-123"
+
+
+def test_telemetry_dashboard_and_events_endpoints():
+    client.get("/health")
+    client.get("/health")
+
+    dashboard_response = client.get("/observability/dashboard?window_minutes=60")
+    assert dashboard_response.status_code == 200
+    assert dashboard_response.json()["status"] == "success"
+    dashboard = dashboard_response.json()["dashboard"]
+    assert dashboard["trace_count"] >= 1.0
+    assert dashboard["latency"]["count"] >= 1.0
+
+    events_response = client.get("/observability/events?limit=10")
+    assert events_response.status_code == 200
+    assert events_response.json()["status"] == "success"
+    events = events_response.json()["events"]
+    assert len(events) > 0
+    assert "event_type" in events[-1]
+
+
+def test_rollout_quality_endpoint():
+    summary = {
+        "walk_forward_folds": 4,
+        "walk_forward_summary": {
+            "sharpe_ratio": {"mean": 0.3},
+            "calmar_ratio": {"mean": 0.2},
+            "max_drawdown_pct": {"mean": -12.0},
+        },
+        "regime_slices": {
+            "BEAR": {"sample_count": 30.0, "win_rate": 0.5},
+            "SIDEWAYS": {"sample_count": 25.0, "win_rate": 0.48},
+        },
+    }
+    response = client.post("/rollout/quality/evaluate", json={"validation_summary": summary})
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "success"
+    assert "quality_gate" in payload
+    assert payload["quality_gate"]["passed"] is True
+
+
+@patch("api.main._persist_rollout_gate_state")
+def test_rollout_stage_endpoints(mock_persist):
+    rollout_id = "api-rollout-demo"
+    shadow = client.post(
+        "/rollout/evaluate/shadow",
+        json={"rollout_id": rollout_id, "sample_count": 100, "error_rate": 0.02},
+    )
+    assert shadow.status_code == 200
+    assert shadow.json()["decision"]["approved"] is True
+
+    canary = client.post(
+        "/rollout/evaluate/canary",
+        json={
+            "rollout_id": rollout_id,
+            "sample_count": 60,
+            "error_rate": 0.03,
+            "drawdown_pct": 2.0,
+            "total_return_pct": 1.2,
+            "latency_p95_ms": 700.0,
+        },
+    )
+    assert canary.status_code == 200
+    assert canary.json()["decision"]["approved"] is True
+
+    production = client.post(
+        "/rollout/evaluate/production",
+        json={
+            "rollout_id": rollout_id,
+            "sample_count": 60,
+            "error_rate": 0.03,
+            "drawdown_pct": 2.0,
+            "total_return_pct": 1.2,
+            "latency_p95_ms": 700.0,
+            "metadata": {"quality_gate": {"passed": True, "reasons": []}},
+        },
+    )
+    assert production.status_code == 200
+    assert production.json()["decision"]["approved"] is True
+
+    status = client.get(f"/rollout/status/{rollout_id}")
+    assert status.status_code == 200
+    assert status.json()["rollout"]["production_passed"] is True
+    assert mock_persist.called
+
+
+@patch("api.main._persist_rollout_gate_state")
+def test_rollout_production_rejects_without_quality_gate(mock_persist):
+    rollout_id = "api-rollout-quality-missing"
+    client.post(
+        "/rollout/evaluate/shadow",
+        json={"rollout_id": rollout_id, "sample_count": 100, "error_rate": 0.02},
+    )
+    client.post(
+        "/rollout/evaluate/canary",
+        json={
+            "rollout_id": rollout_id,
+            "sample_count": 60,
+            "error_rate": 0.03,
+            "drawdown_pct": 2.0,
+            "total_return_pct": 1.2,
+            "latency_p95_ms": 700.0,
+        },
+    )
+    production = client.post(
+        "/rollout/evaluate/production",
+        json={
+            "rollout_id": rollout_id,
+            "sample_count": 60,
+            "error_rate": 0.03,
+            "drawdown_pct": 2.0,
+            "total_return_pct": 1.2,
+            "latency_p95_ms": 700.0,
+        },
+    )
+    assert production.status_code == 200
+    payload = production.json()
+    assert payload["decision"]["approved"] is False
+    assert "missing_quality_gate_evidence" in payload["decision"]["reasons"]
+
+
+def test_api_auth_blocks_missing_key_when_enabled():
+    api_main.api_security.update_config(
+        {
+            "auth_enabled": True,
+            "allow_public_health": False,
+            "read_api_keys": ["read-key"],
+            "admin_api_keys": ["admin-key"],
+            "rate_limit_enabled": False,
+            "rate_limit_requests": 100,
+            "rate_limit_window_seconds": 60,
+        }
+    )
+
+    response = client.get("/observability/events?limit=1")
+    assert response.status_code == 401
+    assert "detail" in response.json()
+
+
+def test_api_auth_read_key_cannot_access_write_endpoint(mock_background_tasks):
+    api_main.api_security.update_config(
+        {
+            "auth_enabled": True,
+            "allow_public_health": True,
+            "read_api_keys": ["read-key"],
+            "admin_api_keys": ["admin-key"],
+            "rate_limit_enabled": False,
+            "rate_limit_requests": 100,
+            "rate_limit_window_seconds": 60,
+        }
+    )
+
+    trading_config = {
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "trade_amount": 100.0,
+        "strategies": [{"name": "sma_crossover", "params": {"short_period": 10, "long_period": 50}, "active": True}],
+    }
+
+    response = client.post("/trading/start", json=trading_config, headers={"X-API-Key": "read-key"})
+    assert response.status_code == 403
+    assert "detail" in response.json()
+
+
+def test_api_auth_admin_key_can_access_write_endpoint(mock_background_tasks):
+    api_main.api_security.update_config(
+        {
+            "auth_enabled": True,
+            "allow_public_health": True,
+            "read_api_keys": ["read-key"],
+            "admin_api_keys": ["admin-key"],
+            "rate_limit_enabled": False,
+            "rate_limit_requests": 100,
+            "rate_limit_window_seconds": 60,
+        }
+    )
+
+    trading_config = {
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "trade_amount": 100.0,
+        "strategies": [{"name": "sma_crossover", "params": {"short_period": 10, "long_period": 50}, "active": True}],
+    }
+
+    response = client.post("/trading/start", json=trading_config, headers={"X-API-Key": "admin-key"})
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"
+
+
+def test_api_rate_limit_blocks_excess_requests():
+    api_main.api_security.update_config(
+        {
+            "auth_enabled": False,
+            "allow_public_health": True,
+            "read_api_keys": [],
+            "admin_api_keys": [],
+            "rate_limit_enabled": True,
+            "rate_limit_requests": 2,
+            "rate_limit_window_seconds": 60,
+        }
+    )
+
+    first = client.get("/health")
+    second = client.get("/health")
+    third = client.get("/health")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert third.status_code == 429
+    assert "Retry-After" in third.headers
 
 # Test start trading endpoint
 def test_start_trading(mock_background_tasks):
@@ -324,6 +569,124 @@ def test_run_backtest(mock_run_backtest):
     assert response.status_code == 400
     assert "detail" in response.json()
     assert "Unknown strategy" in response.json()["detail"]
+
+
+@patch("api.main.db")
+@patch("api.main.run_backtest")
+def test_run_backtest_supports_short_execution_and_validation(
+    mock_run_backtest,
+    mock_db,
+):
+    mock_metrics = MagicMock(spec=PerformanceMetrics)
+    mock_metrics.total_return_pct = 5.0
+    mock_metrics.sharpe_ratio = 0.4
+    mock_metrics.max_drawdown_pct = -8.0
+    mock_metrics.win_rate = 55.0
+    mock_metrics.avg_win = 2.5
+    mock_metrics.avg_loss = 1.8
+    mock_metrics.profit_factor = 1.2
+
+    mock_result = MagicMock(spec=BacktestResult)
+    mock_result.final_equity = 10500.0
+    mock_result.total_trades = 3
+    mock_result.metrics = mock_metrics
+    mock_result.equity_curve = []
+    mock_run_backtest.return_value = mock_result
+    mock_db.get_market_data.return_value = pd.DataFrame()
+
+    payload = {
+        "symbol": "BTCUSDT",
+        "timeframes": ["1h"],
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31",
+        "initial_capital": 10000.0,
+        "commission": 0.001,
+        "strategy_name": "sma_crossover",
+        "strategy_params": {"short_period": 10, "long_period": 50},
+        "trade_mode": "FUTURES",
+        "execution_simulation": {"enabled": True, "spread_bps": 5.0},
+        "run_walk_forward_validation": True,
+        "include_regime_slices": True,
+    }
+
+    response = client.post("/backtest/run", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    assert "validation" in body["results"]
+    assert "quality_gate" in body["results"]
+
+    kwargs = mock_run_backtest.call_args.kwargs
+    assert kwargs["allow_short_positions"] is True
+    assert kwargs["execution_simulation"]["enabled"] is True
+
+
+@patch("api.main.run_backtest")
+def test_run_backtest_sanitizes_non_finite_metric_values(mock_run_backtest):
+    mock_metrics = MagicMock(spec=PerformanceMetrics)
+    mock_metrics.total_return_pct = Decimal("10.5")
+    mock_metrics.sharpe_ratio = Decimal("1.25")
+    mock_metrics.max_drawdown_pct = Decimal("NaN")
+    mock_metrics.win_rate = Decimal("60")
+    mock_metrics.avg_win = Decimal("3.0")
+    mock_metrics.avg_loss = Decimal("0")
+    mock_metrics.profit_factor = Decimal("Infinity")
+
+    mock_result = MagicMock(spec=BacktestResult)
+    mock_result.final_equity = 11000.0
+    mock_result.total_trades = 4
+    mock_result.metrics = mock_metrics
+    mock_result.equity_curve = []
+    mock_run_backtest.return_value = mock_result
+
+    payload = {
+        "symbol": "BTCUSDT",
+        "timeframes": ["1h"],
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31",
+        "initial_capital": 10000.0,
+        "commission": 0.001,
+        "strategy_name": "sma_crossover",
+        "strategy_params": {"short_period": 10, "long_period": 50},
+    }
+
+    response = client.post("/backtest/run", json=payload)
+    assert response.status_code == 200
+    results = response.json()["results"]
+    assert results["profit_loss_percent"] == 10.5
+    assert results["sharpe_ratio"] == 1.25
+    assert results["max_drawdown"] is None
+    assert results["profit_factor"] is None
+
+
+def test_run_backtest_rejects_unknown_execution_simulation_fields():
+    api_main.api_security.update_config(
+        {
+            "auth_enabled": False,
+            "allow_public_health": True,
+            "read_api_keys": [],
+            "admin_api_keys": [],
+            "rate_limit_enabled": False,
+            "rate_limit_requests": 100,
+            "rate_limit_window_seconds": 60,
+        }
+    )
+
+    payload = {
+        "symbol": "BTCUSDT",
+        "timeframes": ["1h"],
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31",
+        "initial_capital": 10000.0,
+        "commission": 0.001,
+        "strategy_name": "sma_crossover",
+        "strategy_params": {"short_period": 10, "long_period": 50},
+        "execution_simulation": {"enabled": True, "latency_ms": 250},
+    }
+
+    response = client.post("/backtest/run", json=payload)
+    assert response.status_code == 422
+    assert "latency_ms" in response.text
 
 # Test get order history endpoint
 def test_get_order_history():

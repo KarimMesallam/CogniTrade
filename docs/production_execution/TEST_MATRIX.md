@@ -36,6 +36,23 @@
 | P2-08 | Observability telemetry and alert-path coverage | `venv/bin/pytest tests/test_observability.py -v` and `venv/bin/pytest tests/test_api.py -k "request_id or telemetry" -v` | Must pass |
 | P2-09 | Shadow and canary rollout guardrails | `venv/bin/pytest tests/test_deploy_policy.py -v` | Must pass |
 | P2-10 | Research reproducibility and experiment tracking | `venv/bin/pytest tests/test_research.py -v` | Must pass |
+| R0-01 | API auth/CORS/rate-limit hardening | `venv/bin/pytest tests/test_api.py -k "auth or cors or rate_limit" -v` | Must pass |
+| R0-02 | Runtime + CI rollout gate enforcement | `venv/bin/pytest tests/test_main.py -k "rollout_production_gate" -v` and `venv/bin/pytest tests/test_deploy_policy.py -k "rollout or quality_gate or roundtrip" -v` | Must pass |
+| R0-03 | Observability persistence durability | `venv/bin/pytest tests/test_observability.py -k "persistence" -v` | Must pass |
+| R0-04 | Strategy quality gate checks for production promotion | `venv/bin/pytest tests/test_deploy_policy.py -k "quality" -v` and `venv/bin/pytest tests/test_api.py -k "rollout_quality or production_rejects_without_quality_gate" -v` | Must pass |
+| R0-05 | Backtest API advanced simulation/validation outputs | `venv/bin/pytest tests/test_api.py -k "supports_short_execution_and_validation or run_backtest" -v` | Must pass |
+| G0-01 | Regime dataset build with PIT integrity | `venv/bin/pytest tests/test_data_pipeline.py -v` and `venv/bin/pytest tests/test_validation.py -k "walk_forward or purged" -v` | Must pass |
+| G0-02 | Benchmark/promotion criteria reproducibility | `venv/bin/pytest tests/test_research.py -v` | Must pass |
+| G0-03 | Candidate strategy robustness across regimes | `venv/bin/pytest tests/test_validation.py -v` and strategy-specific backtest evidence run(s) | Must pass |
+| G0-04 | Cross-engine parity harness (`vectorbt`/`backtrader`) | New parity suite (for example `venv/bin/pytest tests/test_backtest_parity.py -v`) + tolerance report | Must pass |
+| G0-05 | Execution simulation calibration | `venv/bin/pytest tests/test_execution_simulation.py -v` | Must pass |
+| G0-06 | Quality gate evidence package | `venv/bin/pytest tests/test_deploy_policy.py -k "quality" -v` and `/rollout/quality/evaluate` evidence | Must pass |
+| G1-01 | Testnet shadow dress rehearsal | Shadow gate evidence + `venv/bin/pytest tests/test_observability.py -v` | Must pass |
+| G1-02 | Testnet canary dress rehearsal | Canary gate evidence + `venv/bin/pytest tests/test_reconciliation.py -v` and `venv/bin/pytest tests/test_risk_engine.py -v` | Must pass |
+| G1-03 | Resilience drill coverage | `venv/bin/pytest tests/test_main.py -k "risk_engine or rollout_production_gate" -v` and resilience drill evidence | Must pass |
+| G1-04 | Operational readiness and alerting | Alert smoke-test evidence + runbook sign-off entry in `WORKLOG.md` | Must pass |
+| G2-01 | Final go/no-go preflight | `venv/bin/pytest -q` and checklist audit (`GO_NO_GO_CHECKLIST.md`) | Must pass |
+| G2-02 | Controlled capital ramp stage gates | Per-stage rollout evidence + no gate violations for stage duration | Must pass |
 | P3-01 | News/sentiment ingestion adapters and normalized persistence | `venv/bin/pytest tests/test_sentiment_pipeline.py -v` | Must pass |
 | P3-02 | Sentiment feature engineering and point-in-time joins | `venv/bin/pytest tests/test_sentiment_features.py -v` | Must pass |
 | P3-03 | Tool-calling sentiment decision flow and schema/fallback safety | `venv/bin/pytest tests/test_llm_manager.py -k "sentiment or tool" -v` and `venv/bin/pytest tests/test_sentiment_agent.py -v` | Must pass |
@@ -57,6 +74,25 @@ Detailed P3 validation logic and promotion criteria: `docs/production_execution/
 1. All `P1-*` tasks marked `done`.
 2. Run: `venv/bin/pytest -q`
 3. Run targeted resilience/risk suites and record outputs in `WORKLOG.md`.
+
+### Phase 2 Gate
+
+1. All `P2-*` tasks marked `done`.
+2. Run: `venv/bin/pytest -q`
+3. Run targeted data/validation/execution/risk/reconciliation/observability/research suites and record outputs in `WORKLOG.md`.
+
+### Remediation Gate (Non-P3)
+
+1. All `R0-*` tasks marked `done`.
+2. Run: `venv/bin/pytest tests/test_api.py tests/test_main.py tests/test_deploy_policy.py tests/test_observability.py -v`
+3. Run: `venv/bin/pytest -q`
+
+### Gap Closure Gate (Non-P3)
+
+1. All `G0-*`, `G1-*`, and `G2-*` tasks marked `done`.
+2. Run: `venv/bin/pytest -q`
+3. Verify final checklist in `docs/production_execution/GO_NO_GO_CHECKLIST.md` has no open blockers.
+4. Record full evidence trail in `docs/production_execution/WORKLOG.md`.
 
 ### Phase 3 Gate
 
