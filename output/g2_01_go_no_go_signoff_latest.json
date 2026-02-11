@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "canary_passed": true,
+    "ops_readiness_passed": true,
+    "production_gate_passed": true,
+    "quality_gate_packet_passed": true,
+    "resilience_drills_passed": true,
+    "shadow_passed": true
+  },
+  "decision": "GO",
+  "failed_checks": []
+}

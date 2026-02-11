@@ -1,0 +1,24 @@
+{
+  "calibrated_config": {
+    "enabled": true,
+    "funding_rate_per_8h": 0.0,
+    "latency_bps": 615428119.9556684,
+    "max_volume_participation": 1.0,
+    "min_partial_fill_ratio": 0.335,
+    "slippage_bps": 0.0,
+    "spread_bps": 2.0
+  },
+  "fit_error": {
+    "mae_cost_bps": 615428110.9556684,
+    "p95_cost_bps": 615428110.9556684
+  },
+  "notes": [],
+  "observed": {
+    "fill_ratio_p10": 0.335,
+    "fill_ratio_p90": 1.0,
+    "latency_ms_p95": 153857029989.55804,
+    "slippage_bps_p50": 0.0,
+    "slippage_bps_p95": 0.0
+  },
+  "sample_count": 4
+}

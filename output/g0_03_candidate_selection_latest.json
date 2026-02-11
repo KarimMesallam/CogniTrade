@@ -1,0 +1,1244 @@
+{
+  "benchmark_thresholds": {
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_net_return_pct": 1.0,
+    "min_sharpe_ratio": 0.2,
+    "min_total_trades": 25,
+    "require_quality_gate": true
+  },
+  "evaluations": [
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 12.045614128598464,
+          "gross_return_pct": 421.5438779509322,
+          "max_drawdown_abs_pct": 17.09536804648802,
+          "modeled_cost_pct": 73.20151757638435,
+          "net_return_pct": 348.34236037454787,
+          "sharpe_ratio": 11.976324586562392,
+          "total_trades": 219.0
+        },
+        "passed": true,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 190.72536821314603,
+            "eligible_regimes": 4.0,
+            "max_drawdown_abs_mean": 1.9271976853819706,
+            "passing_regimes": 2.0,
+            "sharpe_ratio_mean": 1.1550890871317347,
+            "walk_forward_folds": 9.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "long_period": 3,
+          "short_period": 2
+        },
+        "strategy_name": "sma_crossover",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "e81ca05fd0c905b9",
+      "metrics": {
+        "calmar_ratio": 12.045614128598464,
+        "final_equity": 52154.387795093215,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 17.09536804648802,
+        "modeled_cost_pct": 73.20151757638435,
+        "sharpe_ratio": 11.976324586562392,
+        "total_return_pct": 421.5438779509322,
+        "total_trades": 219.0,
+        "win_rate": 50.2283105022831
+      },
+      "passed": true,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 190.72536821314603,
+          "eligible_regimes": 4.0,
+          "max_drawdown_abs_mean": 1.9271976853819706,
+          "passing_regimes": 2.0,
+          "sharpe_ratio_mean": 1.1550890871317347,
+          "walk_forward_folds": 9.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0017499288486864059,
+            "sample_count": 275.0,
+            "sharpe_like": 0.5454155961111478,
+            "volatility": 0.0032084319941775115,
+            "win_rate": 0.9563636363636364
+          },
+          "BULL": {
+            "mean_return": -0.000855266252940298,
+            "sample_count": 36.0,
+            "sharpe_like": -9.028105395232592,
+            "volatility": 9.47337470597023e-05,
+            "win_rate": 0.0
+          },
+          "HIGH_VOLATILITY": {
+            "mean_return": 0.007184040947007761,
+            "sample_count": 185.0,
+            "sharpe_like": 0.887993946745166,
+            "volatility": 0.00809019135022259,
+            "win_rate": 0.5027027027027027
+          },
+          "SIDEWAYS": {
+            "mean_return": -0.0005721257529281351,
+            "sample_count": 201.0,
+            "sharpe_like": -0.3404540153592955,
+            "volatility": 0.0016804787933675763,
+            "win_rate": 0.05970149253731343
+          }
+        },
+        "walk_forward_folds": 9,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 9.0,
+            "max": 557.3998124899322,
+            "mean": 190.72536821314603,
+            "min": -1.0000000000000004,
+            "std": 259.5066126626661
+          },
+          "max_drawdown_pct": {
+            "fold_count": 9.0,
+            "max": 5.004266108693586,
+            "mean": 1.9271976853819706,
+            "min": 0.0,
+            "std": 2.2070670901792733
+          },
+          "sharpe_ratio": {
+            "fold_count": 9.0,
+            "max": 10.061002389625518,
+            "mean": 1.1550890871317347,
+            "min": -0.9879523380312949,
+            "std": 3.245460117649032
+          },
+          "test_mean_return": {
+            "fold_count": 9.0,
+            "max": 0.0035701547720334375,
+            "mean": 0.0015485624542862083,
+            "min": -0.00042763312647015696,
+            "std": 0.001672577623452048
+          },
+          "train_mean_return": {
+            "fold_count": 9.0,
+            "max": 0.0010181599628405398,
+            "mean": 0.00014493219730158142,
+            "min": -0.000293641413509503,
+            "std": 0.00044088394272243206
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 12.09130318259079,
+          "gross_return_pct": 415.088811953243,
+          "max_drawdown_abs_pct": 16.953374095049767,
+          "modeled_cost_pct": 72.1662361845101,
+          "net_return_pct": 342.92257576873294,
+          "sharpe_ratio": 11.956303716106365,
+          "total_trades": 217.0
+        },
+        "passed": true,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 190.86277869609916,
+            "eligible_regimes": 4.0,
+            "max_drawdown_abs_mean": 1.9167499559673857,
+            "passing_regimes": 2.0,
+            "sharpe_ratio_mean": 1.1658286088489291,
+            "walk_forward_folds": 9.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "long_period": 5,
+          "short_period": 2
+        },
+        "strategy_name": "sma_crossover",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "b87fabdab6765ced",
+      "metrics": {
+        "calmar_ratio": 12.09130318259079,
+        "final_equity": 51508.881195324306,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 16.953374095049767,
+        "modeled_cost_pct": 72.1662361845101,
+        "sharpe_ratio": 11.956303716106365,
+        "total_return_pct": 415.088811953243,
+        "total_trades": 217.0,
+        "win_rate": 50.23041474654379
+      },
+      "passed": true,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 190.86277869609916,
+          "eligible_regimes": 4.0,
+          "max_drawdown_abs_mean": 1.9167499559673857,
+          "passing_regimes": 2.0,
+          "sharpe_ratio_mean": 1.1658286088489291,
+          "walk_forward_folds": 9.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0017104388802220744,
+            "sample_count": 273.0,
+            "sharpe_like": 0.5498832896127083,
+            "volatility": 0.003110548933805143,
+            "win_rate": 0.9597069597069597
+          },
+          "BULL": {
+            "mean_return": -0.0008552662529402945,
+            "sample_count": 34.0,
+            "sharpe_like": -9.028105395234128,
+            "volatility": 9.473374705968579e-05,
+            "win_rate": 0.0
+          },
+          "HIGH_VOLATILITY": {
+            "mean_return": 0.007184040947007781,
+            "sample_count": 185.0,
+            "sharpe_like": 0.8879939467451694,
+            "volatility": 0.008090191350222582,
+            "win_rate": 0.5027027027027027
+          },
+          "SIDEWAYS": {
+            "mean_return": -0.0005721257529281544,
+            "sample_count": 201.0,
+            "sharpe_like": -0.34045401535930664,
+            "volatility": 0.0016804787933675778,
+            "win_rate": 0.05970149253731343
+          }
+        },
+        "walk_forward_folds": 9,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 9.0,
+            "max": 557.3998124899298,
+            "mean": 190.86277869609916,
+            "min": -1.0000000000000002,
+            "std": 259.4098766396313
+          },
+          "max_drawdown_pct": {
+            "fold_count": 9.0,
+            "max": 5.004266108693655,
+            "mean": 1.9167499559673857,
+            "min": 0.0,
+            "std": 2.211103419764118
+          },
+          "sharpe_ratio": {
+            "fold_count": 9.0,
+            "max": 10.082565046851412,
+            "mean": 1.1658286088489291,
+            "min": -0.9879523380313031,
+            "std": 3.252515781203146
+          },
+          "test_mean_return": {
+            "fold_count": 9.0,
+            "max": 0.003570154772033453,
+            "mean": 0.001549442083915837,
+            "min": -0.0004276331264701653,
+            "std": 0.0016710092335960448
+          },
+          "train_mean_return": {
+            "fold_count": 9.0,
+            "max": 0.001019585406595437,
+            "mean": 0.00014748395824393178,
+            "min": -0.00029237385933304105,
+            "std": 0.00044048972505289393
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 62.84724145960898,
+          "gross_return_pct": 34.2753466118921,
+          "max_drawdown_abs_pct": 0.8658651397312506,
+          "modeled_cost_pct": 0.15556908430380412,
+          "net_return_pct": 34.11977752758829,
+          "sharpe_ratio": 18.37229908662246,
+          "total_trades": 1.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 123.24883217537905,
+            "eligible_regimes": 3.0,
+            "max_drawdown_abs_mean": 0.18077725573880712,
+            "passing_regimes": 3.0,
+            "sharpe_ratio_mean": 2.268502272436037,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "long_period": 8,
+          "short_period": 4
+        },
+        "strategy_name": "sma_crossover",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "c377132dc7e353be",
+      "metrics": {
+        "calmar_ratio": 62.84724145960898,
+        "final_equity": 13427.53466118921,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 0.8658651397312506,
+        "modeled_cost_pct": 0.15556908430380412,
+        "sharpe_ratio": 18.37229908662246,
+        "total_return_pct": 34.2753466118921,
+        "total_trades": 1.0,
+        "win_rate": 100.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 123.24883217537905,
+          "eligible_regimes": 3.0,
+          "max_drawdown_abs_mean": 0.18077725573880712,
+          "passing_regimes": 3.0,
+          "sharpe_ratio_mean": 2.268502272436037,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0011002599664336203,
+            "sample_count": 252.0,
+            "sharpe_like": 1.154593721060784,
+            "volatility": 0.0009529412349677042,
+            "win_rate": 0.9920634920634921
+          },
+          "BULL": {
+            "mean_return": -2.3709584099747966e-05,
+            "sample_count": 32.0,
+            "sharpe_like": -0.09471254158207329,
+            "volatility": 0.00025033204371569304,
+            "win_rate": 0.5
+          },
+          "SIDEWAYS": {
+            "mean_return": 9.586727453523613e-05,
+            "sample_count": 193.0,
+            "sharpe_like": 0.2222527869061081,
+            "volatility": 0.0004313434079714635,
+            "win_rate": 0.5284974093264249
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993126477415,
+            "mean": 123.24883217537905,
+            "min": 0.0,
+            "std": 243.0848384820352
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 0.8658651397312506,
+            "mean": 0.18077725573880712,
+            "min": 0.0,
+            "std": 0.34264943097678285
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.83104350070206,
+            "mean": 2.268502272436037,
+            "min": 0.0,
+            "std": 3.8068272347455694
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0011326248643405627,
+            "mean": 0.000492945627160928,
+            "min": 0.0,
+            "std": 0.000464035089411886
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.00040973498449358467,
+            "mean": 0.0002077692154954696,
+            "min": -3.1591144215660044e-06,
+            "std": 0.00018421950302014692
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 49.909007952225494,
+          "gross_return_pct": 33.98016213513099,
+          "max_drawdown_abs_pct": 1.0837742846103802,
+          "modeled_cost_pct": 0.15586397389097806,
+          "net_return_pct": 33.82429816124001,
+          "sharpe_ratio": 10.915927417266161,
+          "total_trades": 1.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 122.9716715463491,
+            "eligible_regimes": 2.0,
+            "max_drawdown_abs_mean": 0.22435909242741486,
+            "passing_regimes": 2.0,
+            "sharpe_ratio_mean": 2.233690428283668,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "long_period": 34,
+          "short_period": 8
+        },
+        "strategy_name": "sma_crossover",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "35f4ed984a4471be",
+      "metrics": {
+        "calmar_ratio": 49.909007952225494,
+        "final_equity": 13398.0162135131,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 1.0837742846103802,
+        "modeled_cost_pct": 0.15586397389097806,
+        "sharpe_ratio": 10.915927417266161,
+        "total_return_pct": 33.98016213513099,
+        "total_trades": 1.0,
+        "win_rate": 100.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 122.9716715463491,
+          "eligible_regimes": 2.0,
+          "max_drawdown_abs_mean": 0.22435909242741486,
+          "passing_regimes": 2.0,
+          "sharpe_ratio_mean": 2.233690428283668,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.001035687864758243,
+            "sample_count": 266.0,
+            "sharpe_like": 0.5084107640380484,
+            "volatility": 0.0020371084524888903,
+            "win_rate": 0.9661654135338346
+          },
+          "BULL": {
+            "mean_return": -0.00012661182943792446,
+            "sample_count": 6.0,
+            "sharpe_like": -0.31215372998894947,
+            "volatility": 0.00040560729305527324,
+            "win_rate": 0.5
+          },
+          "SIDEWAYS": {
+            "mean_return": 9.586737097648318e-05,
+            "sample_count": 193.0,
+            "sharpe_like": 0.22225278658859507,
+            "volatility": 0.00043134384251361567,
+            "win_rate": 0.5284974093264249
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993127655606,
+            "mean": 122.9716715463491,
+            "min": 0.0,
+            "std": 243.21930902591194
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 1.0837742846103802,
+            "mean": 0.22435909242741486,
+            "min": 0.0,
+            "std": 0.42979169214370283
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.8310402618591,
+            "mean": 2.233690428283668,
+            "min": 0.0,
+            "std": 3.825335199078301
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.001132625827738489,
+            "mean": 0.0004899914256555906,
+            "min": 0.0,
+            "std": 0.0004645406535171951
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0004077854886844379,
+            "mean": 0.0002072746357386298,
+            "min": -3.163132274283202e-06,
+            "std": 0.00018368248328781136
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 46.26616031794703,
+          "gross_return_pct": 34.80776126872166,
+          "max_drawdown_abs_pct": 1.194981523108871,
+          "modeled_cost_pct": 0.1550372015297486,
+          "net_return_pct": 34.65272406719191,
+          "sharpe_ratio": 9.124191344819167,
+          "total_trades": 1.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 122.99727325191053,
+            "eligible_regimes": 2.0,
+            "max_drawdown_abs_mean": 0.2466005448734487,
+            "passing_regimes": 2.0,
+            "sharpe_ratio_mean": 2.2308030546574718,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "long_period": 50,
+          "short_period": 10
+        },
+        "strategy_name": "sma_crossover",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "094c87f39c1c6028",
+      "metrics": {
+        "calmar_ratio": 46.26616031794703,
+        "final_equity": 13480.776126872166,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 1.194981523108871,
+        "modeled_cost_pct": 0.1550372015297486,
+        "sharpe_ratio": 9.124191344819167,
+        "total_return_pct": 34.80776126872166,
+        "total_trades": 1.0,
+        "win_rate": 100.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 122.99727325191053,
+          "eligible_regimes": 2.0,
+          "max_drawdown_abs_mean": 0.2466005448734487,
+          "passing_regimes": 2.0,
+          "sharpe_ratio_mean": 2.2308030546574718,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0010835814766717792,
+            "sample_count": 275.0,
+            "sharpe_like": 0.4488714841535838,
+            "volatility": 0.002414012729534465,
+            "win_rate": 0.9563636363636364
+          },
+          "SIDEWAYS": {
+            "mean_return": 9.408703931743765e-06,
+            "sample_count": 185.0,
+            "sharpe_like": 0.009926710399155644,
+            "volatility": 0.000947816905441712,
+            "win_rate": 0.5243243243243243
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993128377875,
+            "mean": 122.99727325191053,
+            "min": 0.0,
+            "std": 243.20683799446508
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 1.194981523108871,
+            "mean": 0.2466005448734487,
+            "min": 0.0,
+            "std": 0.4742666977102139
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.831038268724372,
+            "mean": 2.2308030546574718,
+            "min": 0.0,
+            "std": 3.826922281519764
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0011326264205993271,
+            "mean": 0.0005008087691076702,
+            "min": 0.0,
+            "std": 0.0004630563215864959
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0004162854393223776,
+            "mean": 0.00020907616456505686,
+            "min": -3.1656048020425876e-06,
+            "std": 0.0001856707163010932
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 27.51884772757289,
+          "gross_return_pct": 41.631770753775,
+          "max_drawdown_abs_pct": 2.53078258050353,
+          "modeled_cost_pct": 0.41830847412136,
+          "net_return_pct": 41.21346227965364,
+          "sharpe_ratio": 2.0857153511807014,
+          "total_trades": 2.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 122.74950876395312,
+            "eligible_regimes": 4.0,
+            "max_drawdown_abs_mean": 0.8379615007395105,
+            "passing_regimes": 4.0,
+            "sharpe_ratio_mean": 2.220837162749002,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "overbought": 68,
+          "oversold": 32,
+          "period": 14
+        },
+        "strategy_name": "rsi",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "62e00b2de62ba761",
+      "metrics": {
+        "calmar_ratio": 27.51884772757289,
+        "final_equity": 14163.1770753775,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 2.53078258050353,
+        "modeled_cost_pct": 0.41830847412136,
+        "sharpe_ratio": 2.0857153511807014,
+        "total_return_pct": 41.631770753775,
+        "total_trades": 2.0,
+        "win_rate": 100.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 122.74950876395312,
+          "eligible_regimes": 4.0,
+          "max_drawdown_abs_mean": 0.8379615007395105,
+          "passing_regimes": 4.0,
+          "sharpe_ratio_mean": 2.220837162749002,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0008048726676309577,
+            "sample_count": 275.0,
+            "sharpe_like": 0.16160562769664494,
+            "volatility": 0.004980474251440116,
+            "win_rate": 0.9418181818181818
+          },
+          "BULL": {
+            "mean_return": -3.79643749328773e-05,
+            "sample_count": 25.0,
+            "sharpe_like": -0.1441168501543984,
+            "volatility": 0.00026342773167887363,
+            "win_rate": 0.48
+          },
+          "HIGH_VOLATILITY": {
+            "mean_return": 0.00037204454480108985,
+            "sample_count": 186.0,
+            "sharpe_like": 0.022381028701690533,
+            "volatility": 0.016623210208965407,
+            "win_rate": 0.4946236559139785
+          },
+          "SIDEWAYS": {
+            "mean_return": 0.0004418786494191633,
+            "sample_count": 201.0,
+            "sharpe_like": 0.13125903995734972,
+            "volatility": 0.003366462603739475,
+            "win_rate": 0.5373134328358209
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993579042307,
+            "mean": 122.74950876395312,
+            "min": 0.0,
+            "std": 243.32574328421043
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 2.53078258050353,
+            "mean": 0.8379615007395105,
+            "min": 0.0,
+            "std": 1.050932118555133
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.829796793730214,
+            "mean": 2.220837162749002,
+            "min": 0.00019508901801539182,
+            "std": 3.8317684999595696
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0011329957456517714,
+            "mean": 0.0005946977131393224,
+            "min": 3.7109259662382324e-08,
+            "std": 0.0003947146657140459
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.00041609821342602306,
+            "mean": 0.00020867985314471422,
+            "min": -3.952457673609318e-06,
+            "std": 0.00018588517636949412
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 65.2013234380781,
+          "gross_return_pct": 34.3052671930968,
+          "max_drawdown_abs_pct": 0.8350621431514395,
+          "modeled_cost_pct": 0.1555391936132899,
+          "net_return_pct": 34.14972799948352,
+          "sharpe_ratio": 21.296758405711167,
+          "total_trades": 1.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 123.30012149106888,
+            "eligible_regimes": 3.0,
+            "max_drawdown_abs_mean": 0.17461962581399848,
+            "passing_regimes": 3.0,
+            "sharpe_ratio_mean": 2.2989874322511703,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "overbought": 70,
+          "oversold": 30,
+          "period": 14
+        },
+        "strategy_name": "rsi",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "381df89c46710448",
+      "metrics": {
+        "calmar_ratio": 65.2013234380781,
+        "final_equity": 13430.52671930968,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 0.8350621431514395,
+        "modeled_cost_pct": 0.1555391936132899,
+        "sharpe_ratio": 21.296758405711167,
+        "total_return_pct": 34.3052671930968,
+        "total_trades": 1.0,
+        "win_rate": 100.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 123.30012149106888,
+          "eligible_regimes": 3.0,
+          "max_drawdown_abs_mean": 0.17461962581399848,
+          "passing_regimes": 3.0,
+          "sharpe_ratio_mean": 2.2989874322511703,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0011104438375501213,
+            "sample_count": 250.0,
+            "sharpe_like": 1.7158836992005413,
+            "volatility": 0.0006471556540035292,
+            "win_rate": 0.996
+          },
+          "BULL": {
+            "mean_return": -3.79643749328773e-05,
+            "sample_count": 25.0,
+            "sharpe_like": -0.1441168501543984,
+            "volatility": 0.00026342773167887363,
+            "win_rate": 0.48
+          },
+          "SIDEWAYS": {
+            "mean_return": 9.590440392033285e-05,
+            "sample_count": 193.0,
+            "sharpe_like": 0.2222526646668762,
+            "volatility": 0.0004315107045581628,
+            "win_rate": 0.5284974093264249
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993579042307,
+            "mean": 123.30012149106888,
+            "min": 0.0,
+            "std": 243.06010728390044
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 0.8350621431514395,
+            "mean": 0.17461962581399848,
+            "min": 0.0,
+            "std": 0.3303307683035212
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.829796793730214,
+            "mean": 2.2989874322511703,
+            "min": 0.0,
+            "std": 3.790977821469445
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0011329957456517714,
+            "mean": 0.0004935333163541648,
+            "min": 0.0,
+            "std": 0.00046412857506594664
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.00040996027773726755,
+            "mean": 0.00020745226600696313,
+            "min": -3.952457673609318e-06,
+            "std": 0.00018452663344951456
+          }
+        }
+      }
+    },
+    {
+      "benchmark_decision": {
+        "metrics": {
+          "calmar_ratio": 4.597926740110732,
+          "gross_return_pct": 24.017573817531265,
+          "max_drawdown_abs_pct": 10.086618135613303,
+          "modeled_cost_pct": 0.42074171056110915,
+          "net_return_pct": 23.596832106970155,
+          "sharpe_ratio": 1.2621386984780536,
+          "total_trades": 2.0
+        },
+        "passed": false,
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": 122.15778195324988,
+            "eligible_regimes": 4.0,
+            "max_drawdown_abs_mean": 2.017819752598905,
+            "passing_regimes": 4.0,
+            "sharpe_ratio_mean": 2.210569720213629,
+            "walk_forward_folds": 5.0
+          },
+          "passed": true,
+          "reasons": []
+        },
+        "reasons": [
+          "benchmark_trade_activity_below_floor"
+        ],
+        "thresholds": {
+          "max_drawdown_pct": 25.0,
+          "min_calmar_ratio": 0.1,
+          "min_net_return_pct": 1.0,
+          "min_sharpe_ratio": 0.2,
+          "min_total_trades": 25.0
+        }
+      },
+      "candidate": {
+        "allow_short_positions": true,
+        "params": {
+          "overbought": 60,
+          "oversold": 40,
+          "period": 6
+        },
+        "strategy_name": "rsi",
+        "trade_mode": "FUTURES"
+      },
+      "candidate_id": "4c7d0172037c15d3",
+      "metrics": {
+        "calmar_ratio": 4.597926740110732,
+        "final_equity": 12401.757381753127,
+        "initial_capital": 10000.0,
+        "max_drawdown_pct": 10.086618135613303,
+        "modeled_cost_pct": 0.42074171056110915,
+        "sharpe_ratio": 1.2621386984780536,
+        "total_return_pct": 24.017573817531265,
+        "total_trades": 2.0,
+        "win_rate": 50.0
+      },
+      "passed": false,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 122.15778195324988,
+          "eligible_regimes": 4.0,
+          "max_drawdown_abs_mean": 2.017819752598905,
+          "passing_regimes": 4.0,
+          "sharpe_ratio_mean": 2.210569720213629,
+          "walk_forward_folds": 5.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "validation_summary": {
+        "regime_slices": {
+          "BEAR": {
+            "mean_return": 0.0011725263165451945,
+            "sample_count": 276.0,
+            "sharpe_like": 0.2280352423297928,
+            "volatility": 0.005141864496758113,
+            "win_rate": 0.9528985507246377
+          },
+          "BULL": {
+            "mean_return": -2.8751893879933295e-05,
+            "sample_count": 33.0,
+            "sharpe_like": -0.11583703849125052,
+            "volatility": 0.0002482098494093062,
+            "win_rate": 0.48484848484848486
+          },
+          "HIGH_VOLATILITY": {
+            "mean_return": -0.00010081741003451148,
+            "sample_count": 186.0,
+            "sharpe_like": -0.005464611472024427,
+            "volatility": 0.018449145113177193,
+            "win_rate": 0.5
+          },
+          "SIDEWAYS": {
+            "mean_return": -0.00025833912178790193,
+            "sample_count": 201.0,
+            "sharpe_like": -0.07427715547961944,
+            "volatility": 0.0034780427457105087,
+            "win_rate": 0.5174129353233831
+          }
+        },
+        "walk_forward_folds": 5,
+        "walk_forward_summary": {
+          "calmar_ratio": {
+            "fold_count": 5.0,
+            "max": 609.3993578679106,
+            "mean": 122.15778195324988,
+            "min": -0.41658739381576115,
+            "std": 243.62134033839624
+          },
+          "max_drawdown_pct": {
+            "fold_count": 5.0,
+            "max": 5.883536360381879,
+            "mean": 2.017819752598905,
+            "min": 0.0,
+            "std": 2.5150354762709664
+          },
+          "sharpe_ratio": {
+            "fold_count": 5.0,
+            "max": 9.829797790498928,
+            "mean": 2.210569720213629,
+            "min": -0.010346970466401331,
+            "std": 3.8376585958475857
+          },
+          "test_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.001132995449086773,
+            "mean": 0.00043919985028072835,
+            "min": -0.00018884143841371807,
+            "std": 0.0005105161867488264
+          },
+          "train_mean_return": {
+            "fold_count": 5.0,
+            "max": 0.0004076115140772629,
+            "mean": 0.00020469208421279825,
+            "min": -3.951220694264438e-06,
+            "std": 0.0001815551426051843
+          }
+        }
+      }
+    }
+  ],
+  "has_passing_candidate": true,
+  "quality_thresholds": {
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_regime_samples": 20,
+    "min_regime_win_rate": 0.45,
+    "min_regimes_passing": 2,
+    "min_sharpe_ratio": 0.2,
+    "min_walk_forward_folds": 3
+  },
+  "selected": {
+    "benchmark_decision": {
+      "metrics": {
+        "calmar_ratio": 12.045614128598464,
+        "gross_return_pct": 421.5438779509322,
+        "max_drawdown_abs_pct": 17.09536804648802,
+        "modeled_cost_pct": 73.20151757638435,
+        "net_return_pct": 348.34236037454787,
+        "sharpe_ratio": 11.976324586562392,
+        "total_trades": 219.0
+      },
+      "passed": true,
+      "quality_gate": {
+        "metrics": {
+          "calmar_ratio_mean": 190.72536821314603,
+          "eligible_regimes": 4.0,
+          "max_drawdown_abs_mean": 1.9271976853819706,
+          "passing_regimes": 2.0,
+          "sharpe_ratio_mean": 1.1550890871317347,
+          "walk_forward_folds": 9.0
+        },
+        "passed": true,
+        "reasons": []
+      },
+      "reasons": [],
+      "thresholds": {
+        "max_drawdown_pct": 25.0,
+        "min_calmar_ratio": 0.1,
+        "min_net_return_pct": 1.0,
+        "min_sharpe_ratio": 0.2,
+        "min_total_trades": 25.0
+      }
+    },
+    "candidate": {
+      "allow_short_positions": true,
+      "params": {
+        "long_period": 3,
+        "short_period": 2
+      },
+      "strategy_name": "sma_crossover",
+      "trade_mode": "FUTURES"
+    },
+    "candidate_id": "e81ca05fd0c905b9",
+    "metrics": {
+      "calmar_ratio": 12.045614128598464,
+      "final_equity": 52154.387795093215,
+      "initial_capital": 10000.0,
+      "max_drawdown_pct": 17.09536804648802,
+      "modeled_cost_pct": 73.20151757638435,
+      "sharpe_ratio": 11.976324586562392,
+      "total_return_pct": 421.5438779509322,
+      "total_trades": 219.0,
+      "win_rate": 50.2283105022831
+    },
+    "passed": true,
+    "quality_gate": {
+      "metrics": {
+        "calmar_ratio_mean": 190.72536821314603,
+        "eligible_regimes": 4.0,
+        "max_drawdown_abs_mean": 1.9271976853819706,
+        "passing_regimes": 2.0,
+        "sharpe_ratio_mean": 1.1550890871317347,
+        "walk_forward_folds": 9.0
+      },
+      "passed": true,
+      "reasons": []
+    },
+    "validation_summary": {
+      "regime_slices": {
+        "BEAR": {
+          "mean_return": 0.0017499288486864059,
+          "sample_count": 275.0,
+          "sharpe_like": 0.5454155961111478,
+          "volatility": 0.0032084319941775115,
+          "win_rate": 0.9563636363636364
+        },
+        "BULL": {
+          "mean_return": -0.000855266252940298,
+          "sample_count": 36.0,
+          "sharpe_like": -9.028105395232592,
+          "volatility": 9.47337470597023e-05,
+          "win_rate": 0.0
+        },
+        "HIGH_VOLATILITY": {
+          "mean_return": 0.007184040947007761,
+          "sample_count": 185.0,
+          "sharpe_like": 0.887993946745166,
+          "volatility": 0.00809019135022259,
+          "win_rate": 0.5027027027027027
+        },
+        "SIDEWAYS": {
+          "mean_return": -0.0005721257529281351,
+          "sample_count": 201.0,
+          "sharpe_like": -0.3404540153592955,
+          "volatility": 0.0016804787933675763,
+          "win_rate": 0.05970149253731343
+        }
+      },
+      "walk_forward_folds": 9,
+      "walk_forward_summary": {
+        "calmar_ratio": {
+          "fold_count": 9.0,
+          "max": 557.3998124899322,
+          "mean": 190.72536821314603,
+          "min": -1.0000000000000004,
+          "std": 259.5066126626661
+        },
+        "max_drawdown_pct": {
+          "fold_count": 9.0,
+          "max": 5.004266108693586,
+          "mean": 1.9271976853819706,
+          "min": 0.0,
+          "std": 2.2070670901792733
+        },
+        "sharpe_ratio": {
+          "fold_count": 9.0,
+          "max": 10.061002389625518,
+          "mean": 1.1550890871317347,
+          "min": -0.9879523380312949,
+          "std": 3.245460117649032
+        },
+        "test_mean_return": {
+          "fold_count": 9.0,
+          "max": 0.0035701547720334375,
+          "mean": 0.0015485624542862083,
+          "min": -0.00042763312647015696,
+          "std": 0.001672577623452048
+        },
+        "train_mean_return": {
+          "fold_count": 9.0,
+          "max": 0.0010181599628405398,
+          "mean": 0.00014493219730158142,
+          "min": -0.000293641413509503,
+          "std": 0.00044088394272243206
+        }
+      }
+    }
+  }
+}

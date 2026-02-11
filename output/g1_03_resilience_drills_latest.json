@@ -1,0 +1,22 @@
+{
+  "all_passed": true,
+  "drills": {
+    "api_failure_circuit_breaker": {
+      "blocked_when_open": true,
+      "breaker_opened": true,
+      "mttr_ms": 52.09558799833758,
+      "passed": true,
+      "recovered_after_cooldown": true
+    },
+    "kill_switch": {
+      "blocked_order_reason": "kill_switch_active:exposure_breached:600.0000 > 300.0000",
+      "kill_switch_reason": "exposure_breached:600.0000 > 300.0000",
+      "passed": true,
+      "risk_reducing_order_allowed": true
+    },
+    "restart_recovery": {
+      "mttr_ms": 13.51660300133517,
+      "passed": true
+    }
+  }
+}

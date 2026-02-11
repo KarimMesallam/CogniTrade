@@ -1,0 +1,140 @@
+{
+  "alert_smoke_passed": true,
+  "alert_types_observed": [
+    "error_rate",
+    "latency"
+  ],
+  "alerts": [
+    {
+      "alert_id": "54328db810c047fd949b6034135aa91d",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.1279030004516244,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "ad5a8a83fba946bfa8776766ef18a5b1"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.13ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.442026"
+    },
+    {
+      "alert_id": "fc57209575c84c1ab8e947a61626e88c",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.11323400051333,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "b7cf988066d646f6b5b7d6fe6dbecfa6"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.11ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.443169"
+    },
+    {
+      "alert_id": "f9ab305535fb424d899ab90398aeb323",
+      "alert_type": "error_rate",
+      "details": {
+        "error_rate": 0.6,
+        "sample_size": 5,
+        "threshold": 0.4
+      },
+      "message": "Error-rate threshold breached: 60.00% >= 40.00%",
+      "severity": "high",
+      "timestamp": "2026-02-11T22:44:54.443202"
+    },
+    {
+      "alert_id": "5ba36eb8440249049f1b3176388bb59d",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.1288870009593666,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "14f2357c0aa14767bb63763a0815135e"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.13ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.444367"
+    },
+    {
+      "alert_id": "9f10c6a583b54525b59dc0ca76bb5b97",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.1720149996108375,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "8bc1fcfa18cf4774ad190d0f5242b5b7"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.17ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.445570"
+    },
+    {
+      "alert_id": "8c3f8966eeea46ba9bb1c0ef7f7ec4f0",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.092275997507386,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "c3b33d1e83974029a354a93220846791"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.09ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.446687"
+    },
+    {
+      "alert_id": "777df3891ef04fee87261b7dc8990985",
+      "alert_type": "error_rate",
+      "details": {
+        "error_rate": 0.4,
+        "sample_size": 5,
+        "threshold": 0.4
+      },
+      "message": "Error-rate threshold breached: 40.00% >= 40.00%",
+      "severity": "high",
+      "timestamp": "2026-02-11T22:44:54.446712"
+    },
+    {
+      "alert_id": "735fbbeb5ce54e1cb306d809cfb5ef8a",
+      "alert_type": "error_rate",
+      "details": {
+        "error_rate": 0.6,
+        "sample_size": 5,
+        "threshold": 0.4
+      },
+      "message": "Error-rate threshold breached: 60.00% >= 40.00%",
+      "severity": "high",
+      "timestamp": "2026-02-11T22:44:54.446721"
+    },
+    {
+      "alert_id": "890e0226be1c4c72b437399ce25f5f8d",
+      "alert_type": "latency",
+      "details": {
+        "component": "ops",
+        "latency_ms": 1.1193539976375178,
+        "operation": "smoke",
+        "request_id": null,
+        "threshold_ms": 0.1,
+        "trace_id": "39344d6dd4254fe2b13503a9131b0457"
+      },
+      "message": "Latency threshold breached for ops.smoke: 1.12ms >= 0.10ms",
+      "severity": "medium",
+      "timestamp": "2026-02-11T22:44:54.447864"
+    }
+  ],
+  "runbook_files": [
+    "docs/production_execution/runbooks/ALERT_ROUTING.md",
+    "docs/production_execution/runbooks/ONCALL_ESCALATION_MATRIX.md",
+    "docs/production_execution/runbooks/INCIDENT_SOP.md"
+  ]
+}

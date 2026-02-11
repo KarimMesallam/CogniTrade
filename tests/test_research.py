@@ -7,6 +7,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.backtesting.models.results import BacktestResult, PerformanceMetrics
 from bot.backtesting.research import register_backtest_experiment
+from bot.deploy_policy import StrategyQualityThresholds
+from research.benchmarks import (
+    PromotionBenchmarkThresholds,
+    build_promotion_benchmark_spec,
+    evaluate_promotion_candidate,
+    promotion_thresholds_from_config,
+)
 from research.registry import ExperimentRegistry, fingerprint_dataframe
 
 
@@ -174,3 +181,116 @@ def test_register_backtest_experiment_helper_tracks_metrics():
     assert record.strategy_name == "sma_strategy"
     assert float(record.metrics["sharpe_ratio"]) == 1.6
     assert float(record.metrics["total_return_pct"]) == 12.0
+
+
+def test_build_promotion_benchmark_spec_has_deterministic_fingerprint():
+    thresholds = PromotionBenchmarkThresholds(
+        min_total_trades=30,
+        min_net_return_pct=2.0,
+        min_sharpe_ratio=0.3,
+        min_calmar_ratio=0.2,
+        max_drawdown_pct=20.0,
+    )
+    quality = StrategyQualityThresholds(
+        min_walk_forward_folds=4,
+        min_sharpe_ratio=0.25,
+        min_calmar_ratio=0.15,
+        max_drawdown_pct=18.0,
+        min_regime_samples=25,
+        min_regime_win_rate=0.5,
+        min_regimes_passing=2,
+    )
+    first = build_promotion_benchmark_spec(thresholds=thresholds, quality_thresholds=quality)
+    second = build_promotion_benchmark_spec(thresholds=thresholds, quality_thresholds=quality)
+    assert first["spec_fingerprint"] == second["spec_fingerprint"]
+
+
+def test_evaluate_promotion_candidate_enforces_activity_and_net_return_floors():
+    thresholds = PromotionBenchmarkThresholds(
+        min_total_trades=20,
+        min_net_return_pct=3.0,
+        min_sharpe_ratio=0.4,
+        min_calmar_ratio=0.2,
+        max_drawdown_pct=20.0,
+        require_quality_gate=False,
+    )
+    passed = evaluate_promotion_candidate(
+        metrics={
+            "total_return_pct": 8.0,
+            "modeled_cost_pct": 2.5,
+            "total_trades": 42,
+            "sharpe_ratio": 0.7,
+            "calmar_ratio": 0.35,
+            "max_drawdown_pct": -12.0,
+        },
+        thresholds=thresholds,
+    )
+    assert passed.passed is True
+    assert passed.reasons == []
+
+    failed = evaluate_promotion_candidate(
+        metrics={
+            "total_return_pct": 2.0,
+            "modeled_cost_pct": 1.5,
+            "total_trades": 7,
+            "sharpe_ratio": 0.2,
+            "calmar_ratio": 0.1,
+            "max_drawdown_pct": -28.0,
+        },
+        thresholds=thresholds,
+    )
+    assert failed.passed is False
+    assert "benchmark_trade_activity_below_floor" in failed.reasons
+    assert "benchmark_net_return_below_floor" in failed.reasons
+    assert "benchmark_sharpe_below_floor" in failed.reasons
+    assert "benchmark_calmar_below_floor" in failed.reasons
+    assert "benchmark_drawdown_above_cap" in failed.reasons
+
+
+def test_evaluate_promotion_candidate_includes_quality_gate_when_enabled():
+    thresholds = PromotionBenchmarkThresholds(require_quality_gate=True)
+    decision = evaluate_promotion_candidate(
+        metrics={
+            "net_return_pct": 10.0,
+            "total_trades": 55,
+            "sharpe_ratio": 1.0,
+            "calmar_ratio": 0.6,
+            "max_drawdown_pct": -10.0,
+        },
+        validation_summary={
+            "walk_forward_folds": 1,
+            "walk_forward_summary": {},
+            "regime_slices": {},
+        },
+        thresholds=thresholds,
+    )
+    assert decision.passed is False
+    assert "benchmark_quality_gate_failed" in decision.reasons
+    assert decision.quality_gate is not None
+    assert decision.quality_gate["passed"] is False
+
+
+def test_promotion_thresholds_from_config_maps_expected_values():
+    benchmark_cfg = {
+        "min_total_trades": 33,
+        "min_net_return_pct": 4.5,
+        "min_sharpe_ratio": 0.55,
+        "min_calmar_ratio": 0.25,
+        "max_drawdown_pct": 19.0,
+        "require_quality_gate": False,
+    }
+    quality_cfg = {
+        "min_walk_forward_folds": 4,
+        "min_sharpe_ratio": 0.30,
+        "min_calmar_ratio": 0.20,
+        "max_drawdown_pct": 17.0,
+        "min_regime_samples": 18,
+        "min_regime_win_rate": 0.5,
+        "min_regimes_passing": 3,
+    }
+    thresholds, quality = promotion_thresholds_from_config(benchmark_cfg, quality_cfg)
+    assert thresholds.min_total_trades == 33
+    assert thresholds.min_net_return_pct == 4.5
+    assert thresholds.require_quality_gate is False
+    assert quality.min_walk_forward_folds == 4
+    assert quality.min_regime_samples == 18

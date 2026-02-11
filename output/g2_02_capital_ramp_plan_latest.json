@@ -1,0 +1,43 @@
+{
+  "created_at_utc": "2026-02-11T22:44:54.447908",
+  "promotion_rule": "advance only if no critical gate violations during stage window",
+  "rollback_triggers": [
+    "shadow_or_canary_gate_failure",
+    "quality_gate_regression",
+    "risk_engine_kill_switch_activation",
+    "reconciliation_position_mismatch_above_tolerance",
+    "error_rate_or_latency_alert_breach_persisting_over_15m"
+  ],
+  "stages": [
+    {
+      "capital_pct": 1,
+      "minimum_duration_hours": 24,
+      "stage": 1
+    },
+    {
+      "capital_pct": 5,
+      "minimum_duration_hours": 24,
+      "stage": 2
+    },
+    {
+      "capital_pct": 15,
+      "minimum_duration_hours": 48,
+      "stage": 3
+    },
+    {
+      "capital_pct": 30,
+      "minimum_duration_hours": 72,
+      "stage": 4
+    },
+    {
+      "capital_pct": 50,
+      "minimum_duration_hours": 96,
+      "stage": 5
+    },
+    {
+      "capital_pct": 100,
+      "minimum_duration_hours": 120,
+      "stage": 6
+    }
+  ]
+}

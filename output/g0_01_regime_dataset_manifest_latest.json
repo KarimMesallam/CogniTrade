@@ -1,0 +1,81 @@
+{
+  "combined_dataset_fingerprint": "63ba2c6e66ed2c58d99ebbea500a06388feadbb0aad560cdf0873613b1a67b85",
+  "dataset_version": "g0_regime_pit_v1",
+  "decision_stride": 3,
+  "generated_at": "2026-02-11T22:18:46.966046",
+  "manifest_fingerprint": "97010c707d09d1775951f56078e2510a3155f05c5766337de8ebf48e5c2c5357",
+  "min_history_candles": 35,
+  "missing_representative_regimes": [],
+  "pit": {
+    "lookahead_violation_count": 0,
+    "timestamp_integrity_passed": true
+  },
+  "regimes": {
+    "BEAR": {
+      "avg_confidence": 0.8694475064597423,
+      "dataset_fingerprint": "961031b7ad3b9400e94409d42e4a58f081cb79bd5d69c2ea6e0fde27634c8f10",
+      "end_timestamp": "2025-01-12T05:59:59.999000",
+      "row_count": 28,
+      "start_timestamp": "2025-01-08T20:59:59.999000",
+      "train_fingerprint": "a12700f4a111afa935bdf86bc65e9c5b7e73e3cde6f9a82542b3f538bdf657ad",
+      "train_row_count": 19,
+      "validation_fingerprint": "9b3490aeacad1ed0e2f488a72180c649c0e5e2efe4e5ea4b7aad11541ca820be",
+      "validation_row_count": 9
+    },
+    "BULL": {
+      "avg_confidence": 0.8990985502919429,
+      "dataset_fingerprint": "81f5e8a7a4b5e040f00303145c9d0e0c971a3ab1712cc04acc6a2583d992f6ea",
+      "end_timestamp": "2025-01-05T08:59:59.999000",
+      "row_count": 25,
+      "start_timestamp": "2025-01-02T08:59:59.999000",
+      "train_fingerprint": "aac6178fe25a3033d1297eb81e4858abbb2a51894a055ae2faa61e6d1fb0c620",
+      "train_row_count": 17,
+      "validation_fingerprint": "56b2dd3c93073cacc419edcdf6e5823fd50abc489ba0d9ec1f25f2f697f05e1d",
+      "validation_row_count": 8
+    },
+    "HIGH_VOLATILITY": {
+      "avg_confidence": 0.7290758281516609,
+      "dataset_fingerprint": "a60e81fe43887400e6cb1afa52efc8074a8ebb706f16b4da2dbf0fc6d0167f3b",
+      "end_timestamp": "2025-01-15T20:59:59.999000",
+      "row_count": 28,
+      "start_timestamp": "2025-01-12T11:59:59.999000",
+      "train_fingerprint": "7ae02b6b93e80b2e4b18ae9e934162fa906032ca3b489e3b274cb09549c69c71",
+      "train_row_count": 19,
+      "validation_fingerprint": "bc95c18e41911e4416e1f47ef92ccbd502d21a0d6d806544dfd5effcb55ef13f",
+      "validation_row_count": 9
+    },
+    "SIDEWAYS": {
+      "avg_confidence": 0.8580468625220184,
+      "dataset_fingerprint": "94492e44de61960267f184f7c0f5688548626ad743bd4f3291f127fcd3e9eabc",
+      "end_timestamp": "2025-01-12T08:59:59.999000",
+      "row_count": 28,
+      "start_timestamp": "2025-01-05T11:59:59.999000",
+      "train_fingerprint": "e928bd7962334967d86e3266a4ce25122e16ee557f226dcbed9c38c020d421aa",
+      "train_row_count": 19,
+      "validation_fingerprint": "fa336be5dfc81aedae337527b9e55a028c9da289e86b4f6a9f4fc11279867b0c",
+      "validation_row_count": 9
+    }
+  },
+  "registry_dataset_ids": {
+    "ALL": "1348940267064fe2ae0090f4e5c86947",
+    "BEAR": "0b0dec26441e4a99989bfa4544c2646b",
+    "BULL": "24c14ddb5e854871b1ee3c0d1170dbf8",
+    "HIGH_VOLATILITY": "8df2afb0d933490094a3495013ce2d60",
+    "SIDEWAYS": "264a7514688445889eb9a9c138e1e930"
+  },
+  "representative_regimes_present": [
+    "BULL",
+    "BEAR",
+    "SIDEWAYS",
+    "HIGH_VOLATILITY"
+  ],
+  "representative_regimes_required": [
+    "BULL",
+    "BEAR",
+    "SIDEWAYS",
+    "HIGH_VOLATILITY"
+  ],
+  "symbol": "BTCUSDT",
+  "timeframe": "1h",
+  "total_decision_rows": 109
+}

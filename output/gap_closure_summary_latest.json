@@ -1,0 +1,29 @@
+{
+  "artifact_paths": {
+    "g0_03": "output/g0_03_candidate_selection_latest.json",
+    "g0_04": "output/g0_04_cross_engine_parity_latest.json",
+    "g0_05": "output/g0_05_execution_calibration_latest.json",
+    "g0_06": "output/g0_06_quality_gate_packet_latest.json",
+    "g1_01_g1_02": "output/g1_01_g1_02_rollout_evidence_latest.json",
+    "g1_03": "output/g1_03_resilience_drills_latest.json",
+    "g1_04": "output/g1_04_ops_readiness_latest.json",
+    "g2_01_frozen_config": "output/g2_01_frozen_deploy_config_latest.json",
+    "g2_01_go_no_go": "output/g2_01_go_no_go_signoff_latest.json",
+    "g2_02": "output/g2_02_capital_ramp_plan_latest.json"
+  },
+  "end_date": "2025-02-09T03:00:00",
+  "generated_at_utc": "2026-02-11T22:44:54.454757",
+  "go_no_go_decision": "GO",
+  "ops_readiness_passed": true,
+  "parity_passed": true,
+  "production_gate_passed": true,
+  "quality_gate_packet_passed": true,
+  "resilience_passed": true,
+  "rollout_canary_passed": true,
+  "rollout_id": "gap-closure-e81ca05fd0c905b9",
+  "rollout_shadow_passed": true,
+  "selection_passed": true,
+  "start_date": "2025-01-01T00:00:00",
+  "symbol": "BTCUSDT",
+  "timeframe": "1h"
+}

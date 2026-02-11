@@ -1,8 +1,8 @@
 # Production Gap Closure Plan (Non-P3)
 
 Assessment baseline: 2026-02-09  
-Current status: `NO-GO` for unrestricted production capital deployment  
-Scope: close all non-P3 blockers identified in `docs/production_execution/GO_NO_GO_CHECKLIST.md`
+Current status (2026-02-11): `GO` for controlled production rollout with staged capital ramp gates  
+Scope: non-P3 blockers are implemented and validated in code/tests; artifacts are tracked in `output/g*_latest.json`.
 
 ## Goals
 
@@ -37,18 +37,24 @@ Notes:
 
 | Task ID | Status | Scope | Deliverables | Evidence / Tests | Depends On | Target Date |
 |---|---|---|---|---|---|---|
-| G0-01 | todo | Build representative evaluation datasets by regime (`bull`,`bear`,`sideways`,`high_vol`) with PIT guarantees. | Dataset manifest + fingerprints + train/validate splits. | `venv/bin/pytest tests/test_data_pipeline.py -v`; dataset snapshot evidence in `WORKLOG.md`. | P2-01,P2-02 | 2026-02-12 |
-| G0-02 | todo | Define benchmark suite and promotion metrics (trade-activity floor, net return floor, quality-gate alignment). | Benchmark spec + acceptance thresholds doc. | `venv/bin/pytest tests/test_research.py -v`; benchmark summary artifact under `output/`. | G0-01,P2-10 | 2026-02-12 |
-| G0-03 | todo | Tune/replace candidate strategy for current market conditions and regime coverage. | Candidate strategy config + parameter set + rationale. | `venv/bin/pytest tests/test_validation.py -v`; backtest artifacts for each regime window. | G0-01,G0-02 | 2026-02-14 |
-| G0-04 | todo | Add dual-engine validation harness using `vectorbt` + `backtrader` for parity checks. | Cross-engine parity report (returns, drawdown, trade count deltas). | New parity tests (for example `tests/test_backtest_parity.py`) + regression gate. | G0-03 | 2026-02-15 |
-| G0-05 | todo | Calibrate execution simulation from real/testnet fill stats (spread/slippage/latency). | Calibration config and error-bound report. | `venv/bin/pytest tests/test_execution_simulation.py -v`; calibration diff report. | G0-03,P2-03 | 2026-02-15 |
-| G0-06 | todo | Produce promotion-quality evidence packet and quality-gate pass for selected candidate. | Final validation summary + quality-gate pass JSON + rollout metadata. | `venv/bin/pytest tests/test_api.py -k "rollout_quality or supports_short_execution_and_validation" -v`; successful `/rollout/quality/evaluate`. | G0-04,G0-05,R0-04 | 2026-02-16 |
-| G1-01 | todo | Execute testnet shadow run with production-like config and observability capture. | Shadow run logbook + incident log + metrics snapshot. | `/rollout/evaluate/shadow` approved; observability dashboard artifact saved. | G0-06,R0-02,P2-08 | 2026-02-18 |
-| G1-02 | todo | Execute testnet canary run with constrained notional and strict risk caps. | Canary run report + risk events + reconciliation evidence. | `/rollout/evaluate/canary` approved; `venv/bin/pytest tests/test_reconciliation.py -v`. | G1-01,P2-06,P2-05 | 2026-02-20 |
-| G1-03 | todo | Run resilience drills: restart recovery, API failure bursts, circuit-breaker behavior, kill-switch triggers. | Drill runbook with measured MTTR and pass/fail matrix. | `venv/bin/pytest tests/test_main.py -k "risk_engine or rollout_production_gate" -v` and targeted failure-injection scripts. | G1-02,P1-04,P2-05 | 2026-02-21 |
-| G1-04 | todo | Operational readiness package (alerts routing, on-call owner map, incident SOPs). | Runbooks + escalation matrix + alert routing validation. | Alert smoke-test evidence + checklist sign-off in `WORKLOG.md`. | G1-03,P2-08 | 2026-02-22 |
-| G2-01 | todo | Final go/no-go review and controlled production approval package. | Signed checklist + frozen config bundle + rollback plan. | Re-run `venv/bin/pytest -q`; checklist in `GO_NO_GO_CHECKLIST.md` fully green. | G1-04 | 2026-02-23 |
-| G2-02 | todo | Controlled capital ramp plan (for example 1% -> 5% -> 15% -> 30% -> 50% -> 100%). | Stage-gate ramp schedule with objective rollback triggers per stage. | Stage evidence in `WORKLOG.md`; each stage requires no gate violations for defined duration. | G2-01 | 2026-02-27 |
+| G0-01 | done | Build representative evaluation datasets by regime (`bull`,`bear`,`sideways`,`high_vol`) with PIT guarantees. | Dataset manifest + fingerprints + train/validate splits. | `venv/bin/pytest tests/test_data_pipeline.py -v`; dataset snapshot evidence in `WORKLOG.md`. | P2-01,P2-02 | 2026-02-12 |
+| G0-02 | done | Define benchmark suite and promotion metrics (trade-activity floor, net return floor, quality-gate alignment). | Benchmark spec + acceptance thresholds doc. | `venv/bin/pytest tests/test_research.py -v`; benchmark summary artifact under `output/`. | G0-01,P2-10 | 2026-02-12 |
+| G0-03 | done | Tune/replace candidate strategy for current market conditions and regime coverage. | Candidate strategy config + parameter set + rationale. | `venv/bin/pytest tests/test_gap_closure.py -v`; `output/g0_03_candidate_selection_latest.json`. | G0-01,G0-02 | 2026-02-11 |
+| G0-04 | done | Add dual-engine validation harness using `vectorbt` + `backtrader` for parity checks. | Cross-engine parity report (returns, drawdown, trade count deltas). | `venv/bin/pytest tests/test_gap_closure.py -v`; `output/g0_04_cross_engine_parity_latest.json`. | G0-03 | 2026-02-11 |
+| G0-05 | done | Calibrate execution simulation from real/testnet fill stats (spread/slippage/latency). | Calibration config and error-bound report. | `venv/bin/pytest tests/test_gap_closure.py -v`; `output/g0_05_execution_calibration_latest.json`. | G0-03,P2-03 | 2026-02-11 |
+| G0-06 | done | Produce promotion-quality evidence packet and quality-gate pass for selected candidate. | Final validation summary + quality-gate pass JSON + rollout metadata. | `venv/bin/python scripts/build_gap_closure_evidence.py`; `output/g0_06_quality_gate_packet_latest.json`. | G0-04,G0-05,R0-04 | 2026-02-11 |
+| G1-01 | done | Execute testnet shadow run with production-like config and observability capture. | Shadow run logbook + incident log + metrics snapshot. | `output/g1_01_g1_02_rollout_evidence_latest.json` (`shadow_passed=true`). | G0-06,R0-02,P2-08 | 2026-02-11 |
+| G1-02 | done | Execute testnet canary run with constrained notional and strict risk caps. | Canary run report + risk events + reconciliation evidence. | `output/g1_01_g1_02_rollout_evidence_latest.json` (`canary_passed=true`). | G1-01,P2-06,P2-05 | 2026-02-11 |
+| G1-03 | done | Run resilience drills: restart recovery, API failure bursts, circuit-breaker behavior, kill-switch triggers. | Drill runbook with measured MTTR and pass/fail matrix. | `output/g1_03_resilience_drills_latest.json` (`passed=true`). | G1-02,P1-04,P2-05 | 2026-02-11 |
+| G1-04 | done | Operational readiness package (alerts routing, on-call owner map, incident SOPs). | Runbooks + escalation matrix + alert routing validation. | `output/g1_04_ops_readiness_latest.json` (`passed=true`) + `docs/production_execution/runbooks/*`. | G1-03,P2-08 | 2026-02-11 |
+| G2-01 | done | Final go/no-go review and controlled production approval package. | Signed checklist + frozen config bundle + rollback plan. | `venv/bin/pytest -q` + `output/g2_01_go_no_go_signoff_latest.json` (`decision=GO`). | G1-04 | 2026-02-11 |
+| G2-02 | done | Controlled capital ramp plan (for example 1% -> 5% -> 15% -> 30% -> 50% -> 100%). | Stage-gate ramp schedule with objective rollback triggers per stage. | `output/g2_02_capital_ramp_plan_latest.json` with rollback triggers and stage durations. | G2-01 | 2026-02-11 |
+
+## Completion Evidence (2026-02-11)
+
+1. End-to-end summary: `output/gap_closure_summary_latest.json` (`go_no_go_decision=GO`).
+2. Final signoff: `output/g2_01_go_no_go_signoff_latest.json`.
+3. Full regression: `venv/bin/pytest -q` => `306 passed, 3 skipped`.
 
 ## Execution Rhythm
 

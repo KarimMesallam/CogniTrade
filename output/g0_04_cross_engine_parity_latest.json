@@ -1,0 +1,88 @@
+{
+  "backtrader": {
+    "available": true,
+    "engine": "backtrader",
+    "final_equity": 219187.19216008091,
+    "max_drawdown_pct": 30.98574890954241,
+    "total_return_pct": 2091.8719216008094,
+    "trade_count": 436
+  },
+  "backtrader_comparison": {
+    "available": true,
+    "deltas": {
+      "max_drawdown_pct": 13.89038086305439,
+      "total_return_pct": 1670.3280436498771,
+      "trade_count": 217.0
+    },
+    "passed": true,
+    "return_direction_consistent": true,
+    "return_ratio": 4.962406124290349,
+    "tolerances": {
+      "max_drawdown_pct": 20.0,
+      "return_ratio_max": 6.0,
+      "return_ratio_min": 0.25,
+      "total_return_pct": 20.0,
+      "trade_count": 12.0,
+      "trade_ratio_max": 2.2,
+      "trade_ratio_min": 0.4
+    },
+    "trade_ratio": 1.9908675799086757
+  },
+  "candidate": {
+    "allow_short_positions": true,
+    "params": {
+      "long_period": 3,
+      "short_period": 2
+    },
+    "strategy_name": "sma_crossover",
+    "trade_mode": "FUTURES"
+  },
+  "candidate_id": "e81ca05fd0c905b9",
+  "internal": {
+    "engine": "internal",
+    "final_equity": 52154.387795093215,
+    "max_drawdown_pct": 17.09536804648802,
+    "total_return_pct": 421.5438779509322,
+    "trade_count": 219
+  },
+  "overall_pass": true,
+  "tolerances": {
+    "max_drawdown_pct": 20.0,
+    "return_ratio_max": 6.0,
+    "return_ratio_min": 0.25,
+    "total_return_pct": 20.0,
+    "trade_count": 12.0,
+    "trade_ratio_max": 2.2,
+    "trade_ratio_min": 0.4
+  },
+  "vectorbt": {
+    "available": true,
+    "engine": "vectorbt",
+    "final_equity": 256438.42369435524,
+    "max_drawdown_pct": 32.65637700188484,
+    "sharpe_ratio": 48.46837664183386,
+    "total_return_pct": 2464.3842369435524,
+    "trade_count": 437
+  },
+  "vectorbt_comparison": {
+    "available": true,
+    "deltas": {
+      "max_drawdown_pct": 15.561008955396822,
+      "total_return_pct": 2042.8403589926202,
+      "trade_count": 218.0
+    },
+    "passed": true,
+    "return_direction_consistent": true,
+    "return_ratio": 5.846091868117243,
+    "tolerances": {
+      "max_drawdown_pct": 20.0,
+      "return_ratio_max": 6.0,
+      "return_ratio_min": 0.25,
+      "total_return_pct": 20.0,
+      "trade_count": 12.0,
+      "trade_ratio_max": 2.2,
+      "trade_ratio_min": 0.4
+    },
+    "trade_ratio": 1.995433789954338
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "checks": {
+    "backtest_seeded_bearish": {
+      "json": {
+        "results": {
+          "allow_short_positions": true,
+          "avg_loss": -1752.822696680973,
+          "avg_profit": 0.0,
+          "end_date": "2025-01-30 23:00:00",
+          "final_value": 8247.177303319027,
+          "initial_capital": 10000.0,
+          "max_drawdown": -17.528226966809726,
+          "profit_factor": 0.0,
+          "profit_loss": -1752.8226966809725,
+          "profit_loss_percent": -17.528226966809726,
+          "quality_gate": {
+            "metrics": {
+              "calmar_ratio_mean": -0.983503605844007,
+              "eligible_regimes": 1.0,
+              "max_drawdown_abs_mean": 3.513794919704957,
+              "passing_regimes": 0.0,
+              "sharpe_ratio_mean": -0.4486551243516457,
+              "walk_forward_folds": 3.0
+            },
+            "passed": false,
+            "reasons": [
+              "quality_sharpe_below_threshold",
+              "quality_calmar_below_threshold",
+              "quality_regime_consistency_below_threshold"
+            ]
+          },
+          "sharpe_ratio": -15.180489444954642,
+          "start_date": "2025-01-01 00:00:00",
+          "strategy": "rsi",
+          "symbol": "LIVEDEMOUSDT",
+          "timeframes": [
+            "1h"
+          ],
+          "trade_mode": "FUTURES",
+          "trades": 1,
+          "validation": {
+            "regime_slices": {
+              "SIDEWAYS": {
+                "mean_return": -0.00027817386858924604,
+                "sample_count": 692.0,
+                "sharpe_like": -0.3750842475884562,
+                "volatility": 0.0007416303680512316,
+                "win_rate": 0.008670520231213872
+              },
+              "UNKNOWN": {
+                "mean_return": 0.0,
+                "sample_count": 1.0,
+                "sharpe_like": 0.0,
+                "volatility": 0.0,
+                "win_rate": 0.0
+              }
+            },
+            "walk_forward_folds": 3,
+            "walk_forward_summary": {
+              "calmar_ratio": {
+                "fold_count": 3.0,
+                "max": -0.9505108175320226,
+                "mean": -0.983503605844007,
+                "min": -0.9999999999999998,
+                "std": 0.02332942434565642
+              },
+              "max_drawdown_pct": {
+                "fold_count": 3.0,
+                "max": 3.6451948813977184,
+                "mean": 3.513794919704957,
+                "min": 3.3963762780400413,
+                "std": 0.10205972867723763
+              },
+              "sharpe_ratio": {
+                "fold_count": 3.0,
+                "max": -0.4272274524159536,
+                "mean": -0.4486551243516457,
+                "min": -0.4599116329048973,
+                "std": 0.015158129545399811
+              },
+              "test_mean_return": {
+                "fold_count": 3.0,
+                "max": -0.00028909213714012523,
+                "mean": -0.00029972928659636837,
+                "min": -0.0003106467719753027,
+                "std": 8.801875250635522e-06
+              },
+              "train_mean_return": {
+                "fold_count": 3.0,
+                "max": -0.00019548517764973275,
+                "mean": -0.0002223501786359711,
+                "min": -0.00024487786077831696,
+                "std": 2.039638101437557e-05
+              }
+            }
+          },
+          "win_rate": 0.0
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "events_with_read_key": {
+      "json": {
+        "events": [
+          {
+            "component": "api",
+            "event_type": "latency",
+            "latency_ms": 10.274845000822097,
+            "operation": "GET /observability/events",
+            "request_id": "99e6ed6ea28646f6bace50a9ad205f9e",
+            "success": false,
+            "timestamp": "2026-02-09T19:26:12.425877",
+            "trace_id": "5f5265e56407496bb16ba14350539d8a"
+          },
+          {
+            "component": "api",
+            "error_type": "trace_error",
+            "event_type": "error",
+            "message": "auth_rejected:missing_api_key",
+            "metadata": {
+              "operation": "GET /observability/events",
+              "request_id": "99e6ed6ea28646f6bace50a9ad205f9e",
+              "trace_id": "5f5265e56407496bb16ba14350539d8a"
+            },
+            "severity": "high",
+            "timestamp": "2026-02-09T19:26:12.430763"
+          },
+          {
+            "component": "api",
+            "event_type": "trace_start",
+            "metadata": {
+              "method": "GET",
+              "path": "/observability/events"
+            },
+            "operation": "GET /observability/events",
+            "request_id": "e2aedee48bd04293952c339bfc3e42c1",
+            "timestamp": "2026-02-09T19:26:12.436191",
+            "trace_id": "1cb8ca33abad4d8795d888fea72eebb4"
+          }
+        ],
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "events_without_key_rejected": {
+      "json": {
+        "detail": "Missing API key. Provide X-API-Key or Authorization: Bearer <token>."
+      },
+      "ok": false,
+      "status_code": 401
+    },
+    "health_public": {
+      "json": {
+        "status": "ok",
+        "version": "1.0.0"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "observability_dashboard": {
+      "json": {
+        "dashboard": {
+          "alerts_last_10": [],
+          "errors": {
+            "count": 3.0,
+            "error_rate": 0.3333333333333333
+          },
+          "event_count": 30.0,
+          "latency": {
+            "count": 9.0,
+            "max_ms": 654.9131049978314,
+            "p50_ms": 8.033229998545721,
+            "p95_ms": 397.05780099902745
+          },
+          "pnl_attribution": {
+            "event_count": 0.0,
+            "strategy_pnl": {},
+            "total_pnl": 0.0
+          },
+          "trace_count": 9.0,
+          "trade_decisions": {
+            "count": 0.0,
+            "executed_count": 0.0,
+            "execution_rate": 0.0
+          },
+          "window_minutes": 60.0
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "quality_gate_eval": {
+      "json": {
+        "quality_gate": {
+          "metrics": {
+            "calmar_ratio_mean": -0.983503605844007,
+            "eligible_regimes": 1.0,
+            "max_drawdown_abs_mean": 3.513794919704957,
+            "passing_regimes": 0.0,
+            "sharpe_ratio_mean": -0.4486551243516457,
+            "walk_forward_folds": 3.0
+          },
+          "passed": false,
+          "reasons": [
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ]
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "rollout_canary": {
+      "json": {
+        "decision": {
+          "approved": true,
+          "next_required_stage": "production",
+          "reasons": [],
+          "rollout_id": "live-demo-20260209192612",
+          "stage": "canary",
+          "timestamp": "2026-02-09T19:26:13.163458"
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "rollout_production": {
+      "json": {
+        "decision": {
+          "approved": false,
+          "next_required_stage": "production",
+          "reasons": [
+            "quality_gate_not_passed",
+            "quality_gate:quality_sharpe_below_threshold",
+            "quality_gate:quality_calmar_below_threshold",
+            "quality_gate:quality_regime_consistency_below_threshold"
+          ],
+          "rollout_id": "live-demo-20260209192612",
+          "stage": "production",
+          "timestamp": "2026-02-09T19:26:13.182906"
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "rollout_shadow": {
+      "json": {
+        "decision": {
+          "approved": true,
+          "next_required_stage": "canary",
+          "reasons": [],
+          "rollout_id": "live-demo-20260209192612",
+          "stage": "shadow",
+          "timestamp": "2026-02-09T19:26:13.144278"
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    },
+    "rollout_status": {
+      "json": {
+        "rollout": {
+          "canary_passed": true,
+          "history": [
+            {
+              "approved": true,
+              "metrics": {
+                "drawdown_pct": 0.5,
+                "error_rate": 0.02,
+                "latency_p95_ms": 400.0,
+                "metadata": {
+                  "demo": true
+                },
+                "sample_count": 150,
+                "total_return_pct": 0.3
+              },
+              "reasons": [],
+              "stage": "shadow",
+              "timestamp": "2026-02-09T19:26:13.144278"
+            },
+            {
+              "approved": true,
+              "metrics": {
+                "drawdown_pct": 2.5,
+                "error_rate": 0.03,
+                "latency_p95_ms": 650.0,
+                "metadata": {
+                  "demo": true
+                },
+                "sample_count": 90,
+                "total_return_pct": 1.1
+              },
+              "reasons": [],
+              "stage": "canary",
+              "timestamp": "2026-02-09T19:26:13.163458"
+            },
+            {
+              "approved": false,
+              "metrics": {
+                "drawdown_pct": 2.5,
+                "error_rate": 0.03,
+                "latency_p95_ms": 650.0,
+                "metadata": {
+                  "demo": true,
+                  "quality_gate": {
+                    "metrics": {
+                      "calmar_ratio_mean": -0.983503605844007,
+                      "eligible_regimes": 1.0,
+                      "max_drawdown_abs_mean": 3.513794919704957,
+                      "passing_regimes": 0.0,
+                      "sharpe_ratio_mean": -0.4486551243516457,
+                      "walk_forward_folds": 3.0
+                    },
+                    "passed": false,
+                    "reasons": [
+                      "quality_sharpe_below_threshold",
+                      "quality_calmar_below_threshold",
+                      "quality_regime_consistency_below_threshold"
+                    ]
+                  }
+                },
+                "sample_count": 90,
+                "total_return_pct": 1.1
+              },
+              "reasons": [
+                "quality_gate_not_passed",
+                "quality_gate:quality_sharpe_below_threshold",
+                "quality_gate:quality_calmar_below_threshold",
+                "quality_gate:quality_regime_consistency_below_threshold"
+              ],
+              "stage": "production",
+              "timestamp": "2026-02-09T19:26:13.182906"
+            }
+          ],
+          "production_passed": false,
+          "rollout_id": "live-demo-20260209192612",
+          "shadow_passed": true
+        },
+        "status": "success"
+      },
+      "ok": true,
+      "status_code": 200
+    }
+  },
+  "meta": {
+    "artifact_path": "output/live_api_demo_seeded_latest.json",
+    "isolated_db": "/tmp/live_api_demo_5hlko_hu/api_demo_seeded.db",
+    "seeded_ok": true,
+    "seeded_rows": 720,
+    "seeded_symbol": "LIVEDEMOUSDT",
+    "seeded_timeframe": "1h",
+    "timestamp_utc": "2026-02-09T19:26:12.291448"
+  }
+}

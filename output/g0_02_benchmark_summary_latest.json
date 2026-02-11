@@ -1,0 +1,45 @@
+{
+  "benchmark_spec_fingerprint": "03cfdebd02bccffc8926c1fff322d0f39bdcf088200dd96562e581c88e381100",
+  "benchmark_spec_path": "output/g0_02_benchmark_spec_latest.json",
+  "generated_at": "2026-02-11T22:18:47.018484",
+  "sample_decision": {
+    "metrics": {
+      "calmar_ratio": 0.52,
+      "gross_return_pct": 9.5,
+      "max_drawdown_abs_pct": 14.1,
+      "modeled_cost_pct": 2.3,
+      "net_return_pct": 7.2,
+      "sharpe_ratio": 0.84,
+      "total_trades": 64.0
+    },
+    "passed": true,
+    "quality_gate": {
+      "metrics": {
+        "calmar_ratio_mean": 0.41,
+        "eligible_regimes": 3.0,
+        "max_drawdown_abs_mean": 11.2,
+        "passing_regimes": 3.0,
+        "sharpe_ratio_mean": 0.71,
+        "walk_forward_folds": 4.0
+      },
+      "passed": true,
+      "reasons": []
+    },
+    "reasons": [],
+    "thresholds": {
+      "max_drawdown_pct": 25.0,
+      "min_calmar_ratio": 0.1,
+      "min_net_return_pct": 1.0,
+      "min_sharpe_ratio": 0.2,
+      "min_total_trades": 25.0
+    }
+  },
+  "sample_metrics": {
+    "calmar_ratio": 0.52,
+    "max_drawdown_pct": -14.1,
+    "modeled_cost_pct": 2.3,
+    "sharpe_ratio": 0.84,
+    "total_return_pct": 9.5,
+    "total_trades": 64
+  }
+}

@@ -1,0 +1,374 @@
+{
+  "canary_decision": {
+    "approved": true,
+    "next_required_stage": "production",
+    "reasons": [],
+    "rollout_id": "gap-closure-e81ca05fd0c905b9",
+    "stage": "canary",
+    "timestamp": "2026-02-11T22:44:54.374705"
+  },
+  "observability": {
+    "alerts": [],
+    "dashboard": {
+      "alerts_last_10": [],
+      "errors": {
+        "count": 9.0,
+        "error_rate": 0.05
+      },
+      "event_count": 906.0,
+      "latency": {
+        "count": 180.0,
+        "max_ms": 0.010200994438491762,
+        "p50_ms": 0.0010879957699216902,
+        "p95_ms": 0.001801549296942539
+      },
+      "pnl_attribution": {
+        "event_count": 180.0,
+        "strategy_pnl": {
+          "sma_crossover": 2.6999999999999966
+        },
+        "total_pnl": 3.599999999999985
+      },
+      "trace_count": 180.0,
+      "trade_decisions": {
+        "count": 180.0,
+        "executed_count": 180.0,
+        "execution_rate": 1.0
+      },
+      "window_minutes": 240.0
+    },
+    "events": [
+      {
+        "component": "rollout",
+        "event_type": "trace_start",
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "timestamp": "2026-02-11T22:44:54.374316",
+        "trace_id": "e4dd4198204c4d069ea07b25b7dbd0e5"
+      },
+      {
+        "component": "rollout",
+        "error": null,
+        "event_type": "trace_end",
+        "latency_ms": 0.0010359945008531213,
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "status": "ok",
+        "timestamp": "2026-02-11T22:44:54.374318",
+        "trace_id": "e4dd4198204c4d069ea07b25b7dbd0e5"
+      },
+      {
+        "component": "rollout",
+        "event_type": "latency",
+        "latency_ms": 0.0010359945008531213,
+        "operation": "decision",
+        "request_id": null,
+        "success": true,
+        "timestamp": "2026-02-11T22:44:54.374319",
+        "trace_id": "e4dd4198204c4d069ea07b25b7dbd0e5"
+      },
+      {
+        "event_type": "trade_decision",
+        "executed": true,
+        "llm_decision": "BUY",
+        "metadata": {},
+        "request_id": null,
+        "signal_consensus": "BUY",
+        "strategies": [
+          "sma_crossover"
+        ],
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374321",
+        "trace_id": null,
+        "trade_mode": "FUTURES"
+      },
+      {
+        "event_type": "pnl_attribution",
+        "metadata": {},
+        "regime": null,
+        "strategy_pnl": {
+          "sma_crossover": 0.02
+        },
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374322",
+        "total_pnl": 0.03
+      },
+      {
+        "component": "rollout",
+        "event_type": "trace_start",
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "timestamp": "2026-02-11T22:44:54.374325",
+        "trace_id": "14e396adba764388b541b696c73e2069"
+      },
+      {
+        "component": "rollout",
+        "error": null,
+        "event_type": "trace_end",
+        "latency_ms": 0.0010779986041598022,
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "status": "ok",
+        "timestamp": "2026-02-11T22:44:54.374327",
+        "trace_id": "14e396adba764388b541b696c73e2069"
+      },
+      {
+        "component": "rollout",
+        "event_type": "latency",
+        "latency_ms": 0.0010779986041598022,
+        "operation": "decision",
+        "request_id": null,
+        "success": true,
+        "timestamp": "2026-02-11T22:44:54.374328",
+        "trace_id": "14e396adba764388b541b696c73e2069"
+      },
+      {
+        "event_type": "trade_decision",
+        "executed": true,
+        "llm_decision": "SELL",
+        "metadata": {},
+        "request_id": null,
+        "signal_consensus": "SELL",
+        "strategies": [
+          "sma_crossover"
+        ],
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374329",
+        "trace_id": null,
+        "trade_mode": "FUTURES"
+      },
+      {
+        "event_type": "pnl_attribution",
+        "metadata": {},
+        "regime": null,
+        "strategy_pnl": {
+          "sma_crossover": 0.01
+        },
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374331",
+        "total_pnl": 0.01
+      },
+      {
+        "component": "rollout",
+        "event_type": "trace_start",
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "timestamp": "2026-02-11T22:44:54.374335",
+        "trace_id": "b416e28f147a497bbbc0bb6bc9ba900d"
+      },
+      {
+        "component": "rollout",
+        "error": null,
+        "event_type": "trace_end",
+        "latency_ms": 0.0012239979696460068,
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "status": "ok",
+        "timestamp": "2026-02-11T22:44:54.374337",
+        "trace_id": "b416e28f147a497bbbc0bb6bc9ba900d"
+      },
+      {
+        "component": "rollout",
+        "event_type": "latency",
+        "latency_ms": 0.0012239979696460068,
+        "operation": "decision",
+        "request_id": null,
+        "success": true,
+        "timestamp": "2026-02-11T22:44:54.374338",
+        "trace_id": "b416e28f147a497bbbc0bb6bc9ba900d"
+      },
+      {
+        "event_type": "trade_decision",
+        "executed": true,
+        "llm_decision": "BUY",
+        "metadata": {},
+        "request_id": null,
+        "signal_consensus": "BUY",
+        "strategies": [
+          "sma_crossover"
+        ],
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374339",
+        "trace_id": null,
+        "trade_mode": "FUTURES"
+      },
+      {
+        "event_type": "pnl_attribution",
+        "metadata": {},
+        "regime": null,
+        "strategy_pnl": {
+          "sma_crossover": 0.02
+        },
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374342",
+        "total_pnl": 0.03
+      },
+      {
+        "component": "rollout",
+        "event_type": "trace_start",
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "timestamp": "2026-02-11T22:44:54.374345",
+        "trace_id": "fd60fff39bce4bfa9c75ab10a147d8d7"
+      },
+      {
+        "component": "rollout",
+        "error": null,
+        "event_type": "trace_end",
+        "latency_ms": 0.0011509982869029045,
+        "metadata": {},
+        "operation": "decision",
+        "request_id": null,
+        "status": "ok",
+        "timestamp": "2026-02-11T22:44:54.374347",
+        "trace_id": "fd60fff39bce4bfa9c75ab10a147d8d7"
+      },
+      {
+        "component": "rollout",
+        "event_type": "latency",
+        "latency_ms": 0.0011509982869029045,
+        "operation": "decision",
+        "request_id": null,
+        "success": true,
+        "timestamp": "2026-02-11T22:44:54.374348",
+        "trace_id": "fd60fff39bce4bfa9c75ab10a147d8d7"
+      },
+      {
+        "event_type": "trade_decision",
+        "executed": true,
+        "llm_decision": "SELL",
+        "metadata": {},
+        "request_id": null,
+        "signal_consensus": "SELL",
+        "strategies": [
+          "sma_crossover"
+        ],
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374349",
+        "trace_id": null,
+        "trade_mode": "FUTURES"
+      },
+      {
+        "event_type": "pnl_attribution",
+        "metadata": {},
+        "regime": null,
+        "strategy_pnl": {
+          "sma_crossover": 0.01
+        },
+        "symbol": "BTCUSDT",
+        "timestamp": "2026-02-11T22:44:54.374351",
+        "total_pnl": 0.01
+      }
+    ]
+  },
+  "production_decision": {
+    "approved": true,
+    "next_required_stage": null,
+    "reasons": [],
+    "rollout_id": "gap-closure-e81ca05fd0c905b9",
+    "stage": "production",
+    "timestamp": "2026-02-11T22:44:54.374711"
+  },
+  "reconciliation": {
+    "exchange_open_count": 2,
+    "local_active_count": 2,
+    "missing_local_order_ids": [
+      "1003"
+    ],
+    "position_delta": 0.0,
+    "position_mismatch": false,
+    "reconciled_at": "2026-02-11T22:44:54.374725",
+    "stale_local_order_ids": [
+      "1002"
+    ],
+    "symbol": "BTCUSDT",
+    "synced_local_order_ids": [
+      "1001"
+    ],
+    "trade_mode": "SPOT"
+  },
+  "rollout_id": "gap-closure-e81ca05fd0c905b9",
+  "rollout_status": {
+    "canary_passed": true,
+    "history": [
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 1.5,
+          "error_rate": 0.05,
+          "latency_p95_ms": 0.001801549296942539,
+          "metadata": {
+            "window_minutes": 240.0
+          },
+          "sample_count": 180,
+          "total_return_pct": 1.3
+        },
+        "reasons": [],
+        "stage": "shadow",
+        "timestamp": "2026-02-11T22:44:54.374694"
+      },
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 2.8,
+          "error_rate": 0.06,
+          "latency_p95_ms": 300.0,
+          "metadata": {
+            "phase": "canary"
+          },
+          "sample_count": 90,
+          "total_return_pct": 2.1
+        },
+        "reasons": [],
+        "stage": "canary",
+        "timestamp": "2026-02-11T22:44:54.374705"
+      },
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 2.8,
+          "error_rate": 0.06,
+          "latency_p95_ms": 300.0,
+          "metadata": {
+            "phase": "production",
+            "quality_gate": {
+              "metrics": {
+                "calmar_ratio_mean": 190.72536821314603,
+                "eligible_regimes": 4.0,
+                "max_drawdown_abs_mean": 1.9271976853819706,
+                "passing_regimes": 2.0,
+                "sharpe_ratio_mean": 1.1550890871317347,
+                "walk_forward_folds": 9.0
+              },
+              "passed": true,
+              "reasons": []
+            }
+          },
+          "sample_count": 90,
+          "total_return_pct": 2.1
+        },
+        "reasons": [],
+        "stage": "production",
+        "timestamp": "2026-02-11T22:44:54.374711"
+      }
+    ],
+    "production_passed": true,
+    "rollout_id": "gap-closure-e81ca05fd0c905b9",
+    "shadow_passed": true
+  },
+  "shadow_decision": {
+    "approved": true,
+    "next_required_stage": "canary",
+    "reasons": [],
+    "rollout_id": "gap-closure-e81ca05fd0c905b9",
+    "stage": "shadow",
+    "timestamp": "2026-02-11T22:44:54.374694"
+  }
+}

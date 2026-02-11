@@ -1,0 +1,30 @@
+{
+  "benchmark_thresholds": {
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_net_return_pct": 1.0,
+    "min_sharpe_ratio": 0.2,
+    "min_total_trades": 25,
+    "require_quality_gate": true
+  },
+  "generated_at": "2026-02-11T22:18:47.018373",
+  "quality_gate_thresholds": {
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_regime_samples": 20,
+    "min_regime_win_rate": 0.45,
+    "min_regimes_passing": 2,
+    "min_sharpe_ratio": 0.2,
+    "min_walk_forward_folds": 3
+  },
+  "reason_codes": [
+    "benchmark_trade_activity_below_floor",
+    "benchmark_net_return_below_floor",
+    "benchmark_sharpe_below_floor",
+    "benchmark_calmar_below_floor",
+    "benchmark_drawdown_above_cap",
+    "benchmark_quality_gate_failed"
+  ],
+  "spec_fingerprint": "03cfdebd02bccffc8926c1fff322d0f39bdcf088200dd96562e581c88e381100",
+  "spec_version": "g0_benchmark_v1"
+}

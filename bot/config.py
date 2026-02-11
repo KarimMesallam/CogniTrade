@@ -256,6 +256,16 @@ TRADING_CONFIG = {
         "min_regime_win_rate": float(os.getenv('QUALITY_MIN_REGIME_WIN_RATE', '0.45')),
         "min_regimes_passing": int(os.getenv('QUALITY_MIN_REGIMES_PASSING', '2')),
     },
+
+    # Promotion benchmark thresholds (G0-02)
+    "promotion_benchmarks": {
+        "min_total_trades": int(os.getenv('BENCHMARK_MIN_TOTAL_TRADES', '25')),
+        "min_net_return_pct": float(os.getenv('BENCHMARK_MIN_NET_RETURN_PCT', '1.0')),
+        "min_sharpe_ratio": float(os.getenv('BENCHMARK_MIN_SHARPE_RATIO', os.getenv('QUALITY_MIN_SHARPE_RATIO', '0.20'))),
+        "min_calmar_ratio": float(os.getenv('BENCHMARK_MIN_CALMAR_RATIO', os.getenv('QUALITY_MIN_CALMAR_RATIO', '0.10'))),
+        "max_drawdown_pct": float(os.getenv('BENCHMARK_MAX_DRAWDOWN_PCT', os.getenv('QUALITY_MAX_DRAWDOWN_PCT', '25.0'))),
+        "require_quality_gate": os.getenv('BENCHMARK_REQUIRE_QUALITY_GATE', 'True').lower() in ('true', '1', 't'),
+    },
     
     # Timeframe configuration for market data
     "timeframes": {
@@ -370,6 +380,11 @@ def get_rollout_config():
 def get_quality_gate_config():
     """Get strategy quality-gate configuration."""
     return TRADING_CONFIG.get("quality_gate", {})
+
+
+def get_promotion_benchmark_config():
+    """Get promotion benchmark threshold configuration."""
+    return TRADING_CONFIG.get("promotion_benchmarks", {})
 
 
 def get_trade_mode() -> str:

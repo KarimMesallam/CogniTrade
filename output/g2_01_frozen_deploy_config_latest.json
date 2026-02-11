@@ -1,0 +1,87 @@
+{
+  "generated_at_utc": "2026-02-11T22:44:54.447891",
+  "monitoring": {
+    "derisk_hit_rate_threshold": 0.45,
+    "derisk_mean_return_threshold": -0.0002,
+    "derisk_size_multiplier": 0.5,
+    "disable_hit_rate_threshold": 0.35,
+    "disable_sticky": true,
+    "enabled": true,
+    "min_samples": 20,
+    "window_size": 50
+  },
+  "observability": {
+    "enabled": true,
+    "error_rate_alert_threshold": 0.25,
+    "error_rate_min_events": 20,
+    "latency_alert_ms": 2500.0,
+    "max_events": 4000,
+    "persistence_db_url": "sqlite:///data/observability.db",
+    "persistence_enabled": true
+  },
+  "policy": {
+    "default_regime": "SIDEWAYS",
+    "default_size_multiplier": 1.0,
+    "enabled": true,
+    "max_strategy_turnover_ratio": 1.0,
+    "min_switch_confidence": 0.55,
+    "regimes": {},
+    "switch_cooldown_seconds": 900,
+    "switch_hysteresis_confirmations": 2,
+    "switch_shadow_mode": false
+  },
+  "promotion_benchmarks": {
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_net_return_pct": 1.0,
+    "min_sharpe_ratio": 0.2,
+    "min_total_trades": 25,
+    "require_quality_gate": true
+  },
+  "quality_gate": {
+    "enabled": true,
+    "max_drawdown_pct": 25.0,
+    "min_calmar_ratio": 0.1,
+    "min_regime_samples": 20,
+    "min_regime_win_rate": 0.45,
+    "min_regimes_passing": 2,
+    "min_sharpe_ratio": 0.2,
+    "min_walk_forward_folds": 3
+  },
+  "reconciliation": {
+    "enabled": true,
+    "interval_loops": 5,
+    "position_tolerance": 1e-06,
+    "run_on_startup": true
+  },
+  "regime": {
+    "enabled": true,
+    "high_volatility_threshold_pct": 0.015,
+    "lookback_candles": 50,
+    "sideways_threshold_pct": 0.01,
+    "trend_threshold_pct": 0.02
+  },
+  "risk_engine": {
+    "allow_risk_reducing_orders": true,
+    "daily_loss_limit_usd": 100.0,
+    "enabled": true,
+    "kill_switch_enabled": true,
+    "max_drawdown_pct": 20.0,
+    "max_gross_exposure_usd": 300.0
+  },
+  "rollout": {
+    "enabled": true,
+    "enforce_production_gate": false,
+    "max_canary_drawdown_pct": 8.0,
+    "max_canary_error_rate": 0.15,
+    "max_canary_latency_p95_ms": 3000.0,
+    "max_shadow_error_rate": 0.2,
+    "min_canary_samples": 30,
+    "min_canary_total_return_pct": -1.0,
+    "min_shadow_samples": 50,
+    "require_quality_gate": true,
+    "required_rollout_id": "",
+    "state_store_path": "data/rollout_gate_state.json"
+  },
+  "trade_mode": "SPOT"
+}
