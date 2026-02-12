@@ -10,6 +10,7 @@ This folder is the source of truth for implementing production-readiness work.
 4. `P3_SENTIMENT_NEWS_PLAN.md`: research-backed implementation plan for `P3-01` to `P3-05`.
 5. `GO_NO_GO_CHECKLIST.md`: current production-readiness verdict and blocking checklist.
 6. `GAP_CLOSURE_PLAN.md`: comprehensive non-P3 gap-remediation plan to move from `NO-GO` to controlled `GO`.
+7. `runbooks/TESTNET_14_DAY_SOAK_RUNBOOK.md`: remote-server, 14-day continuous testnet soak plan before live production cutover.
 
 ## Standard Execution Cycle
 

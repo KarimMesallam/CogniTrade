@@ -4,6 +4,7 @@ import sys
 import pytest
 import json
 from decimal import Decimal
+from types import SimpleNamespace
 import pandas as pd
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -489,14 +490,21 @@ def test_get_strategies():
     
     # Verify that LLM strategy is included
     llm_strategy = None
+    strategy_names = set()
     for s in response.json()["strategies"]:
+        strategy_names.add(s["name"])
         if s["name"] == "llm_strategy":
             llm_strategy = s
-            break
     
     assert llm_strategy is not None
     assert "llm_model" in llm_strategy["parameters"]
     assert "base_strategy" in llm_strategy["parameters"]
+    for required in {"ema_crossover", "donchian_breakout", "bear_rally_short", "regime_switch_adaptive"}:
+        assert required in strategy_names
+
+    base_options = set(llm_strategy["parameters"]["base_strategy"]["options"])
+    for required in {"ema_crossover", "donchian_breakout", "bear_rally_short", "regime_switch_adaptive"}:
+        assert required in base_options
 
 # Test run backtest endpoint
 @patch('api.main.run_backtest')
@@ -561,6 +569,69 @@ def test_run_backtest(mock_run_backtest):
     
     response = client.post("/backtest/run", json=backtest_config)
     assert response.status_code == 200
+
+    # Test with EMA crossover strategy
+    backtest_config["strategy_name"] = "ema_crossover"
+    backtest_config["strategy_params"] = {
+        "fast_period": 12,
+        "slow_period": 50
+    }
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 200
+
+    # Test with Donchian breakout strategy
+    backtest_config["strategy_name"] = "donchian_breakout"
+    backtest_config["strategy_params"] = {
+        "lookback_period": 20,
+        "breakout_buffer_bps": 0.0
+    }
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 200
+
+    # Test with bear short strategy
+    backtest_config["strategy_name"] = "bear_rally_short"
+    backtest_config["strategy_params"] = {
+        "fast_period": 8,
+        "slow_period": 30,
+        "rsi_period": 14,
+        "rsi_overbought": 65,
+        "rsi_oversold": 35
+    }
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 200
+
+    # Test with regime switch adaptive strategy
+    backtest_config["strategy_name"] = "regime_switch_adaptive"
+    backtest_config["strategy_params"] = {
+        "regime_lookback_candles": 50,
+        "trend_threshold_pct": 0.02,
+        "sideways_threshold_pct": 0.01,
+        "high_volatility_threshold_pct": 0.015,
+        "bull_short_period": 8,
+        "bull_long_period": 50,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 14,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 21,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 20,
+        "high_vol_breakout_buffer_bps": 5.0
+    }
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 200
+
+    # Test regime-switch strategy validation
+    backtest_config["strategy_name"] = "regime_switch_adaptive"
+    backtest_config["strategy_params"] = {
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.02
+    }
+    response = client.post("/backtest/run", json=backtest_config)
+    assert response.status_code == 400
+    assert "Invalid regime-switch parameters" in response.json().get("detail", "")
     
     # Test with unknown strategy
     backtest_config["strategy_name"] = "unknown_strategy"
@@ -619,6 +690,79 @@ def test_run_backtest_supports_short_execution_and_validation(
     kwargs = mock_run_backtest.call_args.kwargs
     assert kwargs["allow_short_positions"] is True
     assert kwargs["execution_simulation"]["enabled"] is True
+
+
+@patch("api.main.MarketRegimeDetector")
+@patch("api.main.db")
+@patch("api.main.run_backtest")
+def test_run_backtest_regime_slices_ignore_flat_returns(
+    mock_run_backtest,
+    mock_db,
+    mock_regime_detector,
+):
+    mock_metrics = MagicMock(spec=PerformanceMetrics)
+    mock_metrics.total_return_pct = 1.0
+    mock_metrics.sharpe_ratio = 0.4
+    mock_metrics.max_drawdown_pct = -5.0
+    mock_metrics.win_rate = 50.0
+    mock_metrics.avg_win = 1.0
+    mock_metrics.avg_loss = 1.0
+    mock_metrics.profit_factor = 1.0
+
+    timestamps = pd.date_range(start="2025-01-01", periods=7, freq="h")
+    equities = [100.0, 100.0, 101.0, 101.0, 99.0, 99.0, 100.0]
+    equity_curve = [
+        SimpleNamespace(timestamp=ts.to_pydatetime(), equity=eq)
+        for ts, eq in zip(timestamps, equities)
+    ]
+
+    mock_result = MagicMock(spec=BacktestResult)
+    mock_result.final_equity = 10000.0
+    mock_result.total_trades = 3
+    mock_result.metrics = mock_metrics
+    mock_result.equity_curve = equity_curve
+    mock_run_backtest.return_value = mock_result
+
+    market_df = pd.DataFrame(
+        {
+            "timestamp": timestamps,
+            "open": [100.0] * len(timestamps),
+            "high": [101.0] * len(timestamps),
+            "low": [99.0] * len(timestamps),
+            "close": [100.0, 100.0, 101.0, 101.0, 100.0, 100.0, 101.0],
+            "volume": [1.0] * len(timestamps),
+        }
+    )
+    mock_db.get_market_data.return_value = market_df
+
+    detector_instance = MagicMock()
+    detector_instance.detect_from_closes.side_effect = [
+        SimpleNamespace(regime="BULL", confidence=1.0) for _ in range(len(timestamps))
+    ]
+    mock_regime_detector.return_value = detector_instance
+
+    payload = {
+        "symbol": "BTCUSDT",
+        "timeframes": ["1h"],
+        "start_date": "2025-01-01",
+        "end_date": "2025-01-02",
+        "initial_capital": 10000.0,
+        "commission": 0.001,
+        "strategy_name": "sma_crossover",
+        "strategy_params": {"short_period": 2, "long_period": 3},
+        "run_walk_forward_validation": False,
+        "include_regime_slices": True,
+    }
+
+    response = client.post("/backtest/run", json=payload)
+    assert response.status_code == 200
+
+    regime_slices = response.json()["results"]["validation"]["regime_slices"]
+    bull = regime_slices["BULL"]
+
+    # Only non-zero returns should be counted for regime win-rate evaluation.
+    assert bull["sample_count"] == 3.0
+    assert bull["win_rate"] == pytest.approx(2.0 / 3.0, rel=1e-6)
 
 
 @patch("api.main.run_backtest")

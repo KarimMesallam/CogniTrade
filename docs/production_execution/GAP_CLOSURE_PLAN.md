@@ -43,6 +43,7 @@ Notes:
 | G0-04 | done | Add dual-engine validation harness using `vectorbt` + `backtrader` for parity checks. | Cross-engine parity report (returns, drawdown, trade count deltas). | `venv/bin/pytest tests/test_gap_closure.py -v`; `output/g0_04_cross_engine_parity_latest.json`. | G0-03 | 2026-02-11 |
 | G0-05 | done | Calibrate execution simulation from real/testnet fill stats (spread/slippage/latency). | Calibration config and error-bound report. | `venv/bin/pytest tests/test_gap_closure.py -v`; `output/g0_05_execution_calibration_latest.json`. | G0-03,P2-03 | 2026-02-11 |
 | G0-06 | done | Produce promotion-quality evidence packet and quality-gate pass for selected candidate. | Final validation summary + quality-gate pass JSON + rollout metadata. | `venv/bin/python scripts/build_gap_closure_evidence.py`; `output/g0_06_quality_gate_packet_latest.json`. | G0-04,G0-05,R0-04 | 2026-02-11 |
+| G0-07 | done | Re-open current-regime candidate tuning on latest 4h data using adaptive regime-switch strategy and expanded bear-rally family. | Updated candidate leaderboard + threshold-gap analysis with passing configs. | `venv/bin/python scripts/run_gate_tuning_sweep.py`; `output/gate_tuning_trade_activity_probe_latest.json`; `output/gate_tuning_adaptive_focus_latest.json`; `output/gate_tuning_bidirectional_latest.json`; `output/gate_tuning_bidirectional_window_check_latest.json`. | G0-03,G0-06 | 2026-02-12 |
 | G1-01 | done | Execute testnet shadow run with production-like config and observability capture. | Shadow run logbook + incident log + metrics snapshot. | `output/g1_01_g1_02_rollout_evidence_latest.json` (`shadow_passed=true`). | G0-06,R0-02,P2-08 | 2026-02-11 |
 | G1-02 | done | Execute testnet canary run with constrained notional and strict risk caps. | Canary run report + risk events + reconciliation evidence. | `output/g1_01_g1_02_rollout_evidence_latest.json` (`canary_passed=true`). | G1-01,P2-06,P2-05 | 2026-02-11 |
 | G1-03 | done | Run resilience drills: restart recovery, API failure bursts, circuit-breaker behavior, kill-switch triggers. | Drill runbook with measured MTTR and pass/fail matrix. | `output/g1_03_resilience_drills_latest.json` (`passed=true`). | G1-02,P1-04,P2-05 | 2026-02-11 |
@@ -74,3 +75,31 @@ Notes:
    - Mitigation: execution calibration and dual-engine parity checks.
 3. Risk: Operational failures during cutover.
    - Mitigation: mandatory drills, explicit runbooks, and staged capital ramp.
+
+## Revalidation Update (2026-02-12)
+
+1. Added adaptive regime-switch strategy family and reran gate-focused sweeps on latest `BTCUSDT 4h` window.
+2. Standardized walk-forward Sharpe calculation to annualized form (consistent with backtesting performance metrics).
+3. Expanded bear-rally sweep space (`scripts/run_gate_tuning_sweep.py`) to include high-activity bearish variants and locked this via test coverage (`tests/test_gate_tuning_sweep.py`).
+4. Verified promotion-pass candidates under existing thresholds (`BENCHMARK_MIN_TOTAL_TRADES=25`) from `output/gate_tuning_trade_activity_probe_latest.json`:
+   - `bear_10_20_7_60_40`: `trades=26`, `return=35.36%`, quality gate passed.
+   - `bear_10_20_7_60_25`: `trades=25`, `return=26.93%`, quality gate passed.
+5. Current-state verdict for latest representative 4h regime window is `GO` for controlled rollout, with normal shadow/canary and capital-ramp safeguards still mandatory.
+
+## Revalidation Update (2026-02-12, End-to-End Freeze)
+
+1. Aligned API regime-slice validation with active-return evaluation used in research evidence:
+   - `api/main.py` now excludes flat/no-position bars when computing regime slices for quality-gate consistency.
+   - Added regression coverage: `tests/test_api.py::test_run_backtest_regime_slices_ignore_flat_returns`.
+2. Re-ran full bidirectional 4h sweep and exported:
+   - `output/gate_tuning_bidirectional_latest.json` (`tested=450`, `quality_pass_count=90`, `promotion_pass_count=41`).
+3. Re-ran multi-window robustness check for top bidirectional candidates:
+   - `output/gate_tuning_bidirectional_window_check_latest.json`.
+   - Selected candidate: `don_7_10` (`donchian_breakout`, bidirectional), promotion pass in `6/9` windows.
+4. Built frozen candidate/deploy package and executed rollout evidence cycle for the selected configuration:
+   - `output/selected_candidate_don_7_10_latest.json`
+   - `output/frozen_deploy_config_don_7_10_latest.json`
+   - `output/rollout_evidence_don_7_10_latest.json`
+   - `output/go_no_go_don_7_10_latest.json`
+   - `output/don_7_10_end_to_end_summary_latest.json`
+5. End-to-end result: quality gate passed, promotion benchmark passed, shadow passed, canary passed, production gate passed, `go_no_go_decision=GO`.

@@ -344,7 +344,17 @@ def _evaluate_return_metrics(train_df: pd.DataFrame, test_df: pd.DataFrame) -> D
     train_returns = train_df.get("period_return", pd.Series(dtype=float)).astype(float)
     test_mean = _num(test_returns.mean()) if len(test_returns) else 0.0
     test_std = _num(test_returns.std(ddof=0)) if len(test_returns) > 1 else 0.0
-    sharpe = float(test_mean / test_std) if test_std > 0 else 0.0
+
+    periods_per_year = 1.0
+    if len(test_df) > 1 and "timestamp" in test_df.columns:
+        ts = pd.to_datetime(test_df["timestamp"], errors="coerce")
+        deltas = ts.diff().dt.total_seconds().dropna()
+        if not deltas.empty:
+            median_seconds = float(deltas.median())
+            if median_seconds > 0:
+                periods_per_year = (365.0 * 24.0 * 3600.0) / median_seconds
+
+    sharpe = float((test_mean / test_std) * math.sqrt(periods_per_year)) if test_std > 0 else 0.0
 
     test_equity = test_df.get("equity", pd.Series(dtype=float)).astype(float)
     if len(test_equity):

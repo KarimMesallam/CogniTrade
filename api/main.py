@@ -34,7 +34,13 @@ from bot.deploy_policy import (
     evaluate_strategy_quality,
     thresholds_from_config,
 )
-from bot.regime import MarketRegimeDetector
+from bot.regime import (
+    MarketRegimeDetector,
+    REGIME_BEAR,
+    REGIME_BULL,
+    REGIME_HIGH_VOL,
+    REGIME_SIDEWAYS,
+)
 from api.security import APISecurityController
 
 # Create a TradingBot class for the API
@@ -394,6 +400,221 @@ def _build_rsi_backtest_strategy(period: int, overbought: int, oversold: int, ti
     return _strategy
 
 
+def _build_ema_crossover_backtest_strategy(fast_period: int, slow_period: int, timeframe: str):
+    """Build an EMA crossover strategy (trend-following; useful in bull phases)."""
+    def _strategy(data_dict, _symbol):
+        frame = data_dict.get(timeframe)
+        if frame is None or frame.empty or len(frame) < slow_period + 2:
+            return "HOLD"
+
+        fast_ema = frame["close"].ewm(span=fast_period, adjust=False).mean()
+        slow_ema = frame["close"].ewm(span=slow_period, adjust=False).mean()
+        prev_fast, curr_fast = fast_ema.iloc[-2], fast_ema.iloc[-1]
+        prev_slow, curr_slow = slow_ema.iloc[-2], slow_ema.iloc[-1]
+        if any(value != value for value in [prev_fast, curr_fast, prev_slow, curr_slow]):
+            return "HOLD"
+        if prev_fast <= prev_slow and curr_fast > curr_slow:
+            return "BUY"
+        if prev_fast >= prev_slow and curr_fast < curr_slow:
+            return "SELL"
+        return "HOLD"
+
+    _strategy.__name__ = f"ema_crossover_{fast_period}_{slow_period}"
+    return _strategy
+
+
+def _build_donchian_breakout_backtest_strategy(
+    lookback_period: int,
+    timeframe: str,
+    breakout_buffer_bps: float = 0.0,
+):
+    """Build a Donchian breakout strategy (can auto-switch long/short on breakouts)."""
+    def _strategy(data_dict, _symbol):
+        frame = data_dict.get(timeframe)
+        if frame is None or frame.empty or len(frame) < lookback_period + 2:
+            return "HOLD"
+
+        upper = frame["high"].rolling(window=lookback_period).max().shift(1)
+        lower = frame["low"].rolling(window=lookback_period).min().shift(1)
+        prev_close = frame["close"].iloc[-2]
+        curr_close = frame["close"].iloc[-1]
+        curr_upper = upper.iloc[-1]
+        curr_lower = lower.iloc[-1]
+
+        if any(value != value for value in [prev_close, curr_close, curr_upper, curr_lower]):
+            return "HOLD"
+
+        buffer_multiplier = 1.0 + (max(0.0, float(breakout_buffer_bps)) / 10000.0)
+        upper_trigger = curr_upper * buffer_multiplier
+        lower_trigger = curr_lower / buffer_multiplier if buffer_multiplier != 0 else curr_lower
+
+        if prev_close <= upper_trigger and curr_close > upper_trigger:
+            return "BUY"
+        if prev_close >= lower_trigger and curr_close < lower_trigger:
+            return "SELL"
+        return "HOLD"
+
+    _strategy.__name__ = f"donchian_breakout_{lookback_period}_{int(breakout_buffer_bps)}bps"
+    return _strategy
+
+
+def _build_bear_rally_short_backtest_strategy(
+    fast_period: int,
+    slow_period: int,
+    rsi_period: int,
+    rsi_overbought: int,
+    rsi_oversold: int,
+    timeframe: str,
+):
+    """Build a bear-market short-bias strategy: short rallies in established downtrends."""
+    def _strategy(data_dict, _symbol):
+        frame = data_dict.get(timeframe)
+        min_candles = max(slow_period, rsi_period) + 2
+        if frame is None or frame.empty or len(frame) < min_candles:
+            return "HOLD"
+
+        fast_ema = frame["close"].ewm(span=fast_period, adjust=False).mean()
+        slow_ema = frame["close"].ewm(span=slow_period, adjust=False).mean()
+        delta = frame["close"].diff()
+        gain = delta.where(delta > 0, 0.0)
+        loss = -delta.where(delta < 0, 0.0)
+        avg_gain = gain.rolling(window=rsi_period).mean()
+        avg_loss = loss.rolling(window=rsi_period).mean()
+        rs = avg_gain / avg_loss.replace(0, float("nan"))
+        rsi = 100 - (100 / (1 + rs))
+
+        prev_fast, curr_fast = fast_ema.iloc[-2], fast_ema.iloc[-1]
+        prev_slow, curr_slow = slow_ema.iloc[-2], slow_ema.iloc[-1]
+        prev_rsi, curr_rsi = rsi.iloc[-2], rsi.iloc[-1]
+
+        if any(value != value for value in [prev_fast, curr_fast, prev_slow, curr_slow, prev_rsi, curr_rsi]):
+            return "HOLD"
+
+        trend_is_down = curr_fast < curr_slow
+        trend_reversal_up = prev_fast <= prev_slow and curr_fast > curr_slow
+
+        if trend_is_down and prev_rsi > rsi_overbought and curr_rsi < rsi_overbought:
+            return "SELL"
+        if trend_reversal_up:
+            return "BUY"
+        if prev_rsi < rsi_oversold and curr_rsi > rsi_oversold:
+            return "BUY"
+        return "HOLD"
+
+    _strategy.__name__ = (
+        f"bear_rally_short_{fast_period}_{slow_period}_{rsi_period}_{rsi_overbought}_{rsi_oversold}"
+    )
+    return _strategy
+
+
+def _build_regime_switch_adaptive_backtest_strategy(
+    timeframe: str,
+    regime_lookback_candles: int,
+    trend_threshold_pct: float,
+    sideways_threshold_pct: float,
+    high_volatility_threshold_pct: float,
+    min_regime_confidence: float,
+    momentum_confirmation_candles: int,
+    bull_short_period: int,
+    bull_long_period: int,
+    bear_fast_period: int,
+    bear_slow_period: int,
+    bear_rsi_period: int,
+    bear_rsi_overbought: int,
+    bear_rsi_oversold: int,
+    sideways_rsi_period: int,
+    sideways_rsi_overbought: int,
+    sideways_rsi_oversold: int,
+    high_vol_lookback_period: int,
+    high_vol_breakout_buffer_bps: float,
+):
+    """
+    Regime-adaptive meta strategy:
+    - BULL: SMA trend-following
+    - BEAR: bear-rally short strategy
+    - HIGH_VOLATILITY: Donchian breakout
+    - SIDEWAYS (default fallback): RSI mean-reversion
+    """
+    bull_strategy = _build_sma_crossover_backtest_strategy(
+        short_period=bull_short_period,
+        long_period=bull_long_period,
+        timeframe=timeframe,
+    )
+    bear_strategy = _build_bear_rally_short_backtest_strategy(
+        fast_period=bear_fast_period,
+        slow_period=bear_slow_period,
+        rsi_period=bear_rsi_period,
+        rsi_overbought=bear_rsi_overbought,
+        rsi_oversold=bear_rsi_oversold,
+        timeframe=timeframe,
+    )
+    sideways_strategy = _build_rsi_backtest_strategy(
+        period=sideways_rsi_period,
+        overbought=sideways_rsi_overbought,
+        oversold=sideways_rsi_oversold,
+        timeframe=timeframe,
+    )
+    high_vol_strategy = _build_donchian_breakout_backtest_strategy(
+        lookback_period=high_vol_lookback_period,
+        timeframe=timeframe,
+        breakout_buffer_bps=high_vol_breakout_buffer_bps,
+    )
+    detector = MarketRegimeDetector(
+        lookback_candles=regime_lookback_candles,
+        trend_threshold_pct=trend_threshold_pct,
+        sideways_threshold_pct=sideways_threshold_pct,
+        high_volatility_threshold_pct=high_volatility_threshold_pct,
+    )
+
+    def _strategy(data_dict, symbol):
+        frame = data_dict.get(timeframe)
+        if frame is None or frame.empty or "close" not in frame.columns:
+            return "HOLD"
+
+        closes = pd.to_numeric(frame["close"], errors="coerce").dropna()
+        min_required = max(3, regime_lookback_candles, momentum_confirmation_candles + 1)
+        if len(closes) < min_required:
+            return "HOLD"
+
+        timestamp = str(frame["timestamp"].iloc[-1]) if "timestamp" in frame.columns else None
+        regime_state = detector.detect_from_closes(closes.tolist(), timestamp=timestamp)
+        regime = regime_state.regime
+        if float(regime_state.confidence) < float(min_regime_confidence):
+            return "HOLD"
+
+        momentum_base = float(closes.iloc[-(momentum_confirmation_candles + 1)])
+        if momentum_base == 0:
+            return "HOLD"
+        momentum_return = float((closes.iloc[-1] / momentum_base) - 1.0)
+
+        if regime == REGIME_BULL:
+            if momentum_return <= 0:
+                return "HOLD"
+            return bull_strategy(data_dict, symbol)
+        if regime == REGIME_BEAR:
+            if momentum_return >= 0:
+                return "HOLD"
+            return bear_strategy(data_dict, symbol)
+        if regime == REGIME_HIGH_VOL:
+            if abs(momentum_return) < float(trend_threshold_pct):
+                return "HOLD"
+            return high_vol_strategy(data_dict, symbol)
+        if regime == REGIME_SIDEWAYS:
+            if abs(momentum_return) > float(trend_threshold_pct):
+                return "HOLD"
+            return sideways_strategy(data_dict, symbol)
+        return "HOLD"
+
+    _strategy.__name__ = (
+        "regime_switch_adaptive_"
+        f"{regime_lookback_candles}_{int(min_regime_confidence * 100)}c_"
+        f"{bull_short_period}_{bull_long_period}_"
+        f"{bear_fast_period}_{bear_slow_period}_"
+        f"{high_vol_lookback_period}_{int(high_vol_breakout_buffer_bps)}bps"
+    )
+    return _strategy
+
+
 def _equity_frame_from_result(result) -> pd.DataFrame:
     if not result or not getattr(result, "equity_curve", None):
         return pd.DataFrame()
@@ -420,7 +641,17 @@ def _evaluate_return_metrics(train_df: pd.DataFrame, test_df: pd.DataFrame) -> D
 
     test_mean = float(test_returns.mean()) if len(test_returns) else 0.0
     test_std = float(test_returns.std(ddof=0)) if len(test_returns) > 1 else 0.0
-    sharpe = float(test_mean / test_std) if test_std > 0 else 0.0
+
+    periods_per_year = 1.0
+    if len(test_df) > 1 and "timestamp" in test_df.columns:
+        ts = pd.to_datetime(test_df["timestamp"], errors="coerce")
+        deltas = ts.diff().dt.total_seconds().dropna()
+        if not deltas.empty:
+            median_seconds = float(deltas.median())
+            if median_seconds > 0:
+                periods_per_year = (365.0 * 24.0 * 3600.0) / median_seconds
+
+    sharpe = float((test_mean / test_std) * math.sqrt(periods_per_year)) if test_std > 0 else 0.0
 
     test_equity = test_df.get("equity", pd.Series(dtype=float)).astype(float)
     if len(test_equity):
@@ -731,13 +962,195 @@ async def get_strategies():
             }
         },
         {
+            "name": "ema_crossover",
+            "display_name": "EMA Crossover (Bull Trend)",
+            "description": "Trend-following EMA crossover suited for persistent bull trends.",
+            "parameters": {
+                "fast_period": {
+                    "type": "integer",
+                    "min": 3,
+                    "max": 50,
+                    "default": 12,
+                    "description": "Fast EMA period"
+                },
+                "slow_period": {
+                    "type": "integer",
+                    "min": 10,
+                    "max": 200,
+                    "default": 50,
+                    "description": "Slow EMA period"
+                }
+            }
+        },
+        {
+            "name": "donchian_breakout",
+            "display_name": "Donchian Breakout (Long/Short)",
+            "description": "Classic breakout trend strategy that can flip between long and short regimes.",
+            "parameters": {
+                "lookback_period": {
+                    "type": "integer",
+                    "min": 10,
+                    "max": 200,
+                    "default": 20,
+                    "description": "Channel breakout lookback period"
+                },
+                "breakout_buffer_bps": {
+                    "type": "number",
+                    "min": 0,
+                    "max": 100,
+                    "default": 0,
+                    "description": "Optional breakout confirmation buffer in basis points"
+                }
+            }
+        },
+        {
+            "name": "bear_rally_short",
+            "display_name": "Bear Rally Short",
+            "description": "Short-bias bear-market strategy: short overbought rallies during downtrends.",
+            "parameters": {
+                "fast_period": {
+                    "type": "integer",
+                    "min": 3,
+                    "max": 50,
+                    "default": 8,
+                    "description": "Fast EMA period"
+                },
+                "slow_period": {
+                    "type": "integer",
+                    "min": 10,
+                    "max": 200,
+                    "default": 30,
+                    "description": "Slow EMA period"
+                },
+                "rsi_period": {
+                    "type": "integer",
+                    "min": 5,
+                    "max": 50,
+                    "default": 14,
+                    "description": "RSI period"
+                },
+                "rsi_overbought": {
+                    "type": "integer",
+                    "min": 55,
+                    "max": 95,
+                    "default": 65,
+                    "description": "Overbought RSI threshold used for short entries"
+                },
+                "rsi_oversold": {
+                    "type": "integer",
+                    "min": 5,
+                    "max": 45,
+                    "default": 35,
+                    "description": "Oversold RSI threshold used for short exits"
+                }
+            }
+        },
+        {
+            "name": "regime_switch_adaptive",
+            "display_name": "Regime Switch Adaptive",
+            "description": "Adaptive strategy that automatically switches behavior by detected market regime.",
+            "parameters": {
+                "regime_lookback_candles": {
+                    "type": "integer",
+                    "min": 20,
+                    "max": 400,
+                    "default": 50,
+                    "description": "Candles used for regime classification"
+                },
+                "trend_threshold_pct": {
+                    "type": "number",
+                    "min": 0.001,
+                    "max": 0.2,
+                    "default": 0.02,
+                    "description": "Minimum absolute trend threshold for bull/bear regime"
+                },
+                "sideways_threshold_pct": {
+                    "type": "number",
+                    "min": 0.001,
+                    "max": 0.1,
+                    "default": 0.01,
+                    "description": "Maximum absolute trend threshold for sideways regime"
+                },
+                "high_volatility_threshold_pct": {
+                    "type": "number",
+                    "min": 0.001,
+                    "max": 0.2,
+                    "default": 0.015,
+                    "description": "Realized volatility threshold for high-volatility regime"
+                },
+                "min_regime_confidence": {
+                    "type": "number",
+                    "min": 0.0,
+                    "max": 1.0,
+                    "default": 0.55,
+                    "description": "Minimum detector confidence required before any trade signal"
+                },
+                "momentum_confirmation_candles": {
+                    "type": "integer",
+                    "min": 1,
+                    "max": 20,
+                    "default": 4,
+                    "description": "Recent candles used for direction confirmation before acting"
+                },
+                "bull_short_period": {
+                    "type": "integer",
+                    "min": 2,
+                    "max": 50,
+                    "default": 8,
+                    "description": "Short SMA period used in bull regime"
+                },
+                "bull_long_period": {
+                    "type": "integer",
+                    "min": 5,
+                    "max": 200,
+                    "default": 50,
+                    "description": "Long SMA period used in bull regime"
+                },
+                "bear_fast_period": {
+                    "type": "integer",
+                    "min": 2,
+                    "max": 50,
+                    "default": 8,
+                    "description": "Fast EMA period used in bear regime"
+                },
+                "bear_slow_period": {
+                    "type": "integer",
+                    "min": 5,
+                    "max": 200,
+                    "default": 30,
+                    "description": "Slow EMA period used in bear regime"
+                },
+                "high_vol_lookback_period": {
+                    "type": "integer",
+                    "min": 5,
+                    "max": 200,
+                    "default": 20,
+                    "description": "Donchian lookback used in high-volatility regime"
+                },
+                "high_vol_breakout_buffer_bps": {
+                    "type": "number",
+                    "min": 0,
+                    "max": 100,
+                    "default": 5,
+                    "description": "Donchian breakout confirmation buffer in basis points"
+                }
+            }
+        },
+        {
             "name": "llm_strategy",
             "display_name": "LLM-Enhanced Strategy",
             "description": "Strategy that uses LLM to make trading decisions",
             "parameters": {
                 "base_strategy": {
                     "type": "string",
-                    "options": ["sma_crossover", "rsi"],
+                    "options": [
+                        "sma_crossover",
+                        "rsi",
+                        "ema_crossover",
+                        "donchian_breakout",
+                        "bear_rally_short",
+                        "regime_switch_adaptive"
+                    ],
                     "default": "sma_crossover",
                     "description": "Base strategy for LLM to enhance"
                 },
@@ -785,6 +1198,190 @@ async def run_backtest_endpoint(config: BacktestConfig):
                     detail="Invalid RSI parameters: require period > 1 and 0 < oversold < overbought < 100"
                 )
             strat_func = _build_rsi_backtest_strategy(period, overbought, oversold, primary_timeframe)
+        elif config.strategy_name == "ema_crossover":
+            fast_period = int(config.strategy_params.get("fast_period", 12)) if config.strategy_params else 12
+            slow_period = int(config.strategy_params.get("slow_period", 50)) if config.strategy_params else 50
+            if fast_period <= 0 or slow_period <= 0 or fast_period >= slow_period:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid EMA parameters: require 0 < fast_period < slow_period",
+                )
+            strat_func = _build_ema_crossover_backtest_strategy(
+                fast_period,
+                slow_period,
+                primary_timeframe,
+            )
+        elif config.strategy_name == "donchian_breakout":
+            lookback_period = (
+                int(config.strategy_params.get("lookback_period", 20))
+                if config.strategy_params
+                else 20
+            )
+            breakout_buffer_bps = (
+                float(config.strategy_params.get("breakout_buffer_bps", 0.0))
+                if config.strategy_params
+                else 0.0
+            )
+            if lookback_period < 2 or breakout_buffer_bps < 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid Donchian parameters: require lookback_period >= 2 and breakout_buffer_bps >= 0",
+                )
+            strat_func = _build_donchian_breakout_backtest_strategy(
+                lookback_period,
+                primary_timeframe,
+                breakout_buffer_bps,
+            )
+        elif config.strategy_name == "bear_rally_short":
+            fast_period = int(config.strategy_params.get("fast_period", 8)) if config.strategy_params else 8
+            slow_period = int(config.strategy_params.get("slow_period", 30)) if config.strategy_params else 30
+            rsi_period = int(config.strategy_params.get("rsi_period", 14)) if config.strategy_params else 14
+            rsi_overbought = (
+                int(config.strategy_params.get("rsi_overbought", 65))
+                if config.strategy_params
+                else 65
+            )
+            rsi_oversold = (
+                int(config.strategy_params.get("rsi_oversold", 35))
+                if config.strategy_params
+                else 35
+            )
+            if (
+                fast_period <= 0
+                or slow_period <= 0
+                or fast_period >= slow_period
+                or rsi_period <= 1
+                or not (0 < rsi_oversold < rsi_overbought < 100)
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "Invalid bear strategy parameters: require 0 < fast_period < slow_period, "
+                        "rsi_period > 1 and 0 < rsi_oversold < rsi_overbought < 100"
+                    ),
+                )
+            strat_func = _build_bear_rally_short_backtest_strategy(
+                fast_period,
+                slow_period,
+                rsi_period,
+                rsi_overbought,
+                rsi_oversold,
+                primary_timeframe,
+            )
+        elif config.strategy_name == "regime_switch_adaptive":
+            regime_lookback_candles = (
+                int(config.strategy_params.get("regime_lookback_candles", 50)) if config.strategy_params else 50
+            )
+            trend_threshold_pct = (
+                float(config.strategy_params.get("trend_threshold_pct", 0.02)) if config.strategy_params else 0.02
+            )
+            sideways_threshold_pct = (
+                float(config.strategy_params.get("sideways_threshold_pct", 0.01)) if config.strategy_params else 0.01
+            )
+            high_volatility_threshold_pct = (
+                float(config.strategy_params.get("high_volatility_threshold_pct", 0.015))
+                if config.strategy_params
+                else 0.015
+            )
+            min_regime_confidence = (
+                float(config.strategy_params.get("min_regime_confidence", 0.55))
+                if config.strategy_params
+                else 0.55
+            )
+            momentum_confirmation_candles = (
+                int(config.strategy_params.get("momentum_confirmation_candles", 4))
+                if config.strategy_params
+                else 4
+            )
+            bull_short_period = (
+                int(config.strategy_params.get("bull_short_period", 8)) if config.strategy_params else 8
+            )
+            bull_long_period = (
+                int(config.strategy_params.get("bull_long_period", 50)) if config.strategy_params else 50
+            )
+            bear_fast_period = (
+                int(config.strategy_params.get("bear_fast_period", 8)) if config.strategy_params else 8
+            )
+            bear_slow_period = (
+                int(config.strategy_params.get("bear_slow_period", 30)) if config.strategy_params else 30
+            )
+            bear_rsi_period = (
+                int(config.strategy_params.get("bear_rsi_period", 14)) if config.strategy_params else 14
+            )
+            bear_rsi_overbought = (
+                int(config.strategy_params.get("bear_rsi_overbought", 60)) if config.strategy_params else 60
+            )
+            bear_rsi_oversold = (
+                int(config.strategy_params.get("bear_rsi_oversold", 30)) if config.strategy_params else 30
+            )
+            sideways_rsi_period = (
+                int(config.strategy_params.get("sideways_rsi_period", 21)) if config.strategy_params else 21
+            )
+            sideways_rsi_overbought = (
+                int(config.strategy_params.get("sideways_rsi_overbought", 65)) if config.strategy_params else 65
+            )
+            sideways_rsi_oversold = (
+                int(config.strategy_params.get("sideways_rsi_oversold", 35)) if config.strategy_params else 35
+            )
+            high_vol_lookback_period = (
+                int(config.strategy_params.get("high_vol_lookback_period", 20)) if config.strategy_params else 20
+            )
+            high_vol_breakout_buffer_bps = (
+                float(config.strategy_params.get("high_vol_breakout_buffer_bps", 5.0))
+                if config.strategy_params
+                else 5.0
+            )
+
+            if (
+                regime_lookback_candles < 10
+                or not (0 < sideways_threshold_pct < trend_threshold_pct < 1)
+                or not (0 < high_volatility_threshold_pct < 1)
+                or not (0 <= min_regime_confidence <= 1)
+                or momentum_confirmation_candles < 1
+                or bull_short_period <= 0
+                or bull_long_period <= 0
+                or bull_short_period >= bull_long_period
+                or bear_fast_period <= 0
+                or bear_slow_period <= 0
+                or bear_fast_period >= bear_slow_period
+                or bear_rsi_period <= 1
+                or not (0 < bear_rsi_oversold < bear_rsi_overbought < 100)
+                or sideways_rsi_period <= 1
+                or not (0 < sideways_rsi_oversold < sideways_rsi_overbought < 100)
+                or high_vol_lookback_period < 2
+                or high_vol_breakout_buffer_bps < 0
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "Invalid regime-switch parameters: require lookback >= 10; "
+                        "0 < sideways_threshold_pct < trend_threshold_pct < 1; "
+                        "0 < high_volatility_threshold_pct < 1; "
+                        "valid SMA/EMA and RSI ranges; and non-negative breakout buffer"
+                    ),
+                )
+
+            strat_func = _build_regime_switch_adaptive_backtest_strategy(
+                timeframe=primary_timeframe,
+                regime_lookback_candles=regime_lookback_candles,
+                trend_threshold_pct=trend_threshold_pct,
+                sideways_threshold_pct=sideways_threshold_pct,
+                high_volatility_threshold_pct=high_volatility_threshold_pct,
+                min_regime_confidence=min_regime_confidence,
+                momentum_confirmation_candles=momentum_confirmation_candles,
+                bull_short_period=bull_short_period,
+                bull_long_period=bull_long_period,
+                bear_fast_period=bear_fast_period,
+                bear_slow_period=bear_slow_period,
+                bear_rsi_period=bear_rsi_period,
+                bear_rsi_overbought=bear_rsi_overbought,
+                bear_rsi_oversold=bear_rsi_oversold,
+                sideways_rsi_period=sideways_rsi_period,
+                sideways_rsi_overbought=sideways_rsi_overbought,
+                sideways_rsi_oversold=sideways_rsi_oversold,
+                high_vol_lookback_period=high_vol_lookback_period,
+                high_vol_breakout_buffer_bps=high_vol_breakout_buffer_bps,
+            )
         else:
             raise HTTPException(status_code=400, detail=f"Unknown strategy: {config.strategy_name}")
         
@@ -886,9 +1483,16 @@ async def run_backtest_endpoint(config: BacktestConfig):
                     direction="backward",
                 )
                 merged["regime"] = merged["regime"].fillna("UNKNOWN")
+
+                # Evaluate regime quality on active-return bars to avoid
+                # flat no-position periods diluting per-regime win-rate signals.
+                active = merged[np.abs(merged["period_return"].astype(float)) > 1e-12].copy()
+                if active.empty:
+                    active = merged
+
                 validation_summary["regime_slices"] = regime_sliced_evaluation(
-                    merged["period_return"].astype(float).tolist(),
-                    merged["regime"].astype(str).tolist(),
+                    active["period_return"].astype(float).tolist(),
+                    active["regime"].astype(str).tolist(),
                 )
 
         if validation_summary:
