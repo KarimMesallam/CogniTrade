@@ -1,0 +1,50 @@
+{
+  "window": {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "start": "2025-06-13",
+    "end": "2026-02-08",
+    "candles": 1440,
+    "buy_hold_return_pct": -33.552716499346644
+  },
+  "assumptions": {
+    "initial_capital": 10000.0,
+    "position_size_pct": 0.95,
+    "effective_cost_rate_per_side": 0.0015
+  },
+  "strategies": {
+    "rsi_cross_4h": {
+      "final_equity": 8199.783185088083,
+      "total_return_pct": -18.00216814911917,
+      "annualized_return_pct": -7.646983752981264,
+      "max_drawdown_pct": -28.852223057089738,
+      "sharpe_ratio": -0.7397936397232565,
+      "sortino_ratio": -0.6508663200410448,
+      "calmar_ratio": -0.26503967260513056,
+      "win_rate_pct": 27.27272727272727,
+      "profit_factor": 0.32113078626613506,
+      "total_trades": 11,
+      "winning_trades": 3,
+      "losing_trades": 8
+    },
+    "sma_crossover_4h_10_50": {
+      "final_equity": 10177.89719678655,
+      "total_return_pct": 1.778971967865491,
+      "annualized_return_pct": 1.0927407882242288,
+      "max_drawdown_pct": -11.609687728601713,
+      "sharpe_ratio": 0.12786380487379878,
+      "sortino_ratio": 0.11615734947742622,
+      "calmar_ratio": 0.09412318520266007,
+      "win_rate_pct": 36.36363636363637,
+      "profit_factor": 1.1140434170421518,
+      "total_trades": 11,
+      "winning_trades": 4,
+      "losing_trades": 7
+    }
+  },
+  "relative": {
+    "rsi_minus_buyhold_pct_points": 15.550548350227473,
+    "sma_minus_buyhold_pct_points": 35.33168846721213,
+    "sma_minus_rsi_pct_points": 19.781140116984663
+  }
+}

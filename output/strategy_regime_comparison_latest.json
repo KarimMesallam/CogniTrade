@@ -1,0 +1,589 @@
+{
+  "generated_at_utc": "2026-02-12T00:03:11.418448Z",
+  "symbol": "BTCUSDT",
+  "timeframe": "4h",
+  "periods": {
+    "bull_45d": {
+      "start_date": "2025-03-11",
+      "end_date": "2025-07-14",
+      "strategies": [
+        {
+          "label": "sma_crossover_3_8",
+          "strategy_name": "sma_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": 32.6443299567468,
+          "final_value": 13264.43299567468,
+          "sharpe_ratio": 1.7914006648143366,
+          "max_drawdown": -6.492933381243805,
+          "trades": 16,
+          "win_rate": 43.75,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "rsi_21_70_30",
+          "strategy_name": "rsi",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": 5.468484323649627,
+          "final_value": 10546.848432364963,
+          "sharpe_ratio": 2.2099106830177306,
+          "max_drawdown": -0.8703534090366137,
+          "trades": 1,
+          "win_rate": 100.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "ema_crossover_12_50",
+          "strategy_name": "ema_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": 12.201077998798683,
+          "final_value": 11220.107799879868,
+          "sharpe_ratio": 2.679809186257636,
+          "max_drawdown": -2.7252478477399653,
+          "trades": 1,
+          "win_rate": 100.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "donchian_breakout_20",
+          "strategy_name": "donchian_breakout",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": 13.580020342680726,
+          "final_value": 11358.002034268073,
+          "sharpe_ratio": 0.9064040989856934,
+          "max_drawdown": -14.096192937034221,
+          "trades": 5,
+          "win_rate": 40.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "bear_rally_short_8_30",
+          "strategy_name": "bear_rally_short",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": 39.96544625482369,
+          "final_value": 13996.54462548237,
+          "sharpe_ratio": 2.1642320294602975,
+          "max_drawdown": -8.647374711344453,
+          "trades": 1,
+          "win_rate": 100.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 3.0
+          }
+        }
+      ],
+      "top_by_return": {
+        "label": "bear_rally_short_8_30",
+        "strategy_name": "bear_rally_short",
+        "allow_short_positions": true,
+        "status_code": 200,
+        "profit_loss_percent": 39.96544625482369,
+        "final_value": 13996.54462548237,
+        "sharpe_ratio": 2.1642320294602975,
+        "max_drawdown": -8.647374711344453,
+        "trades": 1,
+        "win_rate": 100.0,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 3.0,
+          "passing_regimes": 3.0
+        }
+      },
+      "top_by_return_min5trades": {
+        "label": "sma_crossover_3_8",
+        "strategy_name": "sma_crossover",
+        "allow_short_positions": false,
+        "status_code": 200,
+        "profit_loss_percent": 32.6443299567468,
+        "final_value": 13264.43299567468,
+        "sharpe_ratio": 1.7914006648143366,
+        "max_drawdown": -6.492933381243805,
+        "trades": 16,
+        "win_rate": 43.75,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold",
+          "quality_regime_consistency_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 3.0,
+          "passing_regimes": 0.0
+        }
+      }
+    },
+    "bear_45d": {
+      "start_date": "2025-10-07",
+      "end_date": "2025-11-21",
+      "strategies": [
+        {
+          "label": "sma_crossover_3_8",
+          "strategy_name": "sma_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": -17.228707848210142,
+          "final_value": 8277.129215178986,
+          "sharpe_ratio": -2.6091267664690863,
+          "max_drawdown": -19.838214727233886,
+          "trades": 16,
+          "win_rate": 25.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "rsi_21_70_30",
+          "strategy_name": "rsi",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": -17.428722079038106,
+          "final_value": 8257.12779209619,
+          "sharpe_ratio": -2.06711442961368,
+          "max_drawdown": -18.335347934566727,
+          "trades": 3,
+          "win_rate": 0.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "ema_crossover_12_50",
+          "strategy_name": "ema_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": -2.330238625776401,
+          "final_value": 9766.97613742236,
+          "sharpe_ratio": -0.7563453194303424,
+          "max_drawdown": -6.219536757915349,
+          "trades": 2,
+          "win_rate": 50.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          }
+        },
+        {
+          "label": "donchian_breakout_20",
+          "strategy_name": "donchian_breakout",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": 6.596468683172533,
+          "final_value": 10659.646868317253,
+          "sharpe_ratio": 0.7104299613405183,
+          "max_drawdown": -8.972177570128839,
+          "trades": 5,
+          "win_rate": 40.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          }
+        },
+        {
+          "label": "bear_rally_short_8_30",
+          "strategy_name": "bear_rally_short",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": -20.44855554745235,
+          "final_value": 7955.144445254765,
+          "sharpe_ratio": -1.9771368518988335,
+          "max_drawdown": -22.098193513351642,
+          "trades": 3,
+          "win_rate": 0.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 2.0
+          }
+        }
+      ],
+      "top_by_return": {
+        "label": "donchian_breakout_20",
+        "strategy_name": "donchian_breakout",
+        "allow_short_positions": true,
+        "status_code": 200,
+        "profit_loss_percent": 6.596468683172533,
+        "final_value": 10659.646868317253,
+        "sharpe_ratio": 0.7104299613405183,
+        "max_drawdown": -8.972177570128839,
+        "trades": 5,
+        "win_rate": 40.0,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold",
+          "quality_regime_consistency_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 3.0,
+          "passing_regimes": 1.0
+        }
+      },
+      "top_by_return_min5trades": {
+        "label": "donchian_breakout_20",
+        "strategy_name": "donchian_breakout",
+        "allow_short_positions": true,
+        "status_code": 200,
+        "profit_loss_percent": 6.596468683172533,
+        "final_value": 10659.646868317253,
+        "sharpe_ratio": 0.7104299613405183,
+        "max_drawdown": -8.972177570128839,
+        "trades": 5,
+        "win_rate": 40.0,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold",
+          "quality_regime_consistency_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 3.0,
+          "passing_regimes": 1.0
+        }
+      }
+    },
+    "last_30d": {
+      "start_date": "2026-01-09",
+      "end_date": "2026-02-08",
+      "strategies": [
+        {
+          "label": "sma_crossover_3_8",
+          "strategy_name": "sma_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": -8.372453536128505,
+          "final_value": 9162.75464638715,
+          "sharpe_ratio": -2.1155519853454003,
+          "max_drawdown": -10.11089743712607,
+          "trades": 10,
+          "win_rate": 20.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 2.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "rsi_21_70_30",
+          "strategy_name": "rsi",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": -24.265682190810548,
+          "final_value": 7573.431780918945,
+          "sharpe_ratio": -3.279410031290327,
+          "max_drawdown": -30.90466854219208,
+          "trades": 1,
+          "win_rate": 0.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 2.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "ema_crossover_12_50",
+          "strategy_name": "ema_crossover",
+          "allow_short_positions": false,
+          "status_code": 200,
+          "profit_loss_percent": 0.0,
+          "final_value": 10000.0,
+          "sharpe_ratio": 0.0,
+          "max_drawdown": 0.0,
+          "trades": 0,
+          "win_rate": 0.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 2.0,
+            "passing_regimes": 0.0
+          }
+        },
+        {
+          "label": "donchian_breakout_20",
+          "strategy_name": "donchian_breakout",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": 16.370800607448764,
+          "final_value": 11637.080060744876,
+          "sharpe_ratio": 2.3345489766056375,
+          "max_drawdown": -7.193175221597375,
+          "trades": 3,
+          "win_rate": 66.66666666666666,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 2.0,
+            "passing_regimes": 1.0
+          }
+        },
+        {
+          "label": "bear_rally_short_8_30",
+          "strategy_name": "bear_rally_short",
+          "allow_short_positions": true,
+          "status_code": 200,
+          "profit_loss_percent": -26.110082594221424,
+          "final_value": 7388.991740577858,
+          "sharpe_ratio": -3.551711530839361,
+          "max_drawdown": -32.502773803621146,
+          "trades": 1,
+          "win_rate": 0.0,
+          "quality_gate_passed": false,
+          "quality_gate_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_gate_metrics": {
+            "walk_forward_folds": 0.0,
+            "sharpe_ratio_mean": 0.0,
+            "calmar_ratio_mean": 0.0,
+            "max_drawdown_abs_mean": 0.0,
+            "eligible_regimes": 2.0,
+            "passing_regimes": 0.0
+          }
+        }
+      ],
+      "top_by_return": {
+        "label": "donchian_breakout_20",
+        "strategy_name": "donchian_breakout",
+        "allow_short_positions": true,
+        "status_code": 200,
+        "profit_loss_percent": 16.370800607448764,
+        "final_value": 11637.080060744876,
+        "sharpe_ratio": 2.3345489766056375,
+        "max_drawdown": -7.193175221597375,
+        "trades": 3,
+        "win_rate": 66.66666666666666,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold",
+          "quality_regime_consistency_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 2.0,
+          "passing_regimes": 1.0
+        }
+      },
+      "top_by_return_min5trades": {
+        "label": "sma_crossover_3_8",
+        "strategy_name": "sma_crossover",
+        "allow_short_positions": false,
+        "status_code": 200,
+        "profit_loss_percent": -8.372453536128505,
+        "final_value": 9162.75464638715,
+        "sharpe_ratio": -2.1155519853454003,
+        "max_drawdown": -10.11089743712607,
+        "trades": 10,
+        "win_rate": 20.0,
+        "quality_gate_passed": false,
+        "quality_gate_reasons": [
+          "quality_walk_forward_folds_below_minimum",
+          "quality_sharpe_below_threshold",
+          "quality_calmar_below_threshold",
+          "quality_regime_consistency_below_threshold"
+        ],
+        "quality_gate_metrics": {
+          "walk_forward_folds": 0.0,
+          "sharpe_ratio_mean": 0.0,
+          "calmar_ratio_mean": 0.0,
+          "max_drawdown_abs_mean": 0.0,
+          "eligible_regimes": 2.0,
+          "passing_regimes": 0.0
+        }
+      }
+    }
+  }
+}

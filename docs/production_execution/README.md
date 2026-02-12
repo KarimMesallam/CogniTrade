@@ -41,3 +41,11 @@ If a task cannot be completed without architectural decisions or missing credent
 1. Mark task `blocked`.
 2. Record exact blocker in `WORKLOG.md`.
 3. Propose smallest unblocking options.
+
+## Deployment Artifacts
+
+For remote soak/prod hosts:
+1. `deploy/systemd/cognitrade-bot.service`
+2. `deploy/systemd/cognitrade-api.service`
+3. `deploy/.env.soak.template`
+4. `scripts/soak_daily_check.sh`

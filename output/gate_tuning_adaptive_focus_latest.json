@@ -1,0 +1,507 @@
+{
+  "generated_at": "2026-02-12T01:31:50.672532Z",
+  "tested": 36,
+  "passed": 20,
+  "rows": [
+    {
+      "min_conf": 0.6,
+      "momentum": 4,
+      "ret": 50.850667026431985,
+      "trades": 8,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.680943697548519,
+      "calmar_mean": 1.655751872153967,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 4,
+      "ret": 45.00154489858858,
+      "trades": 9,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.1660313102935596,
+      "calmar_mean": 1.0334572614304742,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 4,
+      "ret": 45.00154489858858,
+      "trades": 9,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.1660313102935596,
+      "calmar_mean": 1.0334572614304742,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 4,
+      "ret": 45.00154489858858,
+      "trades": 9,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.1660313102935596,
+      "calmar_mean": 1.0334572614304742,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 5,
+      "ret": 44.40861011754967,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9981892107738408,
+      "calmar_mean": 1.1176142685689625,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 5,
+      "ret": 44.40861011754967,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9981892107738408,
+      "calmar_mean": 1.1176142685689625,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 5,
+      "ret": 44.40861011754967,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9981892107738408,
+      "calmar_mean": 1.1176142685689625,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.6,
+      "momentum": 5,
+      "ret": 44.22323726905348,
+      "trades": 9,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.0672388132876605,
+      "calmar_mean": 0.9998418005927285,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.6,
+      "momentum": 6,
+      "ret": 44.22323726905348,
+      "trades": 9,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 2.0672388132876605,
+      "calmar_mean": 0.9998418005927285,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.6,
+      "momentum": 2,
+      "ret": 44.118869074255905,
+      "trades": 6,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.3143785191724562,
+      "calmar_mean": 1.0075468806340364,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.6,
+      "momentum": 8,
+      "ret": 42.11499345853866,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.915770142071355,
+      "calmar_mean": 1.0609416503321967,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 6,
+      "ret": 35.30021174652106,
+      "trades": 11,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9973645820800876,
+      "calmar_mean": 1.1178049906270076,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 6,
+      "ret": 35.30021174652106,
+      "trades": 11,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9973645820800876,
+      "calmar_mean": 1.1178049906270076,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 6,
+      "ret": 35.30021174652106,
+      "trades": 11,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.9973645820800876,
+      "calmar_mean": 1.1178049906270076,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 5,
+      "ret": 32.24716455984404,
+      "trades": 5,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.0393697662405206,
+      "calmar_mean": 0.7308213306252126,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 6,
+      "ret": 32.24716455984404,
+      "trades": 5,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.0393697662405206,
+      "calmar_mean": 0.7308213306252126,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 8,
+      "ret": 31.524946519980023,
+      "trades": 6,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.0393697662405206,
+      "calmar_mean": 0.7308213306252126,
+      "passing_regimes": 2.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 8,
+      "ret": 29.78500235435258,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.4420522294722522,
+      "calmar_mean": 0.8883059461197381,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 8,
+      "ret": 29.78500235435258,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.4420522294722522,
+      "calmar_mean": 0.8883059461197381,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 8,
+      "ret": 29.78500235435258,
+      "trades": 10,
+      "q_pass": true,
+      "q_reasons": [],
+      "sharpe_mean": 1.4420522294722522,
+      "calmar_mean": 0.8883059461197381,
+      "passing_regimes": 3.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 3,
+      "ret": 59.99768133824192,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 3.2736243839525354,
+      "calmar_mean": 1.3213652851825404,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 3,
+      "ret": 59.99768133824192,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 3.2736243839525354,
+      "calmar_mean": 1.3213652851825404,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 3,
+      "ret": 59.99768133824192,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 3.2736243839525354,
+      "calmar_mean": 1.3213652851825404,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.6,
+      "momentum": 3,
+      "ret": 59.99768133824192,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 3.2736243839525354,
+      "calmar_mean": 1.3213652851825404,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 5,
+      "ret": 36.86329537114783,
+      "trades": 7,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.0097233103537553,
+      "calmar_mean": 0.7725204156053639,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 6,
+      "ret": 36.86329537114783,
+      "trades": 7,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.0097233103537553,
+      "calmar_mean": 0.7725204156053639,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.4,
+      "momentum": 2,
+      "ret": 35.01351189545283,
+      "trades": 7,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.059274217045896,
+      "calmar_mean": 0.9445882178269092,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.5,
+      "momentum": 2,
+      "ret": 35.01351189545283,
+      "trades": 7,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.059274217045896,
+      "calmar_mean": 0.9445882178269092,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.55,
+      "momentum": 2,
+      "ret": 35.01351189545283,
+      "trades": 7,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.059274217045896,
+      "calmar_mean": 0.9445882178269092,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 8,
+      "ret": 33.43719296811358,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 0.6889879513821878,
+      "calmar_mean": 0.6641593791334166,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 3,
+      "ret": 26.666495482133307,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 2.7193458840225446,
+      "calmar_mean": 1.068237811633921,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 3,
+      "ret": 16.03046446685359,
+      "trades": 6,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.628190275114033,
+      "calmar_mean": 0.8795787538203623,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 4,
+      "ret": 15.682570579463992,
+      "trades": 8,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.8804953406000946,
+      "calmar_mean": 1.1321696371244094,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.65,
+      "momentum": 2,
+      "ret": 13.873398183666177,
+      "trades": 6,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 0.8594256450285668,
+      "calmar_mean": 0.8846928721246311,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 2,
+      "ret": 12.743248296615256,
+      "trades": 6,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.245369418878428,
+      "calmar_mean": 0.5155693328525002,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    },
+    {
+      "min_conf": 0.7,
+      "momentum": 4,
+      "ret": 12.540434589909546,
+      "trades": 6,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": 1.4960955137275505,
+      "calmar_mean": 0.7589350403807325,
+      "passing_regimes": 1.0,
+      "folds": 14.0,
+      "gap": 0.0
+    }
+  ]
+}

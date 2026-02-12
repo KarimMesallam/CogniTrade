@@ -1,0 +1,24 @@
+[Unit]
+Description=CogniTrade Trading Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cognitrade
+WorkingDirectory=/home/cognitrade/trading_bot
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/home/cognitrade/trading_bot/.env
+ExecStart=/home/cognitrade/trading_bot/venv/bin/python -m bot.main
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/cognitrade/trading_bot
+StandardOutput=append:/home/cognitrade/trading_bot/logs/cognitrade-bot.service.log
+StandardError=append:/home/cognitrade/trading_bot/logs/cognitrade-bot.service.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,78 @@
+{
+  "live-demo-20260209192612": {
+    "canary_passed": true,
+    "history": [
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 0.5,
+          "error_rate": 0.02,
+          "latency_p95_ms": 400.0,
+          "metadata": {
+            "demo": true
+          },
+          "sample_count": 150,
+          "total_return_pct": 0.3
+        },
+        "reasons": [],
+        "stage": "shadow",
+        "timestamp": "2026-02-09T19:26:13.144278"
+      },
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 2.5,
+          "error_rate": 0.03,
+          "latency_p95_ms": 650.0,
+          "metadata": {
+            "demo": true
+          },
+          "sample_count": 90,
+          "total_return_pct": 1.1
+        },
+        "reasons": [],
+        "stage": "canary",
+        "timestamp": "2026-02-09T19:26:13.163458"
+      },
+      {
+        "approved": false,
+        "metrics": {
+          "drawdown_pct": 2.5,
+          "error_rate": 0.03,
+          "latency_p95_ms": 650.0,
+          "metadata": {
+            "demo": true,
+            "quality_gate": {
+              "metrics": {
+                "calmar_ratio_mean": -0.983503605844007,
+                "eligible_regimes": 1.0,
+                "max_drawdown_abs_mean": 3.513794919704957,
+                "passing_regimes": 0.0,
+                "sharpe_ratio_mean": -0.4486551243516457,
+                "walk_forward_folds": 3.0
+              },
+              "passed": false,
+              "reasons": [
+                "quality_sharpe_below_threshold",
+                "quality_calmar_below_threshold",
+                "quality_regime_consistency_below_threshold"
+              ]
+            }
+          },
+          "sample_count": 90,
+          "total_return_pct": 1.1
+        },
+        "reasons": [
+          "quality_gate_not_passed",
+          "quality_gate:quality_sharpe_below_threshold",
+          "quality_gate:quality_calmar_below_threshold",
+          "quality_gate:quality_regime_consistency_below_threshold"
+        ],
+        "stage": "production",
+        "timestamp": "2026-02-09T19:26:13.182906"
+      }
+    ],
+    "production_passed": false,
+    "shadow_passed": true
+  }
+}

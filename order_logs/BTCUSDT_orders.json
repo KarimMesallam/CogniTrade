@@ -1,8 +1,50 @@
 [
   {
-    "timestamp": "2025-03-24T23:27:32.340523",
+    "timestamp": "2026-02-12T20:43:29.482016",
     "symbol": "BTCUSDT",
-    "order_id": 123,
+    "order_id": 123456,
+    "client_order_id": "test_client_order_id",
+    "action": "BUY",
+    "type": "MARKET",
+    "side": "BUY",
+    "quantity": "0.001",
+    "price": "50000.00",
+    "status": "NEW",
+    "fills": [
+      {
+        "price": "50000.00",
+        "qty": "0.001",
+        "commission": "0.000001",
+        "commissionAsset": "BTC"
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 123456,
+      "clientOrderId": "test_client_order_id",
+      "transactTime": 1617000000000,
+      "price": "50000.00",
+      "origQty": "0.001",
+      "executedQty": "0.001",
+      "status": "NEW",
+      "type": "MARKET",
+      "side": "BUY",
+      "fills": [
+        {
+          "price": "50000.00",
+          "qty": "0.001",
+          "commission": "0.000001",
+          "commissionAsset": "BTC"
+        }
+      ],
+      "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+    },
+    "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+  },
+  {
+    "timestamp": "2026-02-12T20:43:29.482204",
+    "symbol": "BTCUSDT",
+    "order_id": 123456,
     "client_order_id": "test_client_order_id",
     "action": "BUY",
     "type": "MARKET",
@@ -20,7 +62,7 @@
     ],
     "raw_response": {
       "symbol": "BTCUSDT",
-      "orderId": 123,
+      "orderId": 123456,
       "clientOrderId": "test_client_order_id",
       "transactTime": 1617000000000,
       "price": "50000.00",
@@ -36,8 +78,93 @@
           "commission": "0.000001",
           "commissionAsset": "BTC"
         }
-      ]
+      ],
+      "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
     },
-    "trade_id": "BTCUSDT_BUY_123_1742851652"
+    "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+  },
+  {
+    "timestamp": "2026-02-12T20:43:29.483608",
+    "symbol": "BTCUSDT",
+    "order_id": 123456,
+    "client_order_id": "test_client_order_id",
+    "action": "SHORT",
+    "type": "MARKET",
+    "side": "SELL",
+    "quantity": "0.001",
+    "price": "50000.0",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "50000.00",
+        "qty": "0.001",
+        "commission": "0.000001",
+        "commissionAsset": "BTC"
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 123456,
+      "clientOrderId": "test_client_order_id",
+      "transactTime": 1617000000000,
+      "price": "50000.0",
+      "origQty": "0.001",
+      "executedQty": "0.001",
+      "status": "FILLED",
+      "type": "MARKET",
+      "side": "SELL",
+      "fills": [
+        {
+          "price": "50000.00",
+          "qty": "0.001",
+          "commission": "0.000001",
+          "commissionAsset": "BTC"
+        }
+      ],
+      "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+    },
+    "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+  },
+  {
+    "timestamp": "2026-02-12T20:43:29.487735",
+    "symbol": "BTCUSDT",
+    "order_id": 123456,
+    "client_order_id": "test_client_order_id",
+    "action": "COVER",
+    "type": "MARKET",
+    "side": "BUY",
+    "quantity": "0.02",
+    "price": "50000.0",
+    "status": "FILLED",
+    "fills": [
+      {
+        "price": "50000.00",
+        "qty": "0.001",
+        "commission": "0.000001",
+        "commissionAsset": "BTC"
+      }
+    ],
+    "raw_response": {
+      "symbol": "BTCUSDT",
+      "orderId": 123456,
+      "clientOrderId": "test_client_order_id",
+      "transactTime": 1617000000000,
+      "price": "50000.0",
+      "origQty": "0.02",
+      "executedQty": "0.001",
+      "status": "FILLED",
+      "type": "MARKET",
+      "side": "BUY",
+      "fills": [
+        {
+          "price": "50000.00",
+          "qty": "0.001",
+          "commission": "0.000001",
+          "commissionAsset": "BTC"
+        }
+      ],
+      "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
+    },
+    "trade_id": "847502aa-2a61-5997-aa7b-d70b9c8022c6"
   }
 ]

@@ -1,0 +1,135 @@
+{
+  "generated_at_utc": "2026-02-12T18:37:54Z",
+  "candidate": {
+    "strategy_name": "donchian_breakout",
+    "strategy_params": {
+      "lookback_period": 7,
+      "breakout_buffer_bps": 10
+    },
+    "trade_mode": "FUTURES",
+    "allow_short_positions": true,
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "start_date": "2025-03-05",
+    "end_date": "2026-02-08",
+    "initial_capital": 10000.0,
+    "commission": 0.001
+  },
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "start_date": "2025-03-05",
+    "end_date": "2026-02-08",
+    "bar_count": 1553
+  },
+  "backtest_metrics": {
+    "final_equity": 12384.807523408383,
+    "profit_loss_percent": 23.848075234083826,
+    "sharpe_ratio": 0.5711214158558827,
+    "max_drawdown_pct": 21.223794051287033,
+    "trades": 30.0
+  },
+  "validation_summary": {
+    "walk_forward_folds": 6,
+    "walk_forward_summary": {
+      "calmar_ratio": {
+        "mean": 1.0619411043553562,
+        "std": 2.1294047303419332,
+        "min": -0.8964083210290935,
+        "max": 5.142461820559614,
+        "fold_count": 6.0
+      },
+      "max_drawdown_pct": {
+        "mean": 5.674260108867037,
+        "std": 1.6636315072130436,
+        "min": 2.811921498221227,
+        "max": 8.00692040790266,
+        "fold_count": 6.0
+      },
+      "sharpe_ratio": {
+        "mean": 1.594917836768729,
+        "std": 4.845802299347638,
+        "min": -3.5620075087666097,
+        "max": 9.865029668648603,
+        "fold_count": 6.0
+      },
+      "test_mean_return": {
+        "mean": 0.00026735323864845035,
+        "std": 0.0006153391909056427,
+        "min": -0.00038755268264232347,
+        "max": 0.0011538331172746394,
+        "fold_count": 6.0
+      },
+      "train_mean_return": {
+        "mean": 0.00015057208421215311,
+        "std": 9.971564795865185e-05,
+        "min": -6.679547180211965e-06,
+        "max": 0.00027875304756543257,
+        "fold_count": 6.0
+      }
+    },
+    "regime_slices": {
+      "BEAR": {
+        "sample_count": 261.0,
+        "mean_return": -9.586218810515469e-05,
+        "volatility": 0.008262366995613078,
+        "win_rate": 0.47509578544061304,
+        "sharpe_like": -0.011602267020582955
+      },
+      "SIDEWAYS": {
+        "sample_count": 216.0,
+        "mean_return": -0.0001331752770706183,
+        "volatility": 0.00583668645044175,
+        "win_rate": 0.5,
+        "sharpe_like": -0.022816931867316415
+      },
+      "BULL": {
+        "sample_count": 267.0,
+        "mean_return": 0.000518960079373949,
+        "volatility": 0.006366386886031319,
+        "win_rate": 0.5056179775280899,
+        "sharpe_like": 0.08151563652416646
+      },
+      "HIGH_VOLATILITY": {
+        "sample_count": 47.0,
+        "mean_return": 0.003508577513811393,
+        "volatility": 0.0289158273819588,
+        "win_rate": 0.48936170212765956,
+        "sharpe_like": 0.1213376144305132
+      }
+    }
+  },
+  "quality_gate": {
+    "passed": true,
+    "reasons": [],
+    "metrics": {
+      "walk_forward_folds": 6.0,
+      "sharpe_ratio_mean": 1.594917836768729,
+      "calmar_ratio_mean": 1.0619411043553562,
+      "max_drawdown_abs_mean": 5.674260108867037,
+      "eligible_regimes": 4.0,
+      "passing_regimes": 4.0
+    }
+  },
+  "promotion_gate": {
+    "passed": true,
+    "reasons": [],
+    "metrics": {
+      "gross_return_pct": 23.848075234083826,
+      "modeled_cost_pct": 0.0,
+      "net_return_pct": 23.848075234083826,
+      "total_trades": 30.0,
+      "sharpe_ratio": 0.5711214158558827,
+      "calmar_ratio": 1.1236480704842522,
+      "max_drawdown_abs_pct": 21.223794051287033
+    },
+    "thresholds": {
+      "min_total_trades": 25.0,
+      "min_net_return_pct": 1.0,
+      "min_sharpe_ratio": 0.2,
+      "min_calmar_ratio": 0.1,
+      "max_drawdown_pct": 25.0
+    }
+  },
+  "rollout_id": "candidate-don-7-10-20260212183754"
+}

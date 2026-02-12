@@ -1,0 +1,46 @@
+{
+  "symbol": "BTCUSDT",
+  "strategy": "rsi_cross_4h",
+  "window": {
+    "days": 240,
+    "start": "2025-06-13",
+    "end": "2026-02-08",
+    "candles": 1440,
+    "first_close": 104277.22,
+    "last_close": 69289.38,
+    "buy_hold_return_pct": -33.552716499346644
+  },
+  "dataset": {
+    "downloaded_candles_mainnet": 1441,
+    "downloaded_start": "2025-06-13 00:00:00",
+    "downloaded_end": "2026-02-08 00:00:00"
+  },
+  "assumptions": {
+    "initial_capital": 10000.0,
+    "position_size_pct": 0.95,
+    "effective_cost_rate_per_side": 0.0015,
+    "cost_model_note": "0.10% fee + 0.05% slippage proxy per side"
+  },
+  "result": {
+    "final_equity": 8199.783185088083,
+    "total_return_pct": -18.00216814911917,
+    "annualized_return_pct": -7.646983752981264,
+    "max_drawdown_pct": -28.852223057089738,
+    "sharpe_ratio": -0.7397936397232565,
+    "sortino_ratio": -0.6508663200410448,
+    "calmar_ratio": -0.26503967260513056,
+    "win_rate_pct": 27.27272727272727,
+    "profit_factor": 0.32113078626613506,
+    "total_trades": 11,
+    "winning_trades": 3,
+    "losing_trades": 8
+  },
+  "trade_diagnostics": {
+    "completed_trades": 11,
+    "avg_trade_pl": -163.6560740829017,
+    "median_trade_pl": -116.04242035812658,
+    "best_trade_pl": 533.6322215808487,
+    "worst_trade_pl": -1151.4745879330935,
+    "avg_trade_roi_pct": -1.7751242718873939
+  }
+}

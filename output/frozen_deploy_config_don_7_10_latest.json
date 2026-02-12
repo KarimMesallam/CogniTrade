@@ -1,0 +1,133 @@
+{
+  "generated_at_utc": "2026-02-12T18:37:54.712176",
+  "trade_mode": "FUTURES",
+  "regime": {
+    "enabled": true,
+    "lookback_candles": 50,
+    "trend_threshold_pct": 0.02,
+    "sideways_threshold_pct": 0.01,
+    "high_volatility_threshold_pct": 0.015
+  },
+  "policy": {
+    "enabled": true,
+    "default_regime": "SIDEWAYS",
+    "default_size_multiplier": 1.0,
+    "min_switch_confidence": 0.55,
+    "switch_hysteresis_confirmations": 2,
+    "switch_cooldown_seconds": 900,
+    "max_strategy_turnover_ratio": 1.0,
+    "switch_shadow_mode": false,
+    "regimes": {}
+  },
+  "risk_engine": {
+    "enabled": true,
+    "max_drawdown_pct": 20.0,
+    "max_gross_exposure_usd": 300.0,
+    "daily_loss_limit_usd": 100.0,
+    "kill_switch_enabled": true,
+    "allow_risk_reducing_orders": true
+  },
+  "reconciliation": {
+    "enabled": true,
+    "run_on_startup": true,
+    "interval_loops": 5,
+    "position_tolerance": 1e-06
+  },
+  "observability": {
+    "enabled": true,
+    "max_events": 4000,
+    "latency_alert_ms": 2500.0,
+    "error_rate_alert_threshold": 0.25,
+    "error_rate_min_events": 20,
+    "persistence_enabled": true,
+    "persistence_db_url": "sqlite:///data/observability.db"
+  },
+  "monitoring": {
+    "enabled": true,
+    "window_size": 50,
+    "min_samples": 20,
+    "derisk_hit_rate_threshold": 0.45,
+    "disable_hit_rate_threshold": 0.35,
+    "derisk_mean_return_threshold": -0.0002,
+    "derisk_size_multiplier": 0.5,
+    "disable_sticky": true
+  },
+  "rollout": {
+    "enabled": true,
+    "state_store_path": "data/rollout_gate_state.json",
+    "enforce_production_gate": false,
+    "required_rollout_id": "",
+    "min_shadow_samples": 50,
+    "max_shadow_error_rate": 0.2,
+    "min_canary_samples": 30,
+    "max_canary_error_rate": 0.15,
+    "max_canary_drawdown_pct": 8.0,
+    "min_canary_total_return_pct": -1.0,
+    "max_canary_latency_p95_ms": 3000.0,
+    "require_quality_gate": true
+  },
+  "quality_gate": {
+    "enabled": true,
+    "min_walk_forward_folds": 3,
+    "min_sharpe_ratio": 0.2,
+    "min_calmar_ratio": 0.1,
+    "max_drawdown_pct": 25.0,
+    "min_regime_samples": 20,
+    "min_regime_win_rate": 0.45,
+    "min_regimes_passing": 2
+  },
+  "promotion_benchmarks": {
+    "min_total_trades": 25,
+    "min_net_return_pct": 1.0,
+    "min_sharpe_ratio": 0.2,
+    "min_calmar_ratio": 0.1,
+    "max_drawdown_pct": 25.0,
+    "require_quality_gate": true
+  },
+  "selected_candidate": {
+    "strategy_name": "donchian_breakout",
+    "strategy_params": {
+      "lookback_period": 7,
+      "breakout_buffer_bps": 10
+    },
+    "trade_mode": "FUTURES",
+    "allow_short_positions": true,
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "start_date": "2025-03-05",
+    "end_date": "2026-02-08",
+    "initial_capital": 10000.0,
+    "commission": 0.001
+  },
+  "selected_candidate_backtest": {
+    "profit_loss_percent": 23.848075234083826,
+    "sharpe_ratio": 0.5711214158558827,
+    "max_drawdown_pct": 21.223794051287033,
+    "trades": 30.0,
+    "quality_gate": {
+      "passed": true,
+      "reasons": [],
+      "metrics": {
+        "walk_forward_folds": 6.0,
+        "sharpe_ratio_mean": 1.594917836768729,
+        "calmar_ratio_mean": 1.0619411043553562,
+        "max_drawdown_abs_mean": 5.674260108867037,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 4.0
+      }
+    },
+    "promotion_gate": {
+      "passed": true,
+      "reasons": [],
+      "metrics": {
+        "gross_return_pct": 23.848075234083826,
+        "modeled_cost_pct": 0.0,
+        "net_return_pct": 23.848075234083826,
+        "total_trades": 30.0,
+        "sharpe_ratio": 0.5711214158558827,
+        "calmar_ratio": 1.1236480704842522,
+        "max_drawdown_abs_pct": 21.223794051287033
+      }
+    }
+  }
+}

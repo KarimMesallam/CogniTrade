@@ -1,0 +1,356 @@
+{
+  "rows": [
+    {
+      "label": "bear_8_30_65_35",
+      "ret": 31.542853966461315,
+      "trades": 6,
+      "qg_passed": false,
+      "sharpe_mean": -0.011372636542633917,
+      "calmar_mean": -0.15619780982308518,
+      "passing_regimes": 3.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_8_50",
+      "ret": 29.723850306789334,
+      "trades": 13,
+      "qg_passed": false,
+      "sharpe_mean": 0.01326157204431073,
+      "calmar_mean": 0.31982210956269436,
+      "passing_regimes": 2.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_10_50",
+      "ret": 26.71660319078466,
+      "trades": 12,
+      "qg_passed": false,
+      "sharpe_mean": 0.0004496796611307954,
+      "calmar_mean": 0.17284991433333569,
+      "passing_regimes": 2.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold"
+      ]
+    },
+    {
+      "label": "bear_5_20_65_35",
+      "ret": 23.428559625381475,
+      "trades": 3,
+      "qg_passed": false,
+      "sharpe_mean": -0.01947980120868568,
+      "calmar_mean": -0.18821305364402133,
+      "passing_regimes": 3.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold"
+      ]
+    },
+    {
+      "label": "ema_8_30",
+      "ret": 22.39521007480738,
+      "trades": 18,
+      "qg_passed": false,
+      "sharpe_mean": -0.015797168050316668,
+      "calmar_mean": 0.27785829652984867,
+      "passing_regimes": 2.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold"
+      ]
+    },
+    {
+      "label": "donch_20_0",
+      "ret": 20.936352094595968,
+      "trades": 16,
+      "qg_passed": false,
+      "sharpe_mean": 0.01761652727003649,
+      "calmar_mean": 0.39994774357303303,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "ret": 20.32590705363076,
+      "trades": 31,
+      "qg_passed": false,
+      "sharpe_mean": -0.005396968178809463,
+      "calmar_mean": 0.26801253999871427,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "donch_20_5",
+      "ret": 19.587212083941722,
+      "trades": 16,
+      "qg_passed": false,
+      "sharpe_mean": 0.01761652727003613,
+      "calmar_mean": 0.3999477435730353,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "rsi_21_65_35",
+      "ret": 19.07196797298915,
+      "trades": 7,
+      "qg_passed": false,
+      "sharpe_mean": -0.02368120678516948,
+      "calmar_mean": -0.16290178861069102,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "bear_12_50_70_30",
+      "ret": 17.621572762183277,
+      "trades": 6,
+      "qg_passed": false,
+      "sharpe_mean": -0.03379425772189199,
+      "calmar_mean": -0.30277177547233947,
+      "passing_regimes": 1.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "bear_8_50_70_30",
+      "ret": 17.619699362549873,
+      "trades": 6,
+      "qg_passed": false,
+      "sharpe_mean": -0.03392516554237251,
+      "calmar_mean": -0.2951589410271369,
+      "passing_regimes": 3.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_5_30",
+      "ret": 16.98329194369262,
+      "trades": 27,
+      "qg_passed": false,
+      "sharpe_mean": 0.006931050198432134,
+      "calmar_mean": 0.24062046077880025,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "rsi_14_70_30",
+      "ret": 16.369819258941316,
+      "trades": 11,
+      "qg_passed": false,
+      "sharpe_mean": -0.054774858684102784,
+      "calmar_mean": -0.4449074566450731,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "donch_10_0",
+      "ret": 10.251315623002737,
+      "trades": 33,
+      "qg_passed": false,
+      "sharpe_mean": 0.0017126437719460399,
+      "calmar_mean": 0.545529413134679,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "donch_10_5",
+      "ret": 9.2944814415172,
+      "trades": 28,
+      "qg_passed": false,
+      "sharpe_mean": -0.00725817187341203,
+      "calmar_mean": 0.4958924327738696,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "rsi_21_70_30",
+      "ret": 8.429610097067616,
+      "trades": 6,
+      "qg_passed": false,
+      "sharpe_mean": -0.011550732874306208,
+      "calmar_mean": -0.1439461303095659,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "ema_5_20",
+      "ret": 7.558428993780327,
+      "trades": 32,
+      "qg_passed": false,
+      "sharpe_mean": -0.02085480606529737,
+      "calmar_mean": 0.04122551311501383,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "ema_12_50",
+      "ret": 4.078447610928924,
+      "trades": 10,
+      "qg_passed": false,
+      "sharpe_mean": -0.009731710737013396,
+      "calmar_mean": 0.04147676013475885,
+      "passing_regimes": 1.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_3_20",
+      "ret": 2.6965142698015008,
+      "trades": 36,
+      "qg_passed": false,
+      "sharpe_mean": -0.028652488694778037,
+      "calmar_mean": 0.08448223237585521,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "donch_30_5",
+      "ret": -0.8414420983447416,
+      "trades": 15,
+      "qg_passed": false,
+      "sharpe_mean": -0.011827392929954744,
+      "calmar_mean": 0.05769862823403749,
+      "passing_regimes": 1.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "rsi_14_65_35",
+      "ret": -4.395483510826398,
+      "trades": 18,
+      "qg_passed": false,
+      "sharpe_mean": -0.04980794964424941,
+      "calmar_mean": -0.08400775181137231,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "ema_20_100",
+      "ret": -9.014636041485083,
+      "trades": 4,
+      "qg_passed": false,
+      "sharpe_mean": -0.024644501485733158,
+      "calmar_mean": 0.5296640131413803,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    },
+    {
+      "label": "sma_10_100",
+      "ret": -10.632817352769615,
+      "trades": 6,
+      "qg_passed": false,
+      "sharpe_mean": -0.047135072536905874,
+      "calmar_mean": -0.3120345561345959,
+      "passing_regimes": 0.0,
+      "eligible_regimes": 4.0,
+      "folds": 6.0,
+      "reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ]
+    }
+  ]
+}

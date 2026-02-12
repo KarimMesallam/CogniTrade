@@ -111,11 +111,20 @@ Also configure your Binance testnet credentials and bind API to localhost or pri
 
 ## 5) Keep It Running Continuously (systemd)
 
-Create `/etc/systemd/system/cognitrade-bot.service`:
+Preferred: install the versioned unit files from this repository:
+
+```bash
+sudo cp deploy/systemd/cognitrade-bot.service /etc/systemd/system/
+sudo cp deploy/systemd/cognitrade-api.service /etc/systemd/system/
+```
+
+If you need to customize paths/users, edit the unit files under `deploy/systemd/` and then copy them to `/etc/systemd/system/`.
+
+Reference template for bot service:
 
 ```ini
 [Unit]
-Description=CogniTrade Bot
+Description=CogniTrade Trading Bot
 After=network-online.target
 Wants=network-online.target
 
@@ -124,17 +133,23 @@ Type=simple
 User=cognitrade
 WorkingDirectory=/home/cognitrade/trading_bot
 Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/home/cognitrade/trading_bot/.env
 ExecStart=/home/cognitrade/trading_bot/venv/bin/python -m bot.main
 Restart=always
 RestartSec=10
-StandardOutput=append:/home/cognitrade/trading_bot/logs/cognitrade-service.log
-StandardError=append:/home/cognitrade/trading_bot/logs/cognitrade-service.log
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/cognitrade/trading_bot
+StandardOutput=append:/home/cognitrade/trading_bot/logs/cognitrade-bot.service.log
+StandardError=append:/home/cognitrade/trading_bot/logs/cognitrade-bot.service.log
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Create `/etc/systemd/system/cognitrade-api.service`:
+Reference template for API service:
 
 ```ini
 [Unit]
@@ -147,11 +162,17 @@ Type=simple
 User=cognitrade
 WorkingDirectory=/home/cognitrade/trading_bot/api
 Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/home/cognitrade/trading_bot/.env
 ExecStart=/home/cognitrade/trading_bot/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=10
-StandardOutput=append:/home/cognitrade/trading_bot/logs/cognitrade-api.log
-StandardError=append:/home/cognitrade/trading_bot/logs/cognitrade-api.log
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/cognitrade/trading_bot
+StandardOutput=append:/home/cognitrade/trading_bot/logs/cognitrade-api.service.log
+StandardError=append:/home/cognitrade/trading_bot/logs/cognitrade-api.service.log
 
 [Install]
 WantedBy=multi-user.target
@@ -203,36 +224,41 @@ cp output/go_no_go_don_7_10_latest.json output/soak_baseline/
 
 Run once per day (same UTC hour preferred):
 
-1. Service uptime and restarts:
+1. Run the automated daily collector:
+```bash
+./scripts/soak_daily_check.sh --strict
+```
+
+2. Service uptime and restarts:
 ```bash
 systemctl show cognitrade-bot.service -p ActiveState -p NRestarts
 systemctl show cognitrade-api.service -p ActiveState -p NRestarts
 ```
 
-2. Pull observability snapshot:
+3. Pull observability snapshot:
 ```bash
 curl -s "http://127.0.0.1:8000/observability/dashboard?window_minutes=1440" \
   -H "X-API-Key: <read-key>" \
   > output/soak_day_$(date -u +%Y%m%d)_dashboard.json
 ```
 
-3. Pull recent events:
+4. Pull recent events:
 ```bash
 curl -s "http://127.0.0.1:8000/observability/events?limit=500" \
   -H "X-API-Key: <read-key>" \
   > output/soak_day_$(date -u +%Y%m%d)_events.json
 ```
 
-4. Confirm rollout status:
+5. Confirm rollout status:
 ```bash
 curl -s "http://127.0.0.1:8000/rollout/status/${ROLLOUT_REQUIRED_ID}" \
   -H "X-API-Key: <admin-key>" \
   > output/soak_day_$(date -u +%Y%m%d)_rollout_status.json
 ```
 
-5. Record reconciliation/risk alerts from DB/logs.
+6. Record reconciliation/risk alerts from DB/logs.
 
-6. Append daily summary to `docs/production_execution/WORKLOG.md`:
+7. Append daily summary to `docs/production_execution/WORKLOG.md`:
    - uptime
    - restarts
    - error_rate
@@ -294,6 +320,7 @@ Do not skip stages.
 ```bash
 # from project root on server
 ./scripts/run_tests_local.sh -q
+./scripts/soak_daily_check.sh --strict
 curl -s http://127.0.0.1:8000/health | jq .
 curl -s "http://127.0.0.1:8000/observability/dashboard?window_minutes=60" -H "X-API-Key: <read-key>" | jq .
 curl -s "http://127.0.0.1:8000/rollout/status/${ROLLOUT_REQUIRED_ID}" -H "X-API-Key: <admin-key>" | jq .

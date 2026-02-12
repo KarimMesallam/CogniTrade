@@ -1,0 +1,39 @@
+{
+  "symbol": "BTCUSDT",
+  "strategy": "sma_crossover_4h_10_50",
+  "window": {
+    "start": "2025-06-13",
+    "end": "2026-02-08",
+    "candles": 1440,
+    "first_close": 104277.22,
+    "last_close": 69289.38,
+    "buy_hold_return_pct": -33.552716499346644
+  },
+  "assumptions": {
+    "initial_capital": 10000.0,
+    "position_size_pct": 0.95,
+    "effective_cost_rate_per_side": 0.0015
+  },
+  "result": {
+    "final_equity": 10177.89719678655,
+    "total_return_pct": 1.778971967865491,
+    "annualized_return_pct": 1.0927407882242288,
+    "max_drawdown_pct": -11.609687728601713,
+    "sharpe_ratio": 0.12786380487379878,
+    "sortino_ratio": 0.11615734947742622,
+    "calmar_ratio": 0.09412318520266007,
+    "win_rate_pct": 36.36363636363637,
+    "profit_factor": 1.1140434170421518,
+    "total_trades": 11,
+    "winning_trades": 4,
+    "losing_trades": 7
+  },
+  "trade_diagnostics": {
+    "completed_trades": 11,
+    "avg_trade_pl": 16.172472435140744,
+    "median_trade_pl": -64.43359440249615,
+    "best_trade_pl": 785.4678117334228,
+    "worst_trade_pl": -493.84427639903805,
+    "avg_trade_roi_pct": 0.2393400976955123
+  }
+}

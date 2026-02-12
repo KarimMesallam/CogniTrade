@@ -1,0 +1,556 @@
+{
+  "generated_at_utc": "2026-02-12T14:05:09Z",
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "data_start": "2025-03-05",
+    "data_end": "2026-02-08"
+  },
+  "rows": [
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_90d",
+      "start": "2025-11-10",
+      "end": "2026-02-08",
+      "return_pct": 14.439478965228918,
+      "trades": 14.0,
+      "sharpe": 0.7103025996053436,
+      "drawdown_pct": 21.256823761198227,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_120d",
+      "start": "2025-10-11",
+      "end": "2026-02-08",
+      "return_pct": 24.990460315238725,
+      "trades": 20.0,
+      "sharpe": 0.8469214221094447,
+      "drawdown_pct": 21.256823761198216,
+      "quality_pass": true,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor"
+      ]
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_150d",
+      "start": "2025-09-11",
+      "end": "2026-02-08",
+      "return_pct": 51.68398337600091,
+      "trades": 25.0,
+      "sharpe": 1.2617907345145916,
+      "drawdown_pct": 21.256823761198223,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_180d",
+      "start": "2025-08-12",
+      "end": "2026-02-08",
+      "return_pct": 27.677819300116024,
+      "trades": 30.0,
+      "sharpe": 0.7567443913563924,
+      "drawdown_pct": 21.256823761198216,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_240d",
+      "start": "2025-06-13",
+      "end": "2026-02-08",
+      "return_pct": 21.11457272459902,
+      "trades": 30.0,
+      "sharpe": 0.6490035976776872,
+      "drawdown_pct": 18.783003347515614,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "last_300d",
+      "start": "2025-04-14",
+      "end": "2026-02-08",
+      "return_pct": 21.11457272459902,
+      "trades": 30.0,
+      "sharpe": 0.6490035976776872,
+      "drawdown_pct": 18.783003347515614,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "first_half",
+      "start": "2025-03-05",
+      "end": "2025-08-22",
+      "return_pct": 3.7912785434536636,
+      "trades": 14.0,
+      "sharpe": 0.23486415890485424,
+      "drawdown_pct": 16.709289405009983,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "second_half",
+      "start": "2025-08-22",
+      "end": "2026-02-08",
+      "return_pct": 32.952137940586034,
+      "trades": 31.0,
+      "sharpe": 0.8476830966027408,
+      "drawdown_pct": 21.256823761198227,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_7_10",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 7,
+        "breakout_buffer_bps": 10
+      },
+      "window": "full_4h",
+      "start": "2025-03-05",
+      "end": "2026-02-08",
+      "return_pct": 23.848075234083826,
+      "trades": 30.0,
+      "sharpe": 0.5711214158558827,
+      "drawdown_pct": 21.223794051287033,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_90d",
+      "start": "2025-11-10",
+      "end": "2026-02-08",
+      "return_pct": 10.72547353831802,
+      "trades": 14.0,
+      "sharpe": 0.5447701643858576,
+      "drawdown_pct": 21.042664301589966,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_120d",
+      "start": "2025-10-11",
+      "end": "2026-02-08",
+      "return_pct": 22.29530181065289,
+      "trades": 20.0,
+      "sharpe": 0.7542114279326445,
+      "drawdown_pct": 21.042664301589955,
+      "quality_pass": true,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor"
+      ]
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_150d",
+      "start": "2025-09-11",
+      "end": "2026-02-08",
+      "return_pct": 37.483141109288155,
+      "trades": 26.0,
+      "sharpe": 0.9603657835237392,
+      "drawdown_pct": 21.042664301589898,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_180d",
+      "start": "2025-08-12",
+      "end": "2026-02-08",
+      "return_pct": 20.61914707736056,
+      "trades": 30.0,
+      "sharpe": 0.5892851901773501,
+      "drawdown_pct": 21.042664301589937,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_240d",
+      "start": "2025-06-13",
+      "end": "2026-02-08",
+      "return_pct": 16.732718697026687,
+      "trades": 34.0,
+      "sharpe": 0.5292924631504148,
+      "drawdown_pct": 18.53119919574918,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "last_300d",
+      "start": "2025-04-14",
+      "end": "2026-02-08",
+      "return_pct": 16.732718697026687,
+      "trades": 34.0,
+      "sharpe": 0.5292924631504148,
+      "drawdown_pct": 18.53119919574918,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "first_half",
+      "start": "2025-03-05",
+      "end": "2025-08-22",
+      "return_pct": 7.21538995073688,
+      "trades": 17.0,
+      "sharpe": 0.3585558563238177,
+      "drawdown_pct": 14.584535892971198,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "second_half",
+      "start": "2025-08-22",
+      "end": "2026-02-08",
+      "return_pct": 24.882315576749242,
+      "trades": 30.0,
+      "sharpe": 0.6636706833830388,
+      "drawdown_pct": 21.042664301589973,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "don_9_0",
+      "strategy_name": "donchian_breakout",
+      "params": {
+        "lookback_period": 9,
+        "breakout_buffer_bps": 0
+      },
+      "window": "full_4h",
+      "start": "2025-03-05",
+      "end": "2026-02-08",
+      "return_pct": 22.857938871376753,
+      "trades": 32.0,
+      "sharpe": 0.5546923873186895,
+      "drawdown_pct": 19.998266977045272,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_90d",
+      "start": "2025-11-10",
+      "end": "2026-02-08",
+      "return_pct": -10.845495110922311,
+      "trades": 12.0,
+      "sharpe": -0.8367833126068318,
+      "drawdown_pct": 19.056956411185336,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_120d",
+      "start": "2025-10-11",
+      "end": "2026-02-08",
+      "return_pct": -13.574771669620478,
+      "trades": 17.0,
+      "sharpe": -0.743131269361996,
+      "drawdown_pct": 21.278782772185952,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_150d",
+      "start": "2025-09-11",
+      "end": "2026-02-08",
+      "return_pct": -7.534369254668309,
+      "trades": 19.0,
+      "sharpe": -0.30592258669543104,
+      "drawdown_pct": 21.278782772186027,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_180d",
+      "start": "2025-08-12",
+      "end": "2026-02-08",
+      "return_pct": -9.752323997565654,
+      "trades": 24.0,
+      "sharpe": -0.3664431739385025,
+      "drawdown_pct": 21.27878277218602,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_240d",
+      "start": "2025-06-13",
+      "end": "2026-02-08",
+      "return_pct": -1.4901524822760803,
+      "trades": 28.0,
+      "sharpe": -0.019588364567951835,
+      "drawdown_pct": 17.51626528572655,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "last_300d",
+      "start": "2025-04-14",
+      "end": "2026-02-08",
+      "return_pct": -1.4901524822760803,
+      "trades": 28.0,
+      "sharpe": -0.019588364567951835,
+      "drawdown_pct": 17.51626528572655,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "first_half",
+      "start": "2025-03-05",
+      "end": "2025-08-22",
+      "return_pct": 13.54123087238886,
+      "trades": 20.0,
+      "sharpe": 0.5810118866116815,
+      "drawdown_pct": 13.737331899943264,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "second_half",
+      "start": "2025-08-22",
+      "end": "2026-02-08",
+      "return_pct": -7.941571446759826,
+      "trades": 24.0,
+      "sharpe": -0.28651975803231367,
+      "drawdown_pct": 21.27878277218602,
+      "quality_pass": false,
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "sma_3_30",
+      "strategy_name": "sma_crossover",
+      "params": {
+        "short_period": 3,
+        "long_period": 30
+      },
+      "window": "full_4h",
+      "start": "2025-03-05",
+      "end": "2026-02-08",
+      "return_pct": 17.34114149432433,
+      "trades": 31.0,
+      "sharpe": 0.4809361779187458,
+      "drawdown_pct": 17.516265285726554,
+      "quality_pass": true,
+      "promotion_pass": true,
+      "promotion_reasons": []
+    }
+  ]
+}

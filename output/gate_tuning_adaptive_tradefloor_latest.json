@@ -1,0 +1,1514 @@
+{
+  "generated_at": "2026-02-12T01:43:50.218597Z",
+  "tested": 72,
+  "q_pass": 0,
+  "promo_pass": 0,
+  "rows": [
+    {
+      "label": "t0.01_hv0.012_b2_5_s2_5_d5",
+      "ret": 10.438189977657474,
+      "trades": 27,
+      "api_sharpe": 0.31806894831793114,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.762056074997432,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s2_5_d5",
+      "ret": 8.255256504738554,
+      "trades": 27,
+      "api_sharpe": 0.26846804293382814,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.2537608255176198,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s2_5_d8",
+      "ret": 8.255256504738554,
+      "trades": 27,
+      "api_sharpe": 0.26846804293382814,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.2537608255176198,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s2_5_d5",
+      "ret": 7.611989544420012,
+      "trades": 27,
+      "api_sharpe": 0.25254892499700554,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.8175796400609149,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s2_5_d5",
+      "ret": 5.484927130859632,
+      "trades": 27,
+      "api_sharpe": 0.20519055864212785,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.3092843905811433,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s3_8_d5",
+      "ret": -12.793146586993354,
+      "trades": 27,
+      "api_sharpe": -0.23716804164010744,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.1993912339253883,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s3_8_d5",
+      "ret": -14.516929541085702,
+      "trades": 27,
+      "api_sharpe": -0.27879202852424245,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.6484095969446106,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s5_10_d5",
+      "ret": -17.348180574695217,
+      "trades": 27,
+      "api_sharpe": -0.3588640384328569,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.751145669984914,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s5_10_d5",
+      "ret": -18.9819259957726,
+      "trades": 27,
+      "api_sharpe": -0.39902545360952474,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -3.189711641806936,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b2_5_s2_5_d8",
+      "ret": 12.304849751853162,
+      "trades": 26,
+      "api_sharpe": 0.3559683750419936,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.7626974832174163,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s2_5_d8",
+      "ret": 3.117458318816043,
+      "trades": 26,
+      "api_sharpe": 0.15234122204902256,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.4148273432489256,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b2_5_s3_8_d5",
+      "ret": -9.075974445972115,
+      "trades": 26,
+      "api_sharpe": -0.14837535610305086,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.9991371356573742,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s2_5_d5",
+      "ret": -9.781580668661118,
+      "trades": 26,
+      "api_sharpe": -0.3314944375295783,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.6879416869259576,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s3_8_d5",
+      "ret": -10.87324007124158,
+      "trades": 26,
+      "api_sharpe": -0.19201391005048052,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.44815549867656,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s3_8_d8",
+      "ret": -10.87324007124158,
+      "trades": 26,
+      "api_sharpe": -0.19201391005048052,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.44815549867656,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s3_8_d5",
+      "ret": -17.23214939166166,
+      "trades": 26,
+      "api_sharpe": -0.676055498180366,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.085691358911082,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s3_8_d8",
+      "ret": -17.453136140584903,
+      "trades": 26,
+      "api_sharpe": -0.3599966224045102,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.7112464193219705,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b2_5_s5_10_d5",
+      "ret": -18.73830502576412,
+      "trades": 26,
+      "api_sharpe": -0.40304677369188996,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.7746586798485025,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s5_10_d5",
+      "ret": -20.34457850671056,
+      "trades": 26,
+      "api_sharpe": -0.44308134500900326,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -3.213224651670462,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b2_5_s5_10_d8",
+      "ret": -20.34457850671056,
+      "trades": 26,
+      "api_sharpe": -0.44308134500900326,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -3.213224651670462,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s5_10_d5",
+      "ret": -21.594657977508877,
+      "trades": 26,
+      "api_sharpe": -0.869657939246405,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6706831602535532,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b2_5_s5_10_d8",
+      "ret": -21.764767116158644,
+      "trades": 26,
+      "api_sharpe": -0.4800219861978132,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -3.252548464184293,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s2_5_d8",
+      "ret": 6.974857731556932,
+      "trades": 25,
+      "api_sharpe": 0.23845663335095008,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.0932958619236315,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b2_5_s3_8_d8",
+      "ret": -7.539148995971755,
+      "trades": 25,
+      "api_sharpe": -0.10404139340198552,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.003209855216483,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s2_5_d5",
+      "ret": -8.101803289168092,
+      "trades": 25,
+      "api_sharpe": -0.24854922435526997,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.8438027057269536,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s3_8_d8",
+      "ret": -14.365188566756496,
+      "trades": 25,
+      "api_sharpe": -0.27351258757075736,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.3475102318473122,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s3_8_d5",
+      "ret": -15.691094203246847,
+      "trades": 25,
+      "api_sharpe": -0.5769370694403044,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.224011122362858,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b2_5_s5_10_d8",
+      "ret": -17.364795217046286,
+      "trades": 25,
+      "api_sharpe": -0.35614117939304996,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.7817244540240917,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b2_5_s5_10_d8",
+      "ret": -18.838110835394353,
+      "trades": 25,
+      "api_sharpe": -0.3935612544657606,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.907522375841889,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s5_10_d5",
+      "ret": -20.13482836691575,
+      "trades": 25,
+      "api_sharpe": -0.7648875735443675,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.7620569033062756,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s2_5_d5",
+      "ret": 6.6039412973712395,
+      "trades": 24,
+      "api_sharpe": 0.23240166602416376,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.9568116903549237,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s2_5_d5",
+      "ret": -4.248115291322028,
+      "trades": 24,
+      "api_sharpe": -0.11174147205214802,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.9604124937967442,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s2_5_d8",
+      "ret": -10.169406129968557,
+      "trades": 24,
+      "api_sharpe": -0.33800913424793183,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6300396944422861,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s2_5_d8",
+      "ret": -10.169406129968557,
+      "trades": 24,
+      "api_sharpe": -0.33800913424793183,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6300396944422861,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s3_8_d5",
+      "ret": -10.82670901123396,
+      "trades": 24,
+      "api_sharpe": -0.39893262349781083,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.8744626613959344,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s3_8_d8",
+      "ret": -17.537960873866304,
+      "trades": 24,
+      "api_sharpe": -0.6685302489227348,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.4060961766036517,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s3_8_d8",
+      "ret": -17.537960873866304,
+      "trades": 24,
+      "api_sharpe": -0.6685302489227348,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.4060961766036517,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s5_10_d5",
+      "ret": -19.065333837110266,
+      "trades": 24,
+      "api_sharpe": -0.8213577874446744,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.9154743554835287,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b5_10_s5_10_d8",
+      "ret": -21.884350819360225,
+      "trades": 24,
+      "api_sharpe": -0.857470413124775,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.9825737990430377,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b5_10_s5_10_d8",
+      "ret": -21.884350819360225,
+      "trades": 24,
+      "api_sharpe": -0.857470413124775,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.9825737990430377,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s2_5_d8",
+      "ret": -2.465310281330076,
+      "trades": 23,
+      "api_sharpe": -0.035924642086806464,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.7215211082157412,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s3_8_d5",
+      "ret": -7.867069033225707,
+      "trades": 23,
+      "api_sharpe": -0.11788375486499753,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.8256137103222043,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s3_8_d8",
+      "ret": -9.166390883649074,
+      "trades": 23,
+      "api_sharpe": -0.30880687352194125,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.5942331970554492,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s5_10_d5",
+      "ret": -12.826663448051894,
+      "trades": 23,
+      "api_sharpe": -0.248375340735557,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.4247384106559786,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b5_10_s5_10_d8",
+      "ret": -17.558410722685768,
+      "trades": 23,
+      "api_sharpe": -0.7077045308897434,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.5705049900377366,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s2_5_d5",
+      "ret": 19.842107743505714,
+      "trades": 22,
+      "api_sharpe": 0.5176283635242765,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.9406224863139866,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s2_5_d8",
+      "ret": 19.842107743505714,
+      "trades": 22,
+      "api_sharpe": 0.5176283635242765,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.9406224863139866,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s3_8_d5",
+      "ret": 11.608405192573045,
+      "trades": 22,
+      "api_sharpe": 0.34716415022992175,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.7166789684753673,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s3_8_d8",
+      "ret": 11.608405192573045,
+      "trades": 22,
+      "api_sharpe": 0.34716415022992175,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.7166789684753673,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s2_5_d5",
+      "ret": 9.796719083001044,
+      "trades": 22,
+      "api_sharpe": 0.3020787773769982,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.7715091652715798,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s2_5_d8",
+      "ret": 7.064691620532722,
+      "trades": 22,
+      "api_sharpe": 0.2426794541279447,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.0865180471230107,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s5_10_d5",
+      "ret": 1.2970241994477874,
+      "trades": 22,
+      "api_sharpe": 0.10744983624782412,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6451721386587685,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b5_10_s5_10_d8",
+      "ret": 1.2970241994477874,
+      "trades": 22,
+      "api_sharpe": 0.10744983624782412,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6451721386587685,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s2_5_d5",
+      "ret": 17.392496357839264,
+      "trades": 21,
+      "api_sharpe": 0.46259448614157367,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.2344647702702367,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s2_5_d8",
+      "ret": 10.29392934352598,
+      "trades": 21,
+      "api_sharpe": 0.31339386116301843,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.8748152651128362,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s3_8_d5",
+      "ret": -5.107696614760189,
+      "trades": 21,
+      "api_sharpe": -0.043690160621486965,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.4954342109867704,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s3_8_d8",
+      "ret": -8.596570450717737,
+      "trades": 21,
+      "api_sharpe": -0.13281826076377776,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.984221531269031,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s5_10_d5",
+      "ret": -10.215830405154284,
+      "trades": 21,
+      "api_sharpe": -0.17278775334196936,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.0867714021288597,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.01_b3_8_s5_10_d8",
+      "ret": -13.516895180776064,
+      "trades": 21,
+      "api_sharpe": -0.26165432382411946,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.5831261914757775,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s2_5_d8",
+      "ret": 20.61305313886065,
+      "trades": 20,
+      "api_sharpe": 0.5225189912062008,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.8708468760815544,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s2_5_d5",
+      "ret": 18.220697281096275,
+      "trades": 20,
+      "api_sharpe": 0.47411983523819734,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.0556822846299836,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s2_5_d8",
+      "ret": 18.220697281096275,
+      "trades": 20,
+      "api_sharpe": 0.47411983523819734,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.0556822846299836,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s3_8_d5",
+      "ret": 9.250494556436296,
+      "trades": 20,
+      "api_sharpe": 0.2919513944727967,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.991893159704548,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s5_10_d5",
+      "ret": 3.369447064150408,
+      "trades": 20,
+      "api_sharpe": 0.1587828133578175,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.5910178600383258,
+      "passing_regimes": 1.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s3_8_d8",
+      "ret": -5.839700765260277,
+      "trades": 20,
+      "api_sharpe": -0.061104389180438916,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.5790933774121345,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.01_b3_8_s5_10_d8",
+      "ret": -10.90843014662978,
+      "trades": 20,
+      "api_sharpe": -0.18971014874824368,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -2.1704305685542185,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_net_return_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_calmar_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s3_8_d8",
+      "ret": 12.247682894617373,
+      "trades": 19,
+      "api_sharpe": 0.3546691940319316,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -0.890959762528656,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s3_8_d5",
+      "ret": 10.021253874664925,
+      "trades": 19,
+      "api_sharpe": 0.3065753061907482,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.0632585559714463,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s3_8_d8",
+      "ret": 10.021253874664925,
+      "trades": 19,
+      "api_sharpe": 0.3065753061907482,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.0632585559714463,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.01_hv0.012_b3_8_s5_10_d8",
+      "ret": 6.205294192557304,
+      "trades": 19,
+      "api_sharpe": 0.22303563133387716,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.4898644227353997,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s5_10_d5",
+      "ret": 4.098715749553758,
+      "trades": 19,
+      "api_sharpe": 0.17572549765225542,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6545957471135282,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    },
+    {
+      "label": "t0.012_hv0.012_b3_8_s5_10_d8",
+      "ret": 4.098715749553758,
+      "trades": 19,
+      "api_sharpe": 0.17572549765225542,
+      "q_pass": false,
+      "q_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "sharpe_mean": -1.6545957471135282,
+      "passing_regimes": 0.0,
+      "promo_pass": false,
+      "promo_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_sharpe_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ]
+    }
+  ]
+}

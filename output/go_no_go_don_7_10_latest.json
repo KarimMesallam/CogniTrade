@@ -1,0 +1,12 @@
+{
+  "decision": "GO",
+  "checks": {
+    "quality_gate_packet_passed": true,
+    "shadow_passed": true,
+    "canary_passed": true,
+    "production_gate_passed": true,
+    "resilience_drills_passed": true,
+    "ops_readiness_passed": true
+  },
+  "failed_checks": []
+}

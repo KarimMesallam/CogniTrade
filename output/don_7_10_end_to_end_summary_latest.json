@@ -1,0 +1,17 @@
+{
+  "generated_at_utc": "2026-02-12T18:37:54Z",
+  "candidate_label": "don_7_10",
+  "rollout_id": "candidate-don-7-10-20260212183754",
+  "quality_gate_passed": true,
+  "promotion_gate_passed": true,
+  "shadow_passed": true,
+  "canary_passed": true,
+  "production_gate_passed": true,
+  "go_no_go_decision": "GO",
+  "artifact_paths": {
+    "candidate_packet": "output/selected_candidate_don_7_10_latest.json",
+    "frozen_config": "output/frozen_deploy_config_don_7_10_latest.json",
+    "rollout_evidence": "output/rollout_evidence_don_7_10_latest.json",
+    "go_no_go": "output/go_no_go_don_7_10_latest.json"
+  }
+}

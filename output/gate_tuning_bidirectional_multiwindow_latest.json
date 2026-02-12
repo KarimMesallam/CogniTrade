@@ -1,0 +1,4440 @@
+{
+  "generated_at_utc": "2026-02-12T11:51:07Z",
+  "dataset": {
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "data_start": "2025-03-05",
+    "data_end": "2026-02-08",
+    "bar_count": 1553
+  },
+  "search": {
+    "windows": 9,
+    "candidates_per_window": 210,
+    "total_evaluations": 1890,
+    "success_rows": 1890,
+    "errors": 0,
+    "quality_pass_total": 2,
+    "promotion_pass_total": 0,
+    "profitable_total": 613
+  },
+  "promotion_passes": [],
+  "summary_by_window": {
+    "last_90d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 134,
+      "top5": [
+        {
+          "window": "last_90d",
+          "start_date": "2025-11-10",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.012_s0.006_hv0.015_c0.3_m1_b8_30_br5_20_d6",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.012,
+            "sideways_threshold_pct": 0.006,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.3,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 8,
+            "bull_long_period": 30,
+            "bear_fast_period": 5,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 6,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 34.09606585851409,
+          "trades": 7.0,
+          "sharpe": 1.8148226834882055,
+          "drawdown_pct": 8.112962846241462,
+          "calmar": 4.20266510579547,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 3.000979665439177,
+            "calmar_ratio_mean": 0.9747907742842948,
+            "max_drawdown_abs_mean": 3.9046032463721216,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_90d",
+          "start_date": "2025-11-10",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.02_s0.006_hv0.015_c0.2_m1_b5_20_br3_20_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.02,
+            "sideways_threshold_pct": 0.006,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 3,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 32.037491980153554,
+          "trades": 6.0,
+          "sharpe": 1.4835476307827884,
+          "drawdown_pct": 8.683222376750424,
+          "calmar": 3.689585569745957,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 2.5178914760739692,
+            "calmar_ratio_mean": 0.689820180690178,
+            "max_drawdown_abs_mean": 6.403874435216984,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_90d",
+          "start_date": "2025-11-10",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.02_s0.005_hv0.015_c0.1_m2_b5_50_br8_20_d6",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.02,
+            "sideways_threshold_pct": 0.005,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.1,
+            "momentum_confirmation_candles": 2,
+            "bull_short_period": 5,
+            "bull_long_period": 50,
+            "bear_fast_period": 8,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 6,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 31.72971856554932,
+          "trades": 7.0,
+          "sharpe": 1.6016879928547658,
+          "drawdown_pct": 8.670905185227603,
+          "calmar": 3.659331740774472,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 2.5318350245346473,
+            "calmar_ratio_mean": 0.728740818350073,
+            "max_drawdown_abs_mean": 6.397715839455583,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_90d",
+          "start_date": "2025-11-10",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.02_s0.004_hv0.015_c0.3_m1_b8_30_br3_20_d6",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.02,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.3,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 8,
+            "bull_long_period": 30,
+            "bear_fast_period": 3,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 6,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 29.939116212298995,
+          "trades": 6.0,
+          "sharpe": 1.426470227408793,
+          "drawdown_pct": 8.683222376750424,
+          "calmar": 3.4479269231272753,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 2.5178914760739692,
+            "calmar_ratio_mean": 0.689820180690178,
+            "max_drawdown_abs_mean": 6.403874435216984,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_90d",
+          "start_date": "2025-11-10",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.015_s0.004_hv0.015_c0.2_m1_b5_20_br5_20_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.015,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 5,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 29.096227112242357,
+          "trades": 7.0,
+          "sharpe": 1.4991596434765015,
+          "drawdown_pct": 8.23302650807799,
+          "calmar": 3.534086412049572,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 2.006047436482654,
+            "calmar_ratio_mean": 0.6546397291558937,
+            "max_drawdown_abs_mean": 2.75757270249376,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "last_120d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 81,
+      "top5": [
+        {
+          "window": "last_120d",
+          "start_date": "2025-10-11",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.01_s0.004_hv0.015_c0.3_m1_b8_30_br8_20_d6",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.01,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.3,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 8,
+            "bull_long_period": 30,
+            "bear_fast_period": 8,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 6,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 44.31081252908993,
+          "trades": 13.0,
+          "sharpe": 1.6072846903834146,
+          "drawdown_pct": 8.112962846241457,
+          "calmar": 5.46172999542554,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 3.0,
+            "sharpe_ratio_mean": 0.931734641363689,
+            "calmar_ratio_mean": 0.28718083475668105,
+            "max_drawdown_abs_mean": 5.184986450505589,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_120d",
+          "start_date": "2025-10-11",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.02_s0.006_hv0.01_c0.3_m1_b8_20_br8_40_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.02,
+            "sideways_threshold_pct": 0.006,
+            "high_volatility_threshold_pct": 0.01,
+            "min_regime_confidence": 0.3,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 8,
+            "bull_long_period": 20,
+            "bear_fast_period": 8,
+            "bear_slow_period": 40,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 44.18967832752409,
+          "trades": 10.0,
+          "sharpe": 1.4030470131596842,
+          "drawdown_pct": 9.211530930438592,
+          "calmar": 4.7972132603391335,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 3.0,
+            "sharpe_ratio_mean": 1.4127780020702732,
+            "calmar_ratio_mean": 0.4611170481664613,
+            "max_drawdown_abs_mean": 6.217308879492042,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_120d",
+          "start_date": "2025-10-11",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.01_s0.006_hv0.015_c0.2_m1_b5_20_br8_20_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.01,
+            "sideways_threshold_pct": 0.006,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 8,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 41.23597022832888,
+          "trades": 12.0,
+          "sharpe": 1.5149938123272002,
+          "drawdown_pct": 8.233026508077993,
+          "calmar": 5.008604088407758,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 3.0,
+            "sharpe_ratio_mean": -0.42324413025811075,
+            "calmar_ratio_mean": -0.11016026517786774,
+            "max_drawdown_abs_mean": 3.9071087158570377,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_120d",
+          "start_date": "2025-10-11",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.02_s0.008_hv0.015_c0.2_m3_b3_20_br5_20_d15",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.02,
+            "sideways_threshold_pct": 0.008,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 3,
+            "bull_short_period": 3,
+            "bull_long_period": 20,
+            "bear_fast_period": 5,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 15,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 25.614511416619116,
+          "trades": 11.0,
+          "sharpe": 0.9511351647836827,
+          "drawdown_pct": 10.3807643728656,
+          "calmar": 2.4674976231589634,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 3.0,
+            "sharpe_ratio_mean": -0.12456393140612516,
+            "calmar_ratio_mean": -0.03123397669535377,
+            "max_drawdown_abs_mean": 7.900126365491771,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_120d",
+          "start_date": "2025-10-11",
+          "end_date": "2026-02-08",
+          "label": "don_6_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 24.647872297357207,
+          "trades": 25.0,
+          "sharpe": 0.8601601679412749,
+          "drawdown_pct": 13.13663021798692,
+          "calmar": 1.8762705418630783,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 4.0,
+            "sharpe_ratio_mean": 1.0237612630087276,
+            "calmar_ratio_mean": 0.4418549603815177,
+            "max_drawdown_abs_mean": 6.7907097096608275,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "last_150d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 37,
+      "top5": [
+        {
+          "window": "last_150d",
+          "start_date": "2025-09-11",
+          "end_date": "2026-02-08",
+          "label": "don_6_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 40.85419743398273,
+          "trades": 32.0,
+          "sharpe": 1.069933079529371,
+          "drawdown_pct": 13.136630217986964,
+          "calmar": 3.1099449977699964,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 5.0,
+            "sharpe_ratio_mean": 1.8142112574716047,
+            "calmar_ratio_mean": 0.8700329555609999,
+            "max_drawdown_abs_mean": 6.755685777643045,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_150d",
+          "start_date": "2025-09-11",
+          "end_date": "2026-02-08",
+          "label": "don_6_2",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 2
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 40.85419743398273,
+          "trades": 32.0,
+          "sharpe": 1.069933079529371,
+          "drawdown_pct": 13.136630217986964,
+          "calmar": 3.1099449977699964,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 5.0,
+            "sharpe_ratio_mean": 1.8142112574716047,
+            "calmar_ratio_mean": 0.8700329555609999,
+            "max_drawdown_abs_mean": 6.755685777643045,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_150d",
+          "start_date": "2025-09-11",
+          "end_date": "2026-02-08",
+          "label": "don_8_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 8,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 39.406916417286176,
+          "trades": 26.0,
+          "sharpe": 0.9992234094176773,
+          "drawdown_pct": 21.042664301589976,
+          "calmar": 1.8727151587125117,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 5.0,
+            "sharpe_ratio_mean": 1.8238299963844038,
+            "calmar_ratio_mean": 1.2610085294822608,
+            "max_drawdown_abs_mean": 8.05099612229743,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_150d",
+          "start_date": "2025-09-11",
+          "end_date": "2026-02-08",
+          "label": "sma_8_30",
+          "strategy_name": "sma_crossover",
+          "strategy_params": {
+            "short_period": 8,
+            "long_period": 30
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 38.22082477095646,
+          "trades": 18.0,
+          "sharpe": 1.171705019052208,
+          "drawdown_pct": 12.877438492649674,
+          "calmar": 2.9680456088198413,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 5.0,
+            "sharpe_ratio_mean": 1.075101686937519,
+            "calmar_ratio_mean": 0.9300762251887175,
+            "max_drawdown_abs_mean": 4.873551982672059,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_150d",
+          "start_date": "2025-09-11",
+          "end_date": "2026-02-08",
+          "label": "don_12_3",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 3
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 37.742683299201744,
+          "trades": 19.0,
+          "sharpe": 0.9795640257080798,
+          "drawdown_pct": 23.047290788105098,
+          "calmar": 1.6376190870417213,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 5.0,
+            "sharpe_ratio_mean": 1.0191174595018537,
+            "calmar_ratio_mean": 0.7669406689605048,
+            "max_drawdown_abs_mean": 7.004433485082219,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "last_180d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 16,
+      "top5": [
+        {
+          "window": "last_180d",
+          "start_date": "2025-08-12",
+          "end_date": "2026-02-08",
+          "label": "don_12_3",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 3
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 29.920050238611424,
+          "trades": 20.0,
+          "sharpe": 0.80683946273825,
+          "drawdown_pct": 23.04729078810505,
+          "calmar": 1.2982024878192397,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.1484675674242215,
+            "calmar_ratio_mean": 1.1747798418017705,
+            "max_drawdown_abs_mean": 8.151425191466185,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_180d",
+          "start_date": "2025-08-12",
+          "end_date": "2026-02-08",
+          "label": "don_12_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 24.999720155789582,
+          "trades": 22.0,
+          "sharpe": 0.7012520102731956,
+          "drawdown_pct": 25.194870231421497,
+          "calmar": 0.9922543726623948,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.8763043886351536,
+            "calmar_ratio_mean": 1.1694848937638598,
+            "max_drawdown_abs_mean": 8.122077016029573,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_drawdown_above_cap",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_180d",
+          "start_date": "2025-08-12",
+          "end_date": "2026-02-08",
+          "label": "don_6_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 15.390296527751907,
+          "trades": 39.0,
+          "sharpe": 0.48093951452656997,
+          "drawdown_pct": 13.54151791017075,
+          "calmar": 1.1365266899800486,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.863893548578095,
+            "calmar_ratio_mean": 0.676603285291752,
+            "max_drawdown_abs_mean": 6.1301482463151515,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_180d",
+          "start_date": "2025-08-12",
+          "end_date": "2026-02-08",
+          "label": "don_6_2",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 2
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 15.390296527751907,
+          "trades": 39.0,
+          "sharpe": 0.48093951452656997,
+          "drawdown_pct": 13.54151791017075,
+          "calmar": 1.1365266899800486,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.863893548578095,
+            "calmar_ratio_mean": 0.676603285291752,
+            "max_drawdown_abs_mean": 6.1301482463151515,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_180d",
+          "start_date": "2025-08-12",
+          "end_date": "2026-02-08",
+          "label": "don_10_3",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 10,
+            "breakout_buffer_bps": 3
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 14.639801948899967,
+          "trades": 27.0,
+          "sharpe": 0.45750808899356155,
+          "drawdown_pct": 22.01564176652538,
+          "calmar": 0.6649727545603361,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.0210586619441178,
+            "calmar_ratio_mean": 1.1279127025532485,
+            "max_drawdown_abs_mean": 7.56759724083374,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "last_240d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 36,
+      "top5": [
+        {
+          "window": "last_240d",
+          "start_date": "2025-06-13",
+          "end_date": "2026-02-08",
+          "label": "don_12_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 26.854706932988503,
+          "trades": 24.0,
+          "sharpe": 0.795736542042432,
+          "drawdown_pct": 13.544055046978878,
+          "calmar": 1.982767113677575,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.4206106550086965,
+            "calmar_ratio_mean": 1.1073335463474865,
+            "max_drawdown_abs_mean": 4.855867270452332,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_240d",
+          "start_date": "2025-06-13",
+          "end_date": "2026-02-08",
+          "label": "ema_15_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 15,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 20.7659352080439,
+          "trades": 5.0,
+          "sharpe": 0.8000119138688263,
+          "drawdown_pct": 7.514784254585283,
+          "calmar": 2.763344163257007,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.5102144515472196,
+            "calmar_ratio_mean": 0.6927646757077911,
+            "max_drawdown_abs_mean": 4.9222634290519744,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_240d",
+          "start_date": "2025-06-13",
+          "end_date": "2026-02-08",
+          "label": "ema_12_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 12,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 20.150696968402517,
+          "trades": 6.0,
+          "sharpe": 0.7845911188184286,
+          "drawdown_pct": 7.705294058116249,
+          "calmar": 2.6151755943924164,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.204509089400938,
+            "calmar_ratio_mean": 0.6831625852614326,
+            "max_drawdown_abs_mean": 4.757736803026261,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_240d",
+          "start_date": "2025-06-13",
+          "end_date": "2026-02-08",
+          "label": "ema_10_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 10,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 19.378445792141612,
+          "trades": 6.0,
+          "sharpe": 0.757464243859052,
+          "drawdown_pct": 7.951359929650495,
+          "calmar": 2.4371234560618613,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.3030533709371246,
+            "calmar_ratio_mean": 0.7368735599685494,
+            "max_drawdown_abs_mean": 4.7909532981511385,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_240d",
+          "start_date": "2025-06-13",
+          "end_date": "2026-02-08",
+          "label": "sma_15_80",
+          "strategy_name": "sma_crossover",
+          "strategy_params": {
+            "short_period": 15,
+            "long_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 18.495153717348185,
+          "trades": 6.0,
+          "sharpe": 0.7352914134060445,
+          "drawdown_pct": 8.197033875569172,
+          "calmar": 2.256322713569846,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.2367178687590765,
+            "calmar_ratio_mean": 0.7083886915539744,
+            "max_drawdown_abs_mean": 4.689603973223915,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "last_300d": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 36,
+      "top5": [
+        {
+          "window": "last_300d",
+          "start_date": "2025-04-14",
+          "end_date": "2026-02-08",
+          "label": "don_12_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 26.854706932988503,
+          "trades": 24.0,
+          "sharpe": 0.795736542042432,
+          "drawdown_pct": 13.544055046978878,
+          "calmar": 1.982767113677575,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.4206106550086965,
+            "calmar_ratio_mean": 1.1073335463474865,
+            "max_drawdown_abs_mean": 4.855867270452332,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_300d",
+          "start_date": "2025-04-14",
+          "end_date": "2026-02-08",
+          "label": "ema_15_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 15,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 20.7659352080439,
+          "trades": 5.0,
+          "sharpe": 0.8000119138688263,
+          "drawdown_pct": 7.514784254585283,
+          "calmar": 2.763344163257007,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.5102144515472196,
+            "calmar_ratio_mean": 0.6927646757077911,
+            "max_drawdown_abs_mean": 4.9222634290519744,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_300d",
+          "start_date": "2025-04-14",
+          "end_date": "2026-02-08",
+          "label": "ema_12_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 12,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 20.150696968402517,
+          "trades": 6.0,
+          "sharpe": 0.7845911188184286,
+          "drawdown_pct": 7.705294058116249,
+          "calmar": 2.6151755943924164,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.204509089400938,
+            "calmar_ratio_mean": 0.6831625852614326,
+            "max_drawdown_abs_mean": 4.757736803026261,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_300d",
+          "start_date": "2025-04-14",
+          "end_date": "2026-02-08",
+          "label": "ema_10_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 10,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 19.378445792141612,
+          "trades": 6.0,
+          "sharpe": 0.757464243859052,
+          "drawdown_pct": 7.951359929650495,
+          "calmar": 2.4371234560618613,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.3030533709371246,
+            "calmar_ratio_mean": 0.7368735599685494,
+            "max_drawdown_abs_mean": 4.7909532981511385,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "last_300d",
+          "start_date": "2025-04-14",
+          "end_date": "2026-02-08",
+          "label": "sma_15_80",
+          "strategy_name": "sma_crossover",
+          "strategy_params": {
+            "short_period": 15,
+            "long_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 18.495153717348185,
+          "trades": 6.0,
+          "sharpe": 0.7352914134060445,
+          "drawdown_pct": 8.197033875569172,
+          "calmar": 2.256322713569846,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.2367178687590765,
+            "calmar_ratio_mean": 0.7083886915539744,
+            "max_drawdown_abs_mean": 4.689603973223915,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "first_half": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 162,
+      "top5": [
+        {
+          "window": "first_half",
+          "start_date": "2025-03-05",
+          "end_date": "2025-08-22",
+          "label": "rs_t0.012_s0.004_hv0.01_c0.2_m1_b5_20_br5_40_d15",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.012,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.01,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 5,
+            "bear_slow_period": 40,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 15,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 42.36885884885549,
+          "trades": 10.0,
+          "sharpe": 1.4889261521125723,
+          "drawdown_pct": 8.78064767037721,
+          "calmar": 4.825254404842251,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 1.1044594952539764,
+            "calmar_ratio_mean": 0.6964869372838786,
+            "max_drawdown_abs_mean": 5.360511599560494,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "first_half",
+          "start_date": "2025-03-05",
+          "end_date": "2025-08-22",
+          "label": "rs_t0.012_s0.008_hv0.01_c0.1_m2_b8_20_br3_20_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.012,
+            "sideways_threshold_pct": 0.008,
+            "high_volatility_threshold_pct": 0.01,
+            "min_regime_confidence": 0.1,
+            "momentum_confirmation_candles": 2,
+            "bull_short_period": 8,
+            "bull_long_period": 20,
+            "bear_fast_period": 3,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 41.98267879139514,
+          "trades": 9.0,
+          "sharpe": 1.4565472449829109,
+          "drawdown_pct": 8.78064767037721,
+          "calmar": 4.781273587941559,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 4.005202462999296,
+            "calmar_ratio_mean": 1.1724363744699793,
+            "max_drawdown_abs_mean": 5.358517223361963,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "first_half",
+          "start_date": "2025-03-05",
+          "end_date": "2025-08-22",
+          "label": "rs_t0.01_s0.005_hv0.01_c0.1_m2_b8_20_br5_20_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.01,
+            "sideways_threshold_pct": 0.005,
+            "high_volatility_threshold_pct": 0.01,
+            "min_regime_confidence": 0.1,
+            "momentum_confirmation_candles": 2,
+            "bull_short_period": 8,
+            "bull_long_period": 20,
+            "bear_fast_period": 5,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 40.120924197450584,
+          "trades": 7.0,
+          "sharpe": 1.3909124403405875,
+          "drawdown_pct": 8.78064767037721,
+          "calmar": 4.569244286250586,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 2.704500975212326,
+            "calmar_ratio_mean": 0.8414829548895894,
+            "max_drawdown_abs_mean": 5.732362965348254,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "first_half",
+          "start_date": "2025-03-05",
+          "end_date": "2025-08-22",
+          "label": "rs_t0.01_s0.006_hv0.01_c0.2_m1_b5_20_br8_20_d15",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.01,
+            "sideways_threshold_pct": 0.006,
+            "high_volatility_threshold_pct": 0.01,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 8,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 15,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 39.548188264215675,
+          "trades": 10.0,
+          "sharpe": 1.409530243408745,
+          "drawdown_pct": 8.78064767037721,
+          "calmar": 4.504017214770754,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 0.3092196660852333,
+            "calmar_ratio_mean": 0.4562940968474404,
+            "max_drawdown_abs_mean": 5.0571309141575425,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "first_half",
+          "start_date": "2025-03-05",
+          "end_date": "2025-08-22",
+          "label": "rs_t0.012_s0.004_hv0.015_c0.2_m1_b5_20_br5_40_d10",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.012,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.2,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 5,
+            "bull_long_period": 20,
+            "bear_fast_period": 5,
+            "bear_slow_period": 40,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 10,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 39.44067119909512,
+          "trades": 11.0,
+          "sharpe": 1.3902071847887714,
+          "drawdown_pct": 8.780647670377197,
+          "calmar": 4.491772438627051,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_walk_forward_folds_below_minimum",
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 2.0,
+            "sharpe_ratio_mean": 1.1257490290255965,
+            "calmar_ratio_mean": 0.6993090536300439,
+            "max_drawdown_abs_mean": 5.3605115995605015,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "second_half": {
+      "tested": 210,
+      "quality_pass_count": 0,
+      "promotion_pass_count": 0,
+      "profitable_count": 21,
+      "top5": [
+        {
+          "window": "second_half",
+          "start_date": "2025-08-22",
+          "end_date": "2026-02-08",
+          "label": "don_12_3",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 3
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 31.594456951044357,
+          "trades": 21.0,
+          "sharpe": 0.8130711670740915,
+          "drawdown_pct": 23.047290788105133,
+          "calmar": 1.3708534005806217,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.8001489431232096,
+            "calmar_ratio_mean": 1.061016557203807,
+            "max_drawdown_abs_mean": 6.749672964988446,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "second_half",
+          "start_date": "2025-08-22",
+          "end_date": "2026-02-08",
+          "label": "don_12_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 26.610713763756266,
+          "trades": 23.0,
+          "sharpe": 0.7117427406558244,
+          "drawdown_pct": 25.194870231421458,
+          "calmar": 1.0561957064803238,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.5552263904537198,
+            "calmar_ratio_mean": 1.206448773204655,
+            "max_drawdown_abs_mean": 6.946431929368704,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 1.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_drawdown_above_cap",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "second_half",
+          "start_date": "2025-08-22",
+          "end_date": "2026-02-08",
+          "label": "rs_t0.01_s0.004_hv0.015_c0.3_m1_b8_30_br8_20_d6",
+          "strategy_name": "regime_switch_adaptive",
+          "strategy_params": {
+            "regime_lookback_candles": 40,
+            "trend_threshold_pct": 0.01,
+            "sideways_threshold_pct": 0.004,
+            "high_volatility_threshold_pct": 0.015,
+            "min_regime_confidence": 0.3,
+            "momentum_confirmation_candles": 1,
+            "bull_short_period": 8,
+            "bull_long_period": 30,
+            "bear_fast_period": 8,
+            "bear_slow_period": 20,
+            "bear_rsi_period": 10,
+            "bear_rsi_overbought": 60,
+            "bear_rsi_oversold": 30,
+            "sideways_rsi_period": 14,
+            "sideways_rsi_overbought": 65,
+            "sideways_rsi_oversold": 35,
+            "high_vol_lookback_period": 6,
+            "high_vol_breakout_buffer_bps": 0.0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 24.30908638781768,
+          "trades": 17.0,
+          "sharpe": 0.7614421728747304,
+          "drawdown_pct": 18.850722522963277,
+          "calmar": 1.2895572760251082,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.3443138336229667,
+            "calmar_ratio_mean": 0.8227858096000905,
+            "max_drawdown_abs_mean": 5.224428512454915,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "second_half",
+          "start_date": "2025-08-22",
+          "end_date": "2026-02-08",
+          "label": "don_6_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 23.603066400094068,
+          "trades": 39.0,
+          "sharpe": 0.6657710095596889,
+          "drawdown_pct": 13.13663021798694,
+          "calmar": 1.7967367588513126,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.4637503708463941,
+            "calmar_ratio_mean": 0.8717629699645236,
+            "max_drawdown_abs_mean": 6.839457057598697,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "second_half",
+          "start_date": "2025-08-22",
+          "end_date": "2026-02-08",
+          "label": "don_6_2",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 6,
+            "breakout_buffer_bps": 2
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 23.603066400094068,
+          "trades": 39.0,
+          "sharpe": 0.6657710095596889,
+          "drawdown_pct": 13.13663021798694,
+          "calmar": 1.7967367588513126,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.4637503708463941,
+            "calmar_ratio_mean": 0.8717629699645236,
+            "max_drawdown_abs_mean": 6.839457057598697,
+            "eligible_regimes": 3.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    },
+    "full_4h": {
+      "tested": 210,
+      "quality_pass_count": 2,
+      "promotion_pass_count": 0,
+      "profitable_count": 90,
+      "top5": [
+        {
+          "window": "full_4h",
+          "start_date": "2025-03-05",
+          "end_date": "2026-02-08",
+          "label": "sma_8_50",
+          "strategy_name": "sma_crossover",
+          "strategy_params": {
+            "short_period": 8,
+            "long_period": 50
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 29.905585827077175,
+          "trades": 13.0,
+          "sharpe": 0.7571897795488385,
+          "drawdown_pct": 9.397213965105069,
+          "calmar": 3.182388518355164,
+          "quality_pass": true,
+          "quality_reasons": [],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 1.0354533925134648,
+            "calmar_ratio_mean": 0.47003230106404587,
+            "max_drawdown_abs_mean": 4.300499040792488,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 2.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "full_4h",
+          "start_date": "2025-03-05",
+          "end_date": "2026-02-08",
+          "label": "don_20_10",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 20,
+            "breakout_buffer_bps": 10
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 18.837820141962055,
+          "trades": 14.0,
+          "sharpe": 0.487130568024106,
+          "drawdown_pct": 19.427298874924816,
+          "calmar": 0.9696571954362831,
+          "quality_pass": true,
+          "quality_reasons": [],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 0.5314396035093358,
+            "calmar_ratio_mean": 0.2263898866799411,
+            "max_drawdown_abs_mean": 5.447976598776115,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 2.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "full_4h",
+          "start_date": "2025-03-05",
+          "end_date": "2026-02-08",
+          "label": "don_12_0",
+          "strategy_name": "donchian_breakout",
+          "strategy_params": {
+            "lookback_period": 12,
+            "breakout_buffer_bps": 0
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 38.72833380332207,
+          "trades": 22.0,
+          "sharpe": 0.8444521786446528,
+          "drawdown_pct": 16.56338207618133,
+          "calmar": 2.3381899677973768,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_regime_consistency_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 2.5088849728054994,
+            "calmar_ratio_mean": 1.2968180015424895,
+            "max_drawdown_abs_mean": 4.618465974645417,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 0.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "full_4h",
+          "start_date": "2025-03-05",
+          "end_date": "2026-02-08",
+          "label": "sma_10_50",
+          "strategy_name": "sma_crossover",
+          "strategy_params": {
+            "short_period": 10,
+            "long_period": 50
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 26.11672240438218,
+          "trades": 12.0,
+          "sharpe": 0.6889903126414596,
+          "drawdown_pct": 10.143955119302248,
+          "calmar": 2.5746094198195366,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_sharpe_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": 0.1693738039682539,
+            "calmar_ratio_mean": 0.2991872229962286,
+            "max_drawdown_abs_mean": 4.149026632613161,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 2.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        },
+        {
+          "window": "full_4h",
+          "start_date": "2025-03-05",
+          "end_date": "2026-02-08",
+          "label": "ema_15_80",
+          "strategy_name": "ema_crossover",
+          "strategy_params": {
+            "fast_period": 15,
+            "slow_period": 80
+          },
+          "trade_mode": "FUTURES",
+          "allow_short_positions": true,
+          "return_pct": 25.34465384080704,
+          "trades": 6.0,
+          "sharpe": 0.6671109000148534,
+          "drawdown_pct": 12.934091224704977,
+          "calmar": 1.9595233557961198,
+          "quality_pass": false,
+          "quality_reasons": [
+            "quality_sharpe_below_threshold",
+            "quality_calmar_below_threshold"
+          ],
+          "quality_metrics": {
+            "walk_forward_folds": 6.0,
+            "sharpe_ratio_mean": -0.7330195104591122,
+            "calmar_ratio_mean": -0.0899539603513915,
+            "max_drawdown_abs_mean": 5.113085131409297,
+            "eligible_regimes": 4.0,
+            "passing_regimes": 2.0
+          },
+          "promotion_pass": false,
+          "promotion_reasons": [
+            "benchmark_trade_activity_below_floor",
+            "benchmark_quality_gate_failed"
+          ],
+          "profitable": true
+        }
+      ],
+      "promotion_passes": []
+    }
+  },
+  "top_overall": [
+    {
+      "window": "full_4h",
+      "start_date": "2025-03-05",
+      "end_date": "2026-02-08",
+      "label": "sma_8_50",
+      "strategy_name": "sma_crossover",
+      "strategy_params": {
+        "short_period": 8,
+        "long_period": 50
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 29.905585827077175,
+      "trades": 13.0,
+      "sharpe": 0.7571897795488385,
+      "drawdown_pct": 9.397213965105069,
+      "calmar": 3.182388518355164,
+      "quality_pass": true,
+      "quality_reasons": [],
+      "quality_metrics": {
+        "walk_forward_folds": 6.0,
+        "sharpe_ratio_mean": 1.0354533925134648,
+        "calmar_ratio_mean": 0.47003230106404587,
+        "max_drawdown_abs_mean": 4.300499040792488,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 2.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "full_4h",
+      "start_date": "2025-03-05",
+      "end_date": "2026-02-08",
+      "label": "don_20_10",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 20,
+        "breakout_buffer_bps": 10
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 18.837820141962055,
+      "trades": 14.0,
+      "sharpe": 0.487130568024106,
+      "drawdown_pct": 19.427298874924816,
+      "calmar": 0.9696571954362831,
+      "quality_pass": true,
+      "quality_reasons": [],
+      "quality_metrics": {
+        "walk_forward_folds": 6.0,
+        "sharpe_ratio_mean": 0.5314396035093358,
+        "calmar_ratio_mean": 0.2263898866799411,
+        "max_drawdown_abs_mean": 5.447976598776115,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 2.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_120d",
+      "start_date": "2025-10-11",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.01_s0.004_hv0.015_c0.3_m1_b8_30_br8_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 8,
+        "bull_long_period": 30,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 44.31081252908993,
+      "trades": 13.0,
+      "sharpe": 1.6072846903834146,
+      "drawdown_pct": 8.112962846241457,
+      "calmar": 5.46172999542554,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 3.0,
+        "sharpe_ratio_mean": 0.931734641363689,
+        "calmar_ratio_mean": 0.28718083475668105,
+        "max_drawdown_abs_mean": 5.184986450505589,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_120d",
+      "start_date": "2025-10-11",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.02_s0.006_hv0.01_c0.3_m1_b8_20_br8_40_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.02,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 44.18967832752409,
+      "trades": 10.0,
+      "sharpe": 1.4030470131596842,
+      "drawdown_pct": 9.211530930438592,
+      "calmar": 4.7972132603391335,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 3.0,
+        "sharpe_ratio_mean": 1.4127780020702732,
+        "calmar_ratio_mean": 0.4611170481664613,
+        "max_drawdown_abs_mean": 6.217308879492042,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.004_hv0.01_c0.2_m1_b5_20_br5_40_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 42.36885884885549,
+      "trades": 10.0,
+      "sharpe": 1.4889261521125723,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 4.825254404842251,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.1044594952539764,
+        "calmar_ratio_mean": 0.6964869372838786,
+        "max_drawdown_abs_mean": 5.360511599560494,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.008_hv0.01_c0.1_m2_b8_20_br3_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 41.98267879139514,
+      "trades": 9.0,
+      "sharpe": 1.4565472449829109,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 4.781273587941559,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 4.005202462999296,
+        "calmar_ratio_mean": 1.1724363744699793,
+        "max_drawdown_abs_mean": 5.358517223361963,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_120d",
+      "start_date": "2025-10-11",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.01_s0.006_hv0.015_c0.2_m1_b5_20_br8_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 41.23597022832888,
+      "trades": 12.0,
+      "sharpe": 1.5149938123272002,
+      "drawdown_pct": 8.233026508077993,
+      "calmar": 5.008604088407758,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_sharpe_below_threshold",
+        "quality_calmar_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 3.0,
+        "sharpe_ratio_mean": -0.42324413025811075,
+        "calmar_ratio_mean": -0.11016026517786774,
+        "max_drawdown_abs_mean": 3.9071087158570377,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_6_0",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 6,
+        "breakout_buffer_bps": 0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 40.85419743398273,
+      "trades": 32.0,
+      "sharpe": 1.069933079529371,
+      "drawdown_pct": 13.136630217986964,
+      "calmar": 3.1099449977699964,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.8142112574716047,
+        "calmar_ratio_mean": 0.8700329555609999,
+        "max_drawdown_abs_mean": 6.755685777643045,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_6_2",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 6,
+        "breakout_buffer_bps": 2
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 40.85419743398273,
+      "trades": 32.0,
+      "sharpe": 1.069933079529371,
+      "drawdown_pct": 13.136630217986964,
+      "calmar": 3.1099449977699964,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.8142112574716047,
+        "calmar_ratio_mean": 0.8700329555609999,
+        "max_drawdown_abs_mean": 6.755685777643045,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.005_hv0.01_c0.1_m2_b8_20_br5_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 40.120924197450584,
+      "trades": 7.0,
+      "sharpe": 1.3909124403405875,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 4.569244286250586,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.704500975212326,
+        "calmar_ratio_mean": 0.8414829548895894,
+        "max_drawdown_abs_mean": 5.732362965348254,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.006_hv0.01_c0.2_m1_b5_20_br8_20_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 39.548188264215675,
+      "trades": 10.0,
+      "sharpe": 1.409530243408745,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 4.504017214770754,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 0.3092196660852333,
+        "calmar_ratio_mean": 0.4562940968474404,
+        "max_drawdown_abs_mean": 5.0571309141575425,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.004_hv0.015_c0.2_m1_b5_20_br5_40_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 39.44067119909512,
+      "trades": 11.0,
+      "sharpe": 1.3902071847887714,
+      "drawdown_pct": 8.780647670377197,
+      "calmar": 4.491772438627051,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.1257490290255965,
+        "calmar_ratio_mean": 0.6993090536300439,
+        "max_drawdown_abs_mean": 5.3605115995605015,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_8_0",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 8,
+        "breakout_buffer_bps": 0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 39.406916417286176,
+      "trades": 26.0,
+      "sharpe": 0.9992234094176773,
+      "drawdown_pct": 21.042664301589976,
+      "calmar": 1.8727151587125117,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.8238299963844038,
+        "calmar_ratio_mean": 1.2610085294822608,
+        "max_drawdown_abs_mean": 8.05099612229743,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.006_hv0.01_c0.2_m1_b5_20_br5_30_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 39.04327698757694,
+      "trades": 11.0,
+      "sharpe": 1.372593071461389,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 4.446514477433721,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.248585667002965,
+        "calmar_ratio_mean": 0.9423305048326464,
+        "max_drawdown_abs_mean": 5.360511599560494,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "full_4h",
+      "start_date": "2025-03-05",
+      "end_date": "2026-02-08",
+      "label": "don_12_0",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 12,
+        "breakout_buffer_bps": 0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 38.72833380332207,
+      "trades": 22.0,
+      "sharpe": 0.8444521786446528,
+      "drawdown_pct": 16.56338207618133,
+      "calmar": 2.3381899677973768,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 6.0,
+        "sharpe_ratio_mean": 2.5088849728054994,
+        "calmar_ratio_mean": 1.2968180015424895,
+        "max_drawdown_abs_mean": 4.618465974645417,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.005_hv0.012_c0.2_m1_b5_20_br5_40_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 38.444390413245074,
+      "trades": 11.0,
+      "sharpe": 1.3674982379158105,
+      "drawdown_pct": 8.780647670377203,
+      "calmar": 4.378309192719671,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.12574902902554,
+        "calmar_ratio_mean": 0.6993090536300464,
+        "max_drawdown_abs_mean": 5.360511599560503,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "sma_8_30",
+      "strategy_name": "sma_crossover",
+      "strategy_params": {
+        "short_period": 8,
+        "long_period": 30
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 38.22082477095646,
+      "trades": 18.0,
+      "sharpe": 1.171705019052208,
+      "drawdown_pct": 12.877438492649674,
+      "calmar": 2.9680456088198413,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.075101686937519,
+        "calmar_ratio_mean": 0.9300762251887175,
+        "max_drawdown_abs_mean": 4.873551982672059,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_12_3",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 12,
+        "breakout_buffer_bps": 3
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 37.742683299201744,
+      "trades": 19.0,
+      "sharpe": 0.9795640257080798,
+      "drawdown_pct": 23.047290788105098,
+      "calmar": 1.6376190870417213,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.0191174595018537,
+        "calmar_ratio_mean": 0.7669406689605048,
+        "max_drawdown_abs_mean": 7.004433485082219,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.006_hv0.015_c0.2_m1_b5_20_br8_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 37.50770001001527,
+      "trades": 10.0,
+      "sharpe": 1.3224348980883196,
+      "drawdown_pct": 8.780647670377185,
+      "calmar": 4.271632505715159,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 0.3092196660852986,
+        "calmar_ratio_mean": 0.45629409684743866,
+        "max_drawdown_abs_mean": 5.057130914157547,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.006_hv0.012_c0.1_m2_b8_20_br3_20_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 36.805265921430276,
+      "trades": 10.0,
+      "sharpe": 1.309479031890495,
+      "drawdown_pct": 8.78064767037722,
+      "calmar": 4.1916345243640905,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.7470560440879415,
+        "calmar_ratio_mean": 1.091289118866009,
+        "max_drawdown_abs_mean": 5.358517223361955,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.004_hv0.01_c0.2_m1_b5_20_br8_30_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 36.50414627478612,
+      "trades": 10.0,
+      "sharpe": 1.2856837283037161,
+      "drawdown_pct": 8.808946514889955,
+      "calmar": 4.14398545990515,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.10371679955481,
+        "calmar_ratio_mean": 0.5722276662042752,
+        "max_drawdown_abs_mean": 6.075913589333489,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.006_hv0.015_c0.2_m1_b5_20_br5_30_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 36.0816970353214,
+      "trades": 12.0,
+      "sharpe": 1.2620081282170783,
+      "drawdown_pct": 8.780647670377213,
+      "calmar": 4.109229568229714,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.996077104534306,
+        "calmar_ratio_mean": 0.9005878487039738,
+        "max_drawdown_abs_mean": 5.360511599560498,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_8_3",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 8,
+        "breakout_buffer_bps": 3
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 35.725235067543125,
+      "trades": 26.0,
+      "sharpe": 0.9276848807559137,
+      "drawdown_pct": 21.042664301589976,
+      "calmar": 1.6977524592664692,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 1.4828220873166131,
+        "calmar_ratio_mean": 1.056221861604858,
+        "max_drawdown_abs_mean": 8.050544610669116,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.008_hv0.012_c0.2_m1_b5_20_br5_30_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 35.210479870751826,
+      "trades": 12.0,
+      "sharpe": 1.254540983352571,
+      "drawdown_pct": 8.780647670377203,
+      "calmar": 4.010009419867685,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.9960771045342844,
+        "calmar_ratio_mean": 0.9005878487039763,
+        "max_drawdown_abs_mean": 5.360511599560503,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.004_hv0.012_c0.2_m3_b3_20_br8_30_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 35.03899774401935,
+      "trades": 10.0,
+      "sharpe": 1.2376828341164976,
+      "drawdown_pct": 8.781527072297576,
+      "calmar": 3.990080250911512,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.4368157507550254,
+        "calmar_ratio_mean": 1.1530303682479213,
+        "max_drawdown_abs_mean": 5.0550666833201765,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.004_hv0.012_c0.1_m2_b8_20_br5_20_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 35.01140039872638,
+      "trades": 8.0,
+      "sharpe": 1.245778494512003,
+      "drawdown_pct": 8.78064767037722,
+      "calmar": 3.9873368927946378,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.728068834455669,
+        "calmar_ratio_mean": 0.7886125767387092,
+        "max_drawdown_abs_mean": 5.780527458655111,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.005_hv0.01_c0.3_m3_b5_30_br5_40_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 34.999762882238464,
+      "trades": 9.0,
+      "sharpe": 1.2692409782311127,
+      "drawdown_pct": 8.781527072297598,
+      "calmar": 3.985612364921074,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.124704705473384,
+        "calmar_ratio_mean": 0.7889318288619722,
+        "max_drawdown_abs_mean": 5.054565960153192,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.008_hv0.01_c0.3_m3_b5_30_br5_30_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 34.999762882238464,
+      "trades": 9.0,
+      "sharpe": 1.2692409782311127,
+      "drawdown_pct": 8.781527072297598,
+      "calmar": 3.985612364921074,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.124704705473384,
+        "calmar_ratio_mean": 0.7889318288619722,
+        "max_drawdown_abs_mean": 5.054565960153192,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.005_hv0.01_c0.2_m3_b3_20_br8_30_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 34.90795624444718,
+      "trades": 11.0,
+      "sharpe": 1.2306289358593614,
+      "drawdown_pct": 8.781527072297592,
+      "calmar": 3.9751578463577957,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.2439333212380808,
+        "calmar_ratio_mean": 1.1017090577937616,
+        "max_drawdown_abs_mean": 5.055066683320176,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.005_hv0.01_c0.1_m2_b8_20_br3_30_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 34.651340968194766,
+      "trades": 10.0,
+      "sharpe": 1.268308715564849,
+      "drawdown_pct": 8.78064767037721,
+      "calmar": 3.946330870910138,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.5177757306753494,
+        "calmar_ratio_mean": 0.7573776920763322,
+        "max_drawdown_abs_mean": 5.632220174387703,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_90d",
+      "start_date": "2025-11-10",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.012_s0.006_hv0.015_c0.3_m1_b8_30_br5_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 8,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 34.09606585851409,
+      "trades": 7.0,
+      "sharpe": 1.8148226834882055,
+      "drawdown_pct": 8.112962846241462,
+      "calmar": 4.20266510579547,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.000979665439177,
+        "calmar_ratio_mean": 0.9747907742842948,
+        "max_drawdown_abs_mean": 3.9046032463721216,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.004_hv0.012_c0.2_m3_b3_30_br3_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 30,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.83835189427467,
+      "trades": 6.0,
+      "sharpe": 1.210895684096101,
+      "drawdown_pct": 8.781527072297589,
+      "calmar": 3.8533562119306026,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.644925260048965,
+        "calmar_ratio_mean": 0.7268599850215287,
+        "max_drawdown_abs_mean": 5.651753990206533,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.005_hv0.015_c0.3_m3_b5_30_br5_40_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.79609933603692,
+      "trades": 10.0,
+      "sharpe": 1.2114306823784007,
+      "drawdown_pct": 8.781527072297592,
+      "calmar": 3.8485446845174422,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.1247047054733823,
+        "calmar_ratio_mean": 0.7889318288619765,
+        "max_drawdown_abs_mean": 5.054565960153191,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.008_hv0.015_c0.3_m3_b5_30_br5_30_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.79609933603692,
+      "trades": 10.0,
+      "sharpe": 1.2114306823784007,
+      "drawdown_pct": 8.781527072297592,
+      "calmar": 3.8485446845174422,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.1247047054733823,
+        "calmar_ratio_mean": 0.7889318288619765,
+        "max_drawdown_abs_mean": 5.054565960153191,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.004_hv0.015_c0.2_m1_b5_20_br8_30_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.69658176598257,
+      "trades": 11.0,
+      "sharpe": 1.193154132813361,
+      "drawdown_pct": 8.80894651488996,
+      "calmar": 3.8252680623073916,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.909800991094186,
+        "calmar_ratio_mean": 0.5092043486375335,
+        "max_drawdown_abs_mean": 6.075913589333492,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.008_hv0.015_c0.2_m3_b3_30_br3_20_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 30,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.628730319262736,
+      "trades": 5.0,
+      "sharpe": 1.1994910172704651,
+      "drawdown_pct": 8.781527072297589,
+      "calmar": 3.8294854690306335,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.28697006638737,
+        "calmar_ratio_mean": 0.6541501579965107,
+        "max_drawdown_abs_mean": 5.560168037311339,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.008_hv0.015_c0.2_m3_b3_20_br8_30_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 30,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 33.478463296364026,
+      "trades": 9.0,
+      "sharpe": 1.1929971082642508,
+      "drawdown_pct": 8.781527072297578,
+      "calmar": 3.8123737501164245,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.055569172508748,
+        "calmar_ratio_mean": 0.875201203569298,
+        "max_drawdown_abs_mean": 5.055846070146188,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.008_hv0.015_c0.2_m3_b3_20_br5_40_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.95749732882737,
+      "trades": 11.0,
+      "sharpe": 1.1836006436861637,
+      "drawdown_pct": 8.781527072297578,
+      "calmar": 3.7530485367170257,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.2556134607823237,
+        "calmar_ratio_mean": 0.8384668027094344,
+        "max_drawdown_abs_mean": 5.055066683320176,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.004_hv0.012_c0.3_m3_b5_30_br8_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.004,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.91315814111264,
+      "trades": 10.0,
+      "sharpe": 1.202502115828414,
+      "drawdown_pct": 8.781527072297587,
+      "calmar": 3.7479993935156526,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.124704705473452,
+        "calmar_ratio_mean": 0.7889318288619764,
+        "max_drawdown_abs_mean": 5.054565960153191,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.006_hv0.012_c0.3_m3_b5_30_br5_40_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.3,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 5,
+        "bull_long_period": 30,
+        "bear_fast_period": 5,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.91315814111264,
+      "trades": 10.0,
+      "sharpe": 1.202502115828414,
+      "drawdown_pct": 8.781527072297587,
+      "calmar": 3.7479993935156526,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.124704705473452,
+        "calmar_ratio_mean": 0.7889318288619764,
+        "max_drawdown_abs_mean": 5.054565960153191,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.008_hv0.01_c0.1_m2_b8_20_br3_40_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 40,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.885718888358916,
+      "trades": 8.0,
+      "sharpe": 1.2034403469904202,
+      "drawdown_pct": 8.940659348492602,
+      "calmar": 3.6782207672304903,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_sharpe_below_threshold",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 0.029853769838934063,
+        "calmar_ratio_mean": 0.4319058256355437,
+        "max_drawdown_abs_mean": 6.006332900605127,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.008_hv0.015_c0.1_m2_b8_20_br3_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.643396262733695,
+      "trades": 11.0,
+      "sharpe": 1.2210015768041027,
+      "drawdown_pct": 6.295290276833245,
+      "calmar": 5.185367922248454,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 3.7047134234974233,
+        "calmar_ratio_mean": 1.0340752813950447,
+        "max_drawdown_abs_mean": 5.357813317332711,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_150d",
+      "start_date": "2025-09-11",
+      "end_date": "2026-02-08",
+      "label": "don_12_0",
+      "strategy_name": "donchian_breakout",
+      "strategy_params": {
+        "lookback_period": 12,
+        "breakout_buffer_bps": 0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.526094581133115,
+      "trades": 21.0,
+      "sharpe": 0.873941573020941,
+      "drawdown_pct": 25.19487023142146,
+      "calmar": 1.290980833890885,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 5.0,
+        "sharpe_ratio_mean": 0.6822349084867151,
+        "calmar_ratio_mean": 0.7551234684629738,
+        "max_drawdown_abs_mean": 7.619943937696181,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_drawdown_above_cap",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.005_hv0.015_c0.2_m3_b3_20_br8_20_d15",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 15,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.19957361325023,
+      "trades": 10.0,
+      "sharpe": 1.1809887506920191,
+      "drawdown_pct": 8.781527072297576,
+      "calmar": 3.6667396624930766,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.255613460782273,
+        "calmar_ratio_mean": 0.8384668027094373,
+        "max_drawdown_abs_mean": 5.0550666833201765,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.006_hv0.012_c0.2_m3_b3_20_br8_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.012,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.19957361325023,
+      "trades": 10.0,
+      "sharpe": 1.1809887506920191,
+      "drawdown_pct": 8.781527072297576,
+      "calmar": 3.6667396624930766,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.255613460782273,
+        "calmar_ratio_mean": 0.8384668027094373,
+        "max_drawdown_abs_mean": 5.0550666833201765,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.012_s0.005_hv0.01_c0.2_m3_b3_30_br3_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.012,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 30,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.08627668055365,
+      "trades": 7.0,
+      "sharpe": 1.1566930286461812,
+      "drawdown_pct": 8.781527072297587,
+      "calmar": 3.653837927776113,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.6856471568576525,
+        "calmar_ratio_mean": 0.7542676456197674,
+        "max_drawdown_abs_mean": 5.699669097320401,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.015_s0.008_hv0.01_c0.2_m3_b3_20_br8_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.015,
+        "sideways_threshold_pct": 0.008,
+        "high_volatility_threshold_pct": 0.01,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 3,
+        "bull_short_period": 3,
+        "bull_long_period": 20,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.0712874836248,
+      "trades": 11.0,
+      "sharpe": 1.173953322869097,
+      "drawdown_pct": 8.781527072297592,
+      "calmar": 3.6521310268230707,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 1.2556134607823366,
+        "calmar_ratio_mean": 0.8384668027094345,
+        "max_drawdown_abs_mean": 5.055066683320176,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_90d",
+      "start_date": "2025-11-10",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.02_s0.006_hv0.015_c0.2_m1_b5_20_br3_20_d10",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.02,
+        "sideways_threshold_pct": 0.006,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.2,
+        "momentum_confirmation_candles": 1,
+        "bull_short_period": 5,
+        "bull_long_period": 20,
+        "bear_fast_period": 3,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 10,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 32.037491980153554,
+      "trades": 6.0,
+      "sharpe": 1.4835476307827884,
+      "drawdown_pct": 8.683222376750424,
+      "calmar": 3.689585569745957,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.5178914760739692,
+        "calmar_ratio_mean": 0.689820180690178,
+        "max_drawdown_abs_mean": 6.403874435216984,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "last_90d",
+      "start_date": "2025-11-10",
+      "end_date": "2026-02-08",
+      "label": "rs_t0.02_s0.005_hv0.015_c0.1_m2_b5_50_br8_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.02,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 5,
+        "bull_long_period": 50,
+        "bear_fast_period": 8,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 31.72971856554932,
+      "trades": 7.0,
+      "sharpe": 1.6016879928547658,
+      "drawdown_pct": 8.670905185227603,
+      "calmar": 3.659331740774472,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.5318350245346473,
+        "calmar_ratio_mean": 0.728740818350073,
+        "max_drawdown_abs_mean": 6.397715839455583,
+        "eligible_regimes": 3.0,
+        "passing_regimes": 1.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    },
+    {
+      "window": "first_half",
+      "start_date": "2025-03-05",
+      "end_date": "2025-08-22",
+      "label": "rs_t0.01_s0.005_hv0.015_c0.1_m2_b8_20_br5_20_d6",
+      "strategy_name": "regime_switch_adaptive",
+      "strategy_params": {
+        "regime_lookback_candles": 40,
+        "trend_threshold_pct": 0.01,
+        "sideways_threshold_pct": 0.005,
+        "high_volatility_threshold_pct": 0.015,
+        "min_regime_confidence": 0.1,
+        "momentum_confirmation_candles": 2,
+        "bull_short_period": 8,
+        "bull_long_period": 20,
+        "bear_fast_period": 5,
+        "bear_slow_period": 20,
+        "bear_rsi_period": 10,
+        "bear_rsi_overbought": 60,
+        "bear_rsi_oversold": 30,
+        "sideways_rsi_period": 14,
+        "sideways_rsi_overbought": 65,
+        "sideways_rsi_oversold": 35,
+        "high_vol_lookback_period": 6,
+        "high_vol_breakout_buffer_bps": 0.0
+      },
+      "trade_mode": "FUTURES",
+      "allow_short_positions": true,
+      "return_pct": 31.717306782687448,
+      "trades": 9.0,
+      "sharpe": 1.1799807568466159,
+      "drawdown_pct": 8.214466304869623,
+      "calmar": 3.861152460249924,
+      "quality_pass": false,
+      "quality_reasons": [
+        "quality_walk_forward_folds_below_minimum",
+        "quality_regime_consistency_below_threshold"
+      ],
+      "quality_metrics": {
+        "walk_forward_folds": 2.0,
+        "sharpe_ratio_mean": 2.5443039894344754,
+        "calmar_ratio_mean": 0.7650584094166586,
+        "max_drawdown_abs_mean": 5.777767491655717,
+        "eligible_regimes": 4.0,
+        "passing_regimes": 0.0
+      },
+      "promotion_pass": false,
+      "promotion_reasons": [
+        "benchmark_trade_activity_below_floor",
+        "benchmark_quality_gate_failed"
+      ],
+      "profitable": true
+    }
+  ],
+  "errors": []
+}

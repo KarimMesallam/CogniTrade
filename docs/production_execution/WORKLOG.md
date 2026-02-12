@@ -2,6 +2,34 @@
 
 Append-only log. Newest entries go at the top.
 
+## 2026-02-12 (Session 31)
+
+- Session objective: add ready-to-use remote deployment artifacts for 14-day testnet soak operations.
+- Completed:
+1. Added versioned systemd units:
+   - `deploy/systemd/cognitrade-bot.service`
+   - `deploy/systemd/cognitrade-api.service`
+2. Added soak-specific environment template:
+   - `deploy/.env.soak.template`
+3. Added automated daily soak collector script:
+   - `scripts/soak_daily_check.sh`
+4. Updated soak runbook to use versioned artifacts and scripted daily checks:
+   - `docs/production_execution/runbooks/TESTNET_14_DAY_SOAK_RUNBOOK.md`
+5. Updated production execution index with deployment artifact references:
+   - `docs/production_execution/README.md`
+- Commands run:
+1. `mkdir -p deploy/systemd`
+2. write artifact files under `deploy/` and `scripts/`
+3. `bash -n scripts/soak_daily_check.sh`
+4. `scripts/soak_daily_check.sh --help`
+- Result summary:
+1. Remote-server deployment can now be performed by copying tracked unit files and `.env` template.
+2. Daily soak evidence capture is automated with threshold checks and JSON summary output (`output/soak_daily/YYYYMMDD/summary.json`).
+- Open blockers:
+1. None in implementation.
+2. Pending operational execution on remote host (service install, env setup, day-0 validation).
+
+
 ## 2026-02-12 (Session 30)
 
 - Session objective: produce an operator-ready 14-day continuous testnet soak runbook for remote deployment before live production promotion.
