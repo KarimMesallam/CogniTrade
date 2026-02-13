@@ -86,11 +86,12 @@ MIN_TRADES_OVERRIDE = 8
 # ---------------------------------------------------------------------------
 # ADX computation (Wilder smoothing, matches ATR implementation)
 # ---------------------------------------------------------------------------
-def _compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
+def _compute_adx(df: pd.DataFrame, period: int = 14) -> dict:
     """
-    Compute ADX (Average Directional Index) from OHLC data.
+    Compute ADX (Average Directional Index) and +DI/-DI from OHLC data.
 
-    Uses Wilder's smoothing method. Returns a Series aligned to df.index.
+    Uses Wilder's smoothing method. Returns a dict of Series aligned to df.index:
+        {"adx": Series, "plus_di": Series, "minus_di": Series}
     """
     high = df["high"]
     low = df["low"]
@@ -115,7 +116,8 @@ def _compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
     adx = np.full(n, np.nan)
 
     if n < period + 1:
-        return pd.Series(adx, index=df.index)
+        nan_series = pd.Series(adx, index=df.index)
+        return {"adx": nan_series, "plus_di": nan_series.copy(), "minus_di": nan_series.copy()}
 
     # Seed with simple averages over the first `period` rows
     atr[period] = tr.iloc[1 : period + 1].mean()
@@ -144,7 +146,11 @@ def _compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
             if not np.isnan(dx[i]) and not np.isnan(adx[i - 1]):
                 adx[i] = (adx[i - 1] * (period - 1) + dx[i]) / period
 
-    return pd.Series(adx, index=df.index)
+    return {
+        "adx": pd.Series(adx, index=df.index),
+        "plus_di": pd.Series(plus_di, index=df.index),
+        "minus_di": pd.Series(minus_di, index=df.index),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -152,14 +158,19 @@ def _compute_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
 # ---------------------------------------------------------------------------
 def adx_regime_strategy(data_dict: dict, symbol: str) -> str:
     """
-    ADX regime-adaptive strategy with default parameters.
+    ADX regime-adaptive strategy with default parameters and DI direction filter.
 
-    TRENDING (ADX > 25): MACD direction  -> BUY/SELL
-    CHOPPY   (ADX < 20): RSI mean-revert -> BUY(oversold) / SELL(overbought)
+    DI DIRECTION FILTER (applied to all regimes):
+        +DI > -DI  -> only BUY signals allowed (bullish direction)
+        -DI > +DI  -> only SELL signals allowed (bearish direction)
+
+    TRENDING (ADX > 25): MACD direction  -> BUY/SELL (filtered by DI)
+    CHOPPY   (ADX < 20): RSI mean-revert -> BUY(oversold) / SELL(overbought) (filtered by DI)
     TRANSITION (20-25):  HOLD
     """
     return _adx_regime_logic(data_dict, adx_period=14, trend_thresh=25,
-                             chop_thresh=20, rsi_oversold=30, rsi_overbought=70)
+                             chop_thresh=20, rsi_oversold=30, rsi_overbought=70,
+                             use_di_filter=True)
 
 
 def _adx_regime_logic(
@@ -169,6 +180,7 @@ def _adx_regime_logic(
     chop_thresh: float,
     rsi_oversold: float,
     rsi_overbought: float,
+    use_di_filter: bool = True,
 ) -> str:
     """Core logic shared by default strategy and factory-built variants."""
     tf = TIMEFRAME
@@ -192,27 +204,47 @@ def _adx_regime_logic(
     if pd.isna(macd) or pd.isna(signal_line) or pd.isna(rsi):
         return "HOLD"
 
-    # Compute ADX on-the-fly (not pre-computed by engine)
-    adx_series = _compute_adx(df, period=adx_period)
-    adx_val = adx_series.iloc[-1]
+    # Compute ADX and DI on-the-fly (not pre-computed by engine)
+    adx_data = _compute_adx(df, period=adx_period)
+    adx_val = adx_data["adx"].iloc[-1]
+    plus_di = adx_data["plus_di"].iloc[-1]
+    minus_di = adx_data["minus_di"].iloc[-1]
 
     if pd.isna(adx_val):
         return "HOLD"
 
+    # DI direction: determines which signals are allowed
+    # +DI > -DI = bullish direction → only BUY
+    # -DI > +DI = bearish direction → only SELL
+    if use_di_filter and not pd.isna(plus_di) and not pd.isna(minus_di):
+        bullish_di = plus_di > minus_di
+    else:
+        bullish_di = None  # no filter
+
+    def _filter_signal(raw_signal: str) -> str:
+        """Apply DI direction filter to a raw signal."""
+        if bullish_di is None:
+            return raw_signal
+        if raw_signal == "BUY" and not bullish_di:
+            return "HOLD"  # block BUY in bearish direction
+        if raw_signal == "SELL" and bullish_di:
+            return "HOLD"  # block SELL in bullish direction
+        return raw_signal
+
     # --- TRENDING regime: use MACD for direction ---
     if adx_val >= trend_thresh:
         if macd > signal_line:
-            return "BUY"
+            return _filter_signal("BUY")
         if macd < signal_line:
-            return "SELL"
+            return _filter_signal("SELL")
         return "HOLD"
 
     # --- CHOPPY regime: use RSI mean-reversion ---
     if adx_val <= chop_thresh:
         if rsi < rsi_oversold:
-            return "BUY"
+            return _filter_signal("BUY")
         if rsi > rsi_overbought:
-            return "SELL"
+            return _filter_signal("SELL")
         return "HOLD"
 
     # --- TRANSITION zone: stay out ---
@@ -225,19 +257,22 @@ def make_strategy(
     chop_thresh: float = 20,
     rsi_oversold: float = 30,
     rsi_overbought: float = 70,
+    use_di_filter: bool = True,
 ) -> Callable:
     """
     Factory that returns an ADX regime-adaptive strategy with custom parameters.
+    use_di_filter: If True, only allow BUY when +DI > -DI, SELL when -DI > +DI.
     """
     def strategy(data_dict: dict, symbol: str) -> str:
         return _adx_regime_logic(
             data_dict, adx_period, trend_thresh, chop_thresh,
-            rsi_oversold, rsi_overbought,
+            rsi_oversold, rsi_overbought, use_di_filter,
         )
 
+    di_tag = "" if use_di_filter else "_noDI"
     strategy.__name__ = (
         f"ADX({adx_period})_T{trend_thresh}_C{chop_thresh}"
-        f"_RSI({rsi_oversold}/{rsi_overbought})"
+        f"_RSI({rsi_oversold}/{rsi_overbought}){di_tag}"
     )
     return strategy
 
