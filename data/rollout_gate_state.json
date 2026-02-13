@@ -74,5 +74,72 @@
     ],
     "production_passed": false,
     "shadow_passed": true
+  },
+  "candidate-don-7-10-20260212183754": {
+    "canary_passed": true,
+    "history": [
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 1.5,
+          "error_rate": 0.05,
+          "latency_p95_ms": 0.00385964594897814,
+          "metadata": {
+            "window_minutes": 240.0
+          },
+          "sample_count": 180,
+          "total_return_pct": 1.3
+        },
+        "reasons": [],
+        "stage": "shadow",
+        "timestamp": "2026-02-12T18:37:54.714664"
+      },
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 2.8,
+          "error_rate": 0.06,
+          "latency_p95_ms": 300.0,
+          "metadata": {
+            "phase": "canary"
+          },
+          "sample_count": 90,
+          "total_return_pct": 2.1
+        },
+        "reasons": [],
+        "stage": "canary",
+        "timestamp": "2026-02-12T18:37:54.714678"
+      },
+      {
+        "approved": true,
+        "metrics": {
+          "drawdown_pct": 2.8,
+          "error_rate": 0.06,
+          "latency_p95_ms": 300.0,
+          "metadata": {
+            "phase": "production",
+            "quality_gate": {
+              "metrics": {
+                "calmar_ratio_mean": 1.0619411043553562,
+                "eligible_regimes": 4.0,
+                "max_drawdown_abs_mean": 5.674260108867037,
+                "passing_regimes": 4.0,
+                "sharpe_ratio_mean": 1.594917836768729,
+                "walk_forward_folds": 6.0
+              },
+              "passed": true,
+              "reasons": []
+            }
+          },
+          "sample_count": 90,
+          "total_return_pct": 2.1
+        },
+        "reasons": [],
+        "stage": "production",
+        "timestamp": "2026-02-12T18:37:54.714685"
+      }
+    ],
+    "production_passed": true,
+    "shadow_passed": true
   }
 }
