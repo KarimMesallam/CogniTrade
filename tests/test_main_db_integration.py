@@ -75,7 +75,10 @@ class TestMainDbIntegration:
     
     @patch('bot.order_manager.place_market_buy')
     @patch('bot.main.get_account_balance')
-    def test_execute_trade_saves_to_db(self, mock_get_balance, mock_market_buy,
+    @patch('bot.main.get_trade_mode', return_value='SPOT')
+    @patch('bot.main.is_futures_short_enabled', return_value=False)
+    def test_execute_trade_saves_to_db(self, mock_futures_enabled, mock_trade_mode,
+                                       mock_get_balance, mock_market_buy,
                                        db_integration, mock_order_response):
         """Test that execute_trade saves the trade and signals to the database"""
         # Setup
@@ -91,7 +94,10 @@ class TestMainDbIntegration:
              patch('bot.main.log_decision_with_context'), \
              patch.object(db_integration, 'save_trade', return_value=True):  # Force save_trade to return True
 
-            order_manager = OrderManager("BTCUSDT", use_database=True)
+            order_manager = OrderManager(
+                "BTCUSDT", use_database=True, trade_mode="SPOT",
+                max_order_notional_usd=0, max_position_exposure_usd=0,
+            )
 
             # Add trade_id field so link_signal_to_trade works
             mock_order_response['trade_id'] = f"BTCUSDT_BUY_{mock_order_response['orderId']}_{int(datetime.now().timestamp())}"
@@ -165,20 +171,23 @@ class TestMainDbIntegration:
         mock_order_response = mock_order_response.copy()
         mock_order_response["orderId"] = unique_order_id
         mock_order_response["status"] = "FILLED"
-        
+
         # Initial response when placing the order
         mock_buy.return_value = mock_order_response
-        
+
         # Create a test database connection to verify and modify data directly
         conn = sqlite3.connect(TEST_DB_PATH)
-        
+
         try:
             # Create OrderManager with test database
             with patch('bot.order_manager.DatabaseIntegration', return_value=db_integration), \
                  patch('bot.order_manager.validate_order_filters', return_value=(True, None)), \
                  patch.object(db_integration, 'save_trade', return_value=True):  # Force save_trade to return True
-                
-                order_manager = OrderManager("BTCUSDT", use_database=True)
+
+                order_manager = OrderManager(
+                    "BTCUSDT", use_database=True, trade_mode="SPOT",
+                    max_order_notional_usd=0, max_position_exposure_usd=0,
+                )
                 
                 # Manually insert a trade record for this test
                 trade_id = f"BTCUSDT_BUY_{unique_order_id}_{int(datetime.now().timestamp())}"
@@ -261,8 +270,10 @@ class TestMainDbIntegration:
     @patch('bot.main.get_data_pipeline_config', return_value={"enabled": False})
     @patch('bot.main.time.sleep', side_effect=KeyboardInterrupt)  # Stop after first iteration
     @patch('bot.main.LLMManager')
+    @patch('bot.main.get_notifier', return_value=MagicMock(enabled=False))
     def test_trading_loop_uses_db(
         self,
+        _mock_notifier,
         mock_llm_manager,
         mock_sleep,
         _mock_data_pipeline_config,

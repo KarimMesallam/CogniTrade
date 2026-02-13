@@ -256,9 +256,10 @@ class TestMain:
         mock_order_manager,
         mock_market_data,
     ):
-        """Futures mode should route SELL consensus to short entry when explicitly enabled."""
+        """Futures mode should route SELL consensus to short entry when flat."""
         signals = {"simple": "SELL", "technical": "SELL"}
         llm_decision = "SELL"
+        mock_order_manager.get_position_quantity.return_value = 0
         mock_order_manager.execute_market_short.return_value = {"orderId": 789, "status": "FILLED"}
 
         result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
@@ -282,16 +283,18 @@ class TestMain:
         mock_order_manager,
         mock_market_data,
     ):
-        """Futures BUY consensus should cover an open short if one exists."""
+        """Futures BUY consensus should cover an open short then open long."""
         signals = {"simple": "BUY", "technical": "BUY"}
         llm_decision = "BUY"
         mock_order_manager.get_position_quantity.return_value = -0.25
         mock_order_manager.execute_market_cover.return_value = {"orderId": 790, "status": "FILLED"}
+        mock_order_manager.execute_market_long.return_value = {"orderId": 791, "status": "FILLED"}
 
         result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
 
-        assert result == {"orderId": 790, "status": "FILLED"}
+        assert result == {"orderId": 791, "status": "FILLED"}
         mock_order_manager.execute_market_cover.assert_called_once_with(0.25)
+        mock_order_manager.execute_market_long.assert_called_once()
         mock_order_manager.execute_market_buy.assert_not_called()
         mock_log.assert_called_once()
 
@@ -309,6 +312,7 @@ class TestMain:
         """Futures mode must not open shorts when short enable flag is false."""
         signals = {"simple": "SELL", "technical": "SELL"}
         llm_decision = "SELL"
+        mock_order_manager.get_position_quantity.return_value = 0
 
         result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
 
@@ -317,6 +321,124 @@ class TestMain:
         mock_order_manager.execute_market_sell.assert_not_called()
         mock_log.assert_called_once()
     
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_long_open(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """BUY signal + flat position should open a futures long."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+        mock_order_manager.get_position_quantity.return_value = 0
+        mock_order_manager.execute_market_long.return_value = {"orderId": 800, "status": "FILLED"}
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result == {"orderId": 800, "status": "FILLED"}
+        mock_order_manager.execute_market_long.assert_called_once_with(
+            quote_amount=10.0,
+            leverage=2.0,
+        )
+        mock_order_manager.execute_market_cover.assert_not_called()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_flip_short_to_long(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """BUY signal + short position should cover then open long."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+        mock_order_manager.get_position_quantity.return_value = -0.5
+        mock_order_manager.execute_market_cover.return_value = {"orderId": 801, "status": "FILLED"}
+        mock_order_manager.execute_market_long.return_value = {"orderId": 802, "status": "FILLED"}
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result == {"orderId": 802, "status": "FILLED"}
+        mock_order_manager.execute_market_cover.assert_called_once_with(0.5)
+        mock_order_manager.execute_market_long.assert_called_once()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_flip_long_to_short(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """SELL signal + long position should close long then open short."""
+        signals = {"simple": "SELL", "technical": "SELL"}
+        llm_decision = "SELL"
+        mock_order_manager.get_position_quantity.return_value = 0.3
+        mock_order_manager.execute_market_close_long.return_value = {"orderId": 803, "status": "FILLED"}
+        mock_order_manager.execute_market_short.return_value = {"orderId": 804, "status": "FILLED"}
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result == {"orderId": 804, "status": "FILLED"}
+        mock_order_manager.execute_market_close_long.assert_called_once_with(0.3)
+        mock_order_manager.execute_market_short.assert_called_once()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_skip_when_already_long(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """BUY signal + already long should skip (no new order)."""
+        signals = {"simple": "BUY", "technical": "BUY"}
+        llm_decision = "BUY"
+        mock_order_manager.get_position_quantity.return_value = 0.5
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result is None
+        mock_order_manager.execute_market_long.assert_not_called()
+        mock_order_manager.execute_market_cover.assert_not_called()
+
+    @patch('bot.main.log_decision_with_context')
+    @patch('bot.main.is_futures_short_enabled', return_value=True)
+    @patch('bot.main.get_trade_mode', return_value='FUTURES')
+    def test_execute_trade_futures_skip_when_already_short(
+        self,
+        mock_trade_mode,
+        mock_futures_enabled,
+        mock_log,
+        mock_order_manager,
+        mock_market_data,
+    ):
+        """SELL signal + already short should skip (no new order)."""
+        signals = {"simple": "SELL", "technical": "SELL"}
+        llm_decision = "SELL"
+        mock_order_manager.get_position_quantity.return_value = -0.3
+
+        result = execute_trade(signals, llm_decision, SYMBOL, mock_market_data, mock_order_manager)
+
+        assert result is None
+        mock_order_manager.execute_market_short.assert_not_called()
+        mock_order_manager.execute_market_close_long.assert_not_called()
+
     @patch('bot.main.log_decision_with_context')
     def test_execute_trade_hold(self, mock_log, mock_order_manager, mock_market_data):
         """Test no trade executed when signals or LLM disagree."""
@@ -575,7 +697,8 @@ class TestMain:
     @patch('bot.main.DatabaseIntegration')  # Add mock for DatabaseIntegration
     @patch('bot.main.OrderManager')  # Add mock for OrderManager
     @patch('bot.main.LLMManager')  # Add mock for LLMManager
-    def test_trading_loop(self, mock_llm_manager, mock_order_manager_cls, mock_db_integration, 
+    @patch('bot.main.get_notifier', return_value=MagicMock(enabled=False))
+    def test_trading_loop(self, _mock_notifier, mock_llm_manager, mock_order_manager_cls, mock_db_integration,
                          mock_sleep, _mock_data_pipeline_config, _mock_risk_config, _mock_recon_config,
                          mock_execute_trade, mock_llm, mock_get_all_signals, mock_market_data):
         """Test the main trading loop with mocked dependencies."""
@@ -616,8 +739,10 @@ class TestMain:
     @patch('bot.main.get_risk_engine_config', return_value={"enabled": False})
     @patch('bot.main.get_data_pipeline_config', return_value={"enabled": False})
     @patch('bot.main.time.sleep')
+    @patch('bot.main.get_notifier', return_value=MagicMock(enabled=False))
     def test_trading_loop_error_handling(
         self,
+        _mock_notifier,
         mock_sleep,
         _mock_data_pipeline_config,
         _mock_risk_config,

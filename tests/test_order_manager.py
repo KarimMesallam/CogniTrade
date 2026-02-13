@@ -526,6 +526,131 @@ class TestOrderManager:
         mock_place_futures_order.assert_not_called()
 
     @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty')
+    @patch('bot.order_manager.get_futures_mark_price')
+    @patch('bot.order_manager.calculate_futures_order_quantity')
+    def test_execute_market_long_success(
+        self,
+        mock_calc_futures_qty,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+        mock_order_data,
+    ):
+        """Flat position should allow opening a futures long."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            enable_futures_shorts=True,
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+        )
+        mock_calc_futures_qty.return_value = 0.001
+        mock_futures_price.return_value = 50000.0
+        mock_futures_position_qty.return_value = 0.0
+        mock_place_futures_order.return_value = {
+            **mock_order_data,
+            "side": "BUY",
+            "origQty": "0.001",
+            "price": "50000.0",
+        }
+
+        result = manager.execute_market_long(quote_amount=25.0, leverage=2.0)
+
+        assert result is not None
+        mock_place_futures_order.assert_called_once_with(
+            symbol="BTCUSDT",
+            side="BUY",
+            quantity=0.001,
+            reduce_only=False,
+            leverage=2.0,
+        )
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=-0.01)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_execute_market_long_blocked_when_short_exists(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+    ):
+        """Cannot open long while a short position is open."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            max_order_notional_usd=1000.0,
+            max_position_exposure_usd=1000.0,
+        )
+
+        result = manager.execute_market_long(quantity=0.001)
+
+        assert result is None
+        assert "Cannot open long while short" in manager.last_reject_reason
+        mock_place_futures_order.assert_not_called()
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=0.02)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_execute_market_close_long_success(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+        mock_order_data,
+    ):
+        """Open long position should be closable with reduce-only sell."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            max_order_notional_usd=2000.0,
+            max_position_exposure_usd=2000.0,
+        )
+        mock_place_futures_order.return_value = {
+            **mock_order_data,
+            "side": "SELL",
+            "origQty": "0.02",
+            "price": "50000.0",
+        }
+
+        result = manager.execute_market_close_long(quantity=0.05)
+
+        assert result is not None
+        mock_place_futures_order.assert_called_once_with(
+            symbol="BTCUSDT",
+            side="SELL",
+            quantity=0.02,
+            reduce_only=True,
+        )
+
+    @patch('bot.order_manager.place_futures_market_order')
+    @patch('bot.order_manager.get_futures_position_qty', return_value=0.0)
+    @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
+    def test_execute_market_close_long_no_position(
+        self,
+        mock_futures_price,
+        mock_futures_position_qty,
+        mock_place_futures_order,
+    ):
+        """Close long should reject when no long position is open."""
+        manager = OrderManager(
+            "BTCUSDT",
+            use_database=False,
+            trade_mode="FUTURES",
+            max_order_notional_usd=2000.0,
+            max_position_exposure_usd=2000.0,
+        )
+
+        result = manager.execute_market_close_long(quantity=0.01)
+
+        assert result is None
+        assert "No open long position" in manager.last_reject_reason
+        mock_place_futures_order.assert_not_called()
+
+    @patch('bot.order_manager.place_futures_market_order')
     @patch('bot.order_manager.get_futures_position_qty', return_value=-0.02)
     @patch('bot.order_manager.get_futures_mark_price', return_value=50000.0)
     def test_execute_market_cover_uses_reduce_only_buy(

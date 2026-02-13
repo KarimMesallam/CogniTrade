@@ -5,13 +5,15 @@ from typing import Dict, Any, Optional
 from binance.exceptions import BinanceAPIException, BinanceRequestException
 import pandas as pd
 from bot.config import (
-    SYMBOL, TESTNET, TRADING_CONFIG, 
-    get_trading_parameter, get_loop_interval, 
+    SYMBOL, TESTNET, TRADING_CONFIG,
+    get_trading_parameter, get_loop_interval,
     get_consensus_method, is_llm_agreement_required, is_live_trading_enabled,
     get_trade_mode, is_futures_short_enabled, get_regime_config, get_policy_config,
     get_data_pipeline_config, get_risk_engine_config, get_reconciliation_config,
     get_observability_config, get_monitoring_config, get_rollout_config,
+    get_notification_config,
 )
+from bot.notifications import get_notifier
 from bot.strategy import get_all_strategy_signals, simple_signal, technical_analysis_signal
 from bot.binance_api import (
     place_market_buy,
@@ -155,6 +157,18 @@ def _extract_last_price_from_market_data(market_data: Dict[str, Any], symbol: st
     return None
 
 
+_last_good_portfolio_state: Optional[Dict[str, float]] = None
+
+
+def _fetch_balance_with_retry(asset: str) -> Optional[Dict[str, float]]:
+    """Fetch balance for an asset, retrying once on failure."""
+    result = get_account_balance(asset)
+    if result is not None:
+        return result
+    time.sleep(0.5)
+    return get_account_balance(asset)
+
+
 def estimate_portfolio_risk_state(
     symbol: str,
     market_data: Dict[str, Any],
@@ -164,33 +178,46 @@ def estimate_portfolio_risk_state(
     """
     Estimate live portfolio equity and gross exposure for hard risk checks.
     """
+    global _last_good_portfolio_state
     price = _extract_last_price_from_market_data(market_data, symbol) or 0.0
     quote_asset = getattr(order_manager, "quote_asset", "USDT") or "USDT"
     base_asset = getattr(order_manager, "base_asset", symbol.replace("USDT", ""))
 
     if trade_mode == "FUTURES":
-        quote_balance = get_account_balance(quote_asset) or get_account_balance("USDT") or {}
+        quote_balance = _fetch_balance_with_retry(quote_asset) or _fetch_balance_with_retry("USDT") or {}
         equity_usd = float(quote_balance.get("total", quote_balance.get("free", 0.0)) or 0.0)
         position_qty = order_manager.get_position_quantity()
         mark_price = get_futures_mark_price(symbol) or price or 0.0
         gross_exposure_usd = abs(float(position_qty or 0.0)) * float(mark_price)
-        return {
+        result = {
             "equity_usd": float(equity_usd),
             "gross_exposure_usd": float(gross_exposure_usd),
             "reference_price": float(mark_price),
         }
+        if equity_usd > 0:
+            _last_good_portfolio_state = result
+        elif _last_good_portfolio_state is not None:
+            logger.warning("Balance read returned zero equity; using last known good state")
+            return _last_good_portfolio_state
+        return result
 
-    quote_balance = get_account_balance(quote_asset) or {}
-    base_balance = get_account_balance(base_asset) or {}
+    quote_balance = _fetch_balance_with_retry(quote_asset) or {}
+    base_balance = _fetch_balance_with_retry(base_asset) or {}
     quote_total = float(quote_balance.get("total", quote_balance.get("free", 0.0)) or 0.0)
     base_total = float(base_balance.get("total", base_balance.get("free", 0.0)) or 0.0)
     equity_usd = quote_total + (base_total * float(price))
     gross_exposure_usd = abs(base_total * float(price))
-    return {
+    result = {
         "equity_usd": float(equity_usd),
         "gross_exposure_usd": float(gross_exposure_usd),
         "reference_price": float(price),
     }
+    if equity_usd > 0:
+        _last_good_portfolio_state = result
+    elif _last_good_portfolio_state is not None:
+        logger.warning("Balance read returned zero equity; using last known good state")
+        return _last_good_portfolio_state
+    return result
 
 def enforce_live_trading_safety_gate():
     """
@@ -470,8 +497,9 @@ def execute_trade(
         llm_required = is_llm_agreement_required()
         
         # Determine if we should execute a trade
-        execute_buy = signal_consensus == "BUY" and (not llm_required or llm_decision == "BUY")
-        execute_sell = signal_consensus == "SELL" and (not llm_required or llm_decision == "SELL")
+        llm_upper = (llm_decision or "").upper()
+        execute_buy = signal_consensus == "BUY" and (not llm_required or llm_upper == "BUY")
+        execute_sell = signal_consensus == "SELL" and (not llm_required or llm_upper == "SELL")
         
         # Get execution mode and position sizing config.
         trade_mode = get_trade_mode()
@@ -532,17 +560,43 @@ def execute_trade(
 
         if trade_mode == "FUTURES":
             default_futures_leverage = get_trading_parameter("default_futures_leverage", 2.0)
-            if not futures_shorts_enabled:
-                logger.warning(
-                    "TRADE_MODE is FUTURES but ENABLE_FUTURES_SHORTS is false; no futures shorts will be executed."
-                )
+
+            current_position = order_manager.get_position_quantity()
+            if current_position is None:
+                logger.warning("Unable to determine current futures position; skipping trade.")
+                return None
 
             if execute_sell:
-                logger.info("Executing futures SHORT for %s", symbol)
+                # Close long if currently long
+                if current_position > 0:
+                    close_notional = float(current_position) * float(market_price)
+                    if not _check_risk(close_notional, reduces_exposure=True):
+                        return None
+                    close_order = order_manager.execute_market_close_long(abs(current_position))
+                    if not close_order:
+                        reject_reason = getattr(order_manager, "last_reject_reason", None)
+                        if reject_reason:
+                            logger.warning("Futures close long rejected: %s", reject_reason)
+                        logger.warning("Futures close long execution failed")
+                        return None
+                    logger.info("Futures close long executed: %s", close_order.get('orderId'))
+                    _link_signals_to_trade(close_order)
+                    # Fall through to open short
+
+                # Skip if already short
+                if current_position < 0:
+                    logger.info("Already short for %s; skipping SELL signal.", symbol)
+                    return None
+
+                # Open short
                 if not futures_shorts_enabled:
-                    return None
+                    logger.warning(
+                        "TRADE_MODE is FUTURES but ENABLE_FUTURES_SHORTS is false; skipping short entry."
+                    )
+                    # Return close order if we closed a long above, else None
+                    return locals().get("close_order")
                 if not _check_risk(effective_order_amount, reduces_exposure=False):
-                    return None
+                    return locals().get("close_order")
 
                 order = order_manager.execute_market_short(
                     quote_amount=effective_order_amount,
@@ -557,33 +611,50 @@ def execute_trade(
                 if reject_reason:
                     logger.warning("Futures short rejected by risk checks: %s", reject_reason)
                 logger.warning("Futures short execution failed")
+                # If we closed a long but failed to open short, return the close order (safe flat state)
+                return locals().get("close_order")
 
             elif execute_buy:
-                logger.info("Executing futures SHORT cover for %s", symbol)
-                if not futures_shorts_enabled:
+                # Cover short if currently short
+                if current_position < 0:
+                    cover_notional = abs(float(current_position)) * float(market_price)
+                    if not _check_risk(cover_notional, reduces_exposure=True):
+                        return None
+                    cover_order = order_manager.execute_market_cover(abs(current_position))
+                    if not cover_order:
+                        reject_reason = getattr(order_manager, "last_reject_reason", None)
+                        if reject_reason:
+                            logger.warning("Futures short cover rejected: %s", reject_reason)
+                        logger.warning("Futures short cover execution failed")
+                        return None
+                    logger.info("Futures short cover executed: %s", cover_order.get('orderId'))
+                    _link_signals_to_trade(cover_order)
+                    # Fall through to open long
+
+                # Skip if already long
+                if current_position > 0:
+                    logger.info("Already long for %s; skipping BUY signal.", symbol)
                     return None
 
-                current_position = order_manager.get_position_quantity()
-                if current_position is None:
-                    logger.warning("Unable to determine current futures position for short cover.")
-                    return None
-                if current_position >= 0:
-                    logger.info("No open short position to cover for %s", symbol)
-                    return None
-                cover_notional = abs(float(current_position)) * float(market_price)
-                if not _check_risk(cover_notional, reduces_exposure=True):
-                    return None
+                # Open long
+                if not _check_risk(effective_order_amount, reduces_exposure=False):
+                    return locals().get("cover_order")
 
-                order = order_manager.execute_market_cover(abs(current_position))
+                order = order_manager.execute_market_long(
+                    quote_amount=effective_order_amount,
+                    leverage=default_futures_leverage,
+                )
                 if order:
-                    logger.info("Futures short cover executed successfully: %s", order.get('orderId'))
+                    logger.info("Futures long executed successfully: %s", order.get('orderId'))
                     _link_signals_to_trade(order)
                     return order
 
                 reject_reason = getattr(order_manager, "last_reject_reason", None)
                 if reject_reason:
-                    logger.warning("Futures short cover rejected by risk checks: %s", reject_reason)
-                logger.warning("Futures short cover execution failed")
+                    logger.warning("Futures long rejected by risk checks: %s", reject_reason)
+                logger.warning("Futures long execution failed")
+                # If we covered a short but failed to open long, return cover order (safe flat state)
+                return locals().get("cover_order")
 
             else:
                 logger.info(
@@ -815,6 +886,18 @@ def trading_loop():
             float(monitoring_config.get("derisk_size_multiplier", 0.5)),
         )
 
+    notification_config = get_notification_config()
+    notifier = get_notifier(notification_config)
+    notify_severities = {"critical", "high"}
+    min_sev = str(notification_config.get("min_alert_severity", "high")).lower()
+    if min_sev == "medium":
+        notify_severities = {"critical", "high", "medium"}
+    elif min_sev == "low":
+        notify_severities = {"critical", "high", "medium", "low"}
+    if notifier.enabled:
+        notifier.send_lifecycle("started")
+        logger.info("Telegram notifications enabled (min_severity=%s)", min_sev)
+
     def _flush_observability_alerts() -> None:
         if not observability or not db_integration:
             return
@@ -828,6 +911,8 @@ def trading_loop():
                 severity=severity,
                 data=alert.get("details", {}),
             )
+            if severity in notify_severities:
+                notifier.send_alert(alert)
 
     previous_policy_signals: Dict[str, str] = {}
     previous_reference_price: Optional[float] = None
@@ -1026,6 +1111,11 @@ def trading_loop():
                                 "daily_pnl_usd": risk_snapshot.daily_pnl_usd,
                             },
                         )
+                        notifier.send_alert({
+                            "severity": "critical",
+                            "message": f"Risk kill-switch activated: {risk_snapshot.kill_switch_reason}",
+                            "alert_type": "error",
+                        })
                 if risk_snapshot.kill_switch_active:
                     logger.warning("Risk kill-switch active: %s", risk_snapshot.kill_switch_reason)
             
@@ -1261,6 +1351,14 @@ def trading_loop():
                 position_size_multiplier=effective_size_multiplier,
                 risk_engine=risk_engine,
             )
+            if order:
+                trade_side = order.get("side", "BUY")
+                notifier.send_trade(
+                    symbol=SYMBOL,
+                    side=trade_side,
+                    order=order,
+                    regime=policy_decision.active_regime,
+                )
             execution_latency_ms = (time.perf_counter() - execution_start) * 1000.0
             signal_consensus = get_signal_consensus(
                 policy_signals,
@@ -1409,7 +1507,7 @@ if __name__ == '__main__':
             trading_loop()
         except KeyboardInterrupt:
             logger.info("Bot stopped by user")
-            
+
             # Log shutdown to database
             try:
                 db = DatabaseIntegration()
@@ -1420,9 +1518,15 @@ if __name__ == '__main__':
                 )
             except:
                 pass
+            try:
+                _notifier = get_notifier()
+                _notifier.send_lifecycle("stopped")
+                _notifier.shutdown()
+            except:
+                pass
         except Exception as e:
             logger.critical(f"Critical error: {e}")
-            
+
             # Log critical error to database
             try:
                 db = DatabaseIntegration()
@@ -1432,6 +1536,12 @@ if __name__ == '__main__':
                     severity="critical",
                     data={"error_type": "critical_system_error"}
                 )
+            except:
+                pass
+            try:
+                _notifier = get_notifier()
+                _notifier.send_lifecycle("crashed")
+                _notifier.shutdown()
             except:
                 pass
     else:

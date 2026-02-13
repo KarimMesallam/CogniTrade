@@ -34,7 +34,7 @@ EXCHANGE_CIRCUIT_BREAKER = CircuitBreaker(
 def _create_binance_client() -> Client:
     """Initialize Binance client with request timeout when supported."""
     try:
-        return Client(
+        c = Client(
             API_KEY,
             API_SECRET,
             testnet=TESTNET,
@@ -42,7 +42,16 @@ def _create_binance_client() -> Client:
         )
     except TypeError:
         logger.warning("python-binance Client does not support requests_params timeout in this version.")
-        return Client(API_KEY, API_SECRET, testnet=TESTNET)
+        c = Client(API_KEY, API_SECRET, testnet=TESTNET)
+
+    if TESTNET:
+        c.FUTURES_URL = c.FUTURES_TESTNET_URL
+        c.FUTURES_DATA_URL = c.FUTURES_DATA_TESTNET_URL
+        c.FUTURES_COIN_URL = c.FUTURES_COIN_TESTNET_URL
+        c.FUTURES_COIN_DATA_URL = c.FUTURES_COIN_DATA_TESTNET_URL
+        logger.info("Testnet mode: futures URLs switched to %s", c.FUTURES_URL)
+
+    return c
 
 
 # Initialize Binance client with request timeout and retry/circuit protection.

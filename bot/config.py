@@ -205,6 +205,15 @@ TRADING_CONFIG = {
         "disable_sticky": os.getenv('EDGE_MONITOR_DISABLE_STICKY', 'True').lower() in ('true', '1', 't'),
     },
 
+    # Telegram notification controls
+    "notifications": {
+        "enabled": os.getenv('ENABLE_TELEGRAM_NOTIFICATIONS', 'True').lower() in ('true', '1', 't'),
+        "bot_token": os.getenv('TELEGRAM_BOT_TOKEN', ''),
+        "chat_id": os.getenv('TELEGRAM_CHAT_ID', ''),
+        "rate_limit_per_minute": int(os.getenv('TELEGRAM_RATE_LIMIT_PER_MINUTE', '20')),
+        "min_alert_severity": os.getenv('TELEGRAM_MIN_ALERT_SEVERITY', 'high').lower(),
+    },
+
     # API security controls
     "api_security": {
         "auth_enabled": os.getenv('API_AUTH_ENABLED', DEFAULT_API_AUTH_ENABLED).lower() in ('true', '1', 't'),
@@ -213,7 +222,7 @@ TRADING_CONFIG = {
         "admin_api_keys": _parse_csv_env('API_ADMIN_KEYS', ''),
         "allowed_origins": _parse_csv_env(
             'API_ALLOWED_ORIGINS',
-            'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+            'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8001,http://127.0.0.1:8001',
         ),
         "allow_credentials": os.getenv('API_CORS_ALLOW_CREDENTIALS', 'False').lower() in ('true', '1', 't'),
         "allow_methods": _parse_csv_env('API_CORS_ALLOW_METHODS', 'GET,POST,PUT,DELETE,OPTIONS'),
@@ -365,6 +374,11 @@ def get_observability_config():
 def get_monitoring_config():
     """Get edge-decay monitoring configuration."""
     return TRADING_CONFIG.get("monitoring", {})
+
+
+def get_notification_config():
+    """Get Telegram notification configuration."""
+    return TRADING_CONFIG.get("notifications", {})
 
 
 def get_api_security_config():

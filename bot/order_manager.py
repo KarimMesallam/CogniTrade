@@ -317,10 +317,9 @@ class OrderManager:
 
             return True
 
-        # Exposure limits apply to buy-side accumulation in spot mode.
+        # Exposure limits apply to buy-side accumulation (spot and futures long).
         if (
             enforce_exposure_limit
-            and self.trade_mode == "SPOT"
             and side == "BUY"
             and self.max_position_exposure_usd > Decimal("0")
         ):
@@ -649,6 +648,132 @@ class OrderManager:
             logger.error("Error executing futures market short: %s", e)
             return None
 
+    def execute_market_long(self, quantity=None, quote_amount=None, leverage=None):
+        """
+        Execute a futures market long (BUY) order.
+
+        Args:
+            quantity: Base-asset quantity to go long.
+            quote_amount: Optional quote-asset margin amount used with leverage to derive quantity.
+            leverage: Optional leverage override.
+        """
+        try:
+            self._clear_reject_reason()
+            if self.trade_mode != "FUTURES":
+                self._set_reject_reason("Long execution requires TRADE_MODE=FUTURES.")
+                return None
+
+            leverage_dec = Decimal(str(leverage)) if leverage is not None else self.default_futures_leverage
+            quote_amount_decimal = None
+            if quantity is None and quote_amount is not None:
+                quote_amount_decimal = Decimal(str(quote_amount))
+                quantity = calculate_futures_order_quantity(
+                    self.symbol,
+                    float(quote_amount_decimal),
+                    leverage=float(leverage_dec),
+                )
+                if quantity is None:
+                    self._set_reject_reason("Failed to calculate futures long quantity.")
+                    return None
+            elif quote_amount is not None:
+                quote_amount_decimal = Decimal(str(quote_amount))
+
+            if quantity is None:
+                self._set_reject_reason("Either quantity or quote_amount must be provided for futures long.")
+                return None
+
+            quantity_decimal = Decimal(str(quantity))
+
+            current_position_qty = self._get_current_position_qty()
+            if current_position_qty is not None and current_position_qty < Decimal("0"):
+                self._set_reject_reason("Cannot open long while short position exists.")
+                return None
+
+            if not self._check_pre_trade_limits(
+                side="BUY",
+                quantity=quantity_decimal,
+                enforce_exposure_limit=True,
+            ):
+                return None
+
+            logger.info(
+                "Executing futures market long: %s, quantity: %s, leverage: %s",
+                self.symbol,
+                quantity_decimal,
+                leverage_dec,
+            )
+            order = place_futures_market_order(
+                symbol=self.symbol,
+                side="BUY",
+                quantity=float(quantity_decimal),
+                reduce_only=False,
+                leverage=float(leverage_dec),
+            )
+            if order:
+                self._log_order(order, "LONG", order.get("status", "UNKNOWN"))
+                logger.info("Futures long executed: %s", order.get("orderId"))
+                return order
+
+            logger.error("Futures long execution failed")
+            return None
+        except Exception as e:
+            logger.error("Error executing futures market long: %s", e)
+            return None
+
+    def execute_market_close_long(self, quantity):
+        """
+        Close an existing futures long using a reduce-only market SELL.
+        """
+        try:
+            self._clear_reject_reason()
+            if self.trade_mode != "FUTURES":
+                self._set_reject_reason("Close long requires TRADE_MODE=FUTURES.")
+                return None
+
+            quantity_decimal = Decimal(str(quantity))
+            if quantity_decimal <= Decimal("0"):
+                self._set_reject_reason(f"Invalid close long quantity {quantity_decimal}; quantity must be > 0.")
+                return None
+
+            current_position_qty = self._get_current_position_qty()
+            if current_position_qty is None:
+                self._set_reject_reason("Unable to determine current futures position for close long.")
+                return None
+            if current_position_qty <= Decimal("0"):
+                self._set_reject_reason("No open long position to close.")
+                return None
+
+            close_quantity = min(current_position_qty, quantity_decimal)
+            if close_quantity <= Decimal("0"):
+                self._set_reject_reason("Computed close long quantity is zero.")
+                return None
+
+            if not self._check_pre_trade_limits(
+                side="SELL",
+                quantity=close_quantity,
+                known_notional=Decimal("0"),
+                enforce_exposure_limit=False,
+            ):
+                return None
+
+            logger.info("Executing futures close long: %s, quantity: %s", self.symbol, close_quantity)
+            order = place_futures_market_order(
+                symbol=self.symbol,
+                side="SELL",
+                quantity=float(close_quantity),
+                reduce_only=True,
+            )
+            if order:
+                self._log_order(order, "CLOSE_LONG", order.get("status", "UNKNOWN"))
+                logger.info("Futures close long executed: %s", order.get("orderId"))
+                return order
+
+            logger.error("Futures close long execution failed")
+            return None
+        except Exception as e:
+            logger.error("Error executing futures close long: %s", e)
+            return None
+
     def execute_market_cover(self, quantity):
         """
         Close an existing futures short using a reduce-only market BUY.
@@ -919,9 +1044,9 @@ class OrderManager:
 
                 action = str(entry.get("action", entry.get("side", ""))).upper()
                 side = str(entry.get("side", "")).upper()
-                if action in {"BUY", "COVER"} or side == "BUY":
+                if action in {"BUY", "COVER", "LONG"} or side == "BUY":
                     signed_qty += qty
-                elif action in {"SELL", "SHORT"} or side == "SELL":
+                elif action in {"SELL", "SHORT", "CLOSE_LONG"} or side == "SELL":
                     signed_qty -= qty
             except Exception:
                 continue

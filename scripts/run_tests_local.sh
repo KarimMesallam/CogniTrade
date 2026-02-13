@@ -35,6 +35,8 @@ sed -i '/^API_AUTH_ENABLED=/d' .env
 sed -i '/^ROLLOUT_ENFORCE_PRODUCTION_GATE=/d' .env
 sed -i '/^TRADE_MODE=/d' .env
 sed -i '/^ENABLE_FUTURES_SHORTS=/d' .env
+sed -i '/^DEFAULT_ORDER_AMOUNT_USD=/d' .env
+sed -i '/^LLM_AGREEMENT_REQUIRED=/d' .env
 
 if grep -q '^ENABLE_LLM_DECISIONS=' .env; then
   sed -i 's/^ENABLE_LLM_DECISIONS=.*/ENABLE_LLM_DECISIONS=True/' .env

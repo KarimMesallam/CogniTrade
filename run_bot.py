@@ -6,6 +6,7 @@ This script is a convenient way to start the trading bot.
 import sys
 import logging
 from bot.main import initialize_bot, trading_loop
+from bot.notifications import get_notifier
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -28,6 +29,18 @@ if __name__ == "__main__":
             sys.exit(1)
     except KeyboardInterrupt:
         logger.info("Bot stopped by user")
+        try:
+            _notifier = get_notifier()
+            _notifier.send_lifecycle("stopped")
+            _notifier.shutdown()
+        except:
+            pass
     except Exception as e:
         logger.critical(f"Critical error: {e}")
-        sys.exit(1) 
+        try:
+            _notifier = get_notifier()
+            _notifier.send_lifecycle("crashed")
+            _notifier.shutdown()
+        except:
+            pass
+        sys.exit(1)

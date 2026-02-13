@@ -45,7 +45,7 @@ first_csv_item() {
   echo "$raw" | cut -d',' -f1 | xargs
 }
 
-API_URL="${API_URL:-http://127.0.0.1:8000}"
+API_URL="${API_URL:-http://127.0.0.1:8001}"
 READ_KEY="${API_READ_KEY:-}"
 ADMIN_KEY="${API_ADMIN_KEY:-}"
 ROLLOUT_ID="${ROLLOUT_ID:-}"
@@ -227,3 +227,43 @@ PY
 echo "Soak daily artifacts written to: $DAY_DIR"
 echo "Summary: $SUMMARY_JSON"
 cat "$SUMMARY_JSON"
+
+# --- Telegram notification ---
+TG_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-$(read_env_var TELEGRAM_BOT_TOKEN || true)}"
+TG_CHAT_ID="${TELEGRAM_CHAT_ID:-$(read_env_var TELEGRAM_CHAT_ID || true)}"
+TG_ENABLED="${ENABLE_TELEGRAM_NOTIFICATIONS:-$(read_env_var ENABLE_TELEGRAM_NOTIFICATIONS || echo True)}"
+
+if [[ "${TG_ENABLED,,}" =~ ^(true|1|t)$ ]] && [[ -n "$TG_BOT_TOKEN" ]] && [[ -n "$TG_CHAT_ID" ]]; then
+  TG_OVERALL=$(jq -r 'if .overall_pass then "PASS ✅" else "FAIL ❌" end' "$SUMMARY_JSON")
+  TG_MSG=$(python - <<PYEOF
+import json, sys
+with open("$SUMMARY_JSON") as f:
+    s = json.load(f)
+m = s.get("metrics", {})
+c = s.get("checks", {})
+overall = "✅ PASS" if s.get("overall_pass") else "❌ FAIL"
+failed = [k for k, v in c.items() if not v]
+lines = [
+    f"📊 *CogniTrade Daily Soak Summary* {overall}",
+    f"Rollout: {s.get('rollout_id', 'N/A')}",
+    f"Error rate: {m.get('error_rate', 0):.2%}",
+    f"Latency P95: {m.get('latency_p95_ms', 0):.0f}ms",
+    f"Drawdown: {m.get('last_drawdown_pct', 0):.2f}%",
+    f"Return: {m.get('last_total_return_pct', 0):.2f}%",
+    f"Events: {int(m.get('event_count', 0))} | Traces: {int(m.get('trace_count', 0))}",
+]
+if failed:
+    lines.append(f"Failed checks: {', '.join(failed)}")
+print("\n".join(lines))
+PYEOF
+  )
+
+  curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+    -H "Content-Type: application/json" \
+    -d "$(python -c "import json,sys; print(json.dumps({'chat_id': '$TG_CHAT_ID', 'text': sys.stdin.read(), 'parse_mode': 'Markdown'}))" <<< "$TG_MSG")" \
+    > /dev/null || true
+
+  echo "Telegram summary sent."
+else
+  echo "Telegram notifications disabled or not configured; skipping."
+fi
