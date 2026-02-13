@@ -1,12 +1,13 @@
 # CogniTrade
 
-Production-focused crypto algorithmic trading platform with Binance execution, LLM-assisted decisioning, research-grade backtesting, and staged rollout safety gates.
+Production-grade crypto algorithmic trading platform with Binance execution, ADX regime-adaptive strategy, LLM-assisted decisioning, research-grade backtesting, and staged rollout safety gates.
 
 ## Status
 
-- Non-P3 production scope (`P0`/`P1`/`P2` + `R0` + `G0`/`G1`/`G2`) is implemented and test-backed.
+- Production strategy: **ADX(10)\_T25\_C15 + DI filter** — backtest-validated across bull (+29.5%), mixed (+12.5%), and bear (+5.5%) regimes.
+- Bot runs via `systemd` in FUTURES mode with shorts enabled on Binance Testnet.
+- Daily soak checks via cron (06:00 UTC) with Telegram notifications.
 - Current deployment posture is `GO` for controlled live rollout with staged capital ramp gates.
-- Immediate full-capital deployment is intentionally blocked until ramp stages are completed.
 
 See:
 - `docs/production_execution/GO_NO_GO_CHECKLIST.md`
@@ -21,11 +22,13 @@ See:
 - Explicit live-trading safety gate:
   - `TESTNET=True` by default.
   - `TESTNET=False` requires `ENABLE_LIVE_TRADING=True`.
-- Multi-strategy signal aggregation with configurable consensus.
+- Multi-strategy signal aggregation with configurable consensus (simple, technical, trend\_following, custom).
+- Production strategy: ADX regime-adaptive with DI direction filter — MACD trend-following in trending markets, RSI mean-reversion in choppy markets.
 - Optional LLM pipeline:
   - Primary model: DeepSeek (`LLM_PRIMARY_MODEL`, default `deepseek-reasoner`).
   - Secondary model: OpenAI (`LLM_SECONDARY_MODEL`, default `gpt-5-mini`).
   - Safe fallback to rule-based behavior.
+- Telegram notifications for trades, alerts, lifecycle events, and daily soak summaries.
 
 ### Risk and Execution Controls
 - Pre-trade notional and exposure limits.
@@ -60,16 +63,20 @@ See:
 ## Repository Layout
 
 ```text
-trading_bot/
+CogniTrade/
 ├── bot/                            # Core runtime, risk, policy, data, execution
-├── bot/backtesting/                # Modular backtesting engine
-├── bot/observability/              # Telemetry + alerting
-├── bot/data_pipeline/              # PIT dataset and regime dataset tooling
-├── api/main.py                     # FastAPI control plane
-├── research/                       # Experiment registry, benchmarks, gap closure
-├── scripts/                        # Evidence builders and rollout gate scripts
-├── tests/                          # Pytest suites
+│   ├── backtesting/                # Modular backtesting engine
+│   ├── observability/              # Telemetry, traces, alerts, persistence
+│   ├── data_pipeline/              # PIT dataset and regime dataset tooling
+│   └── custom_strategies/          # Plugin directory for user-defined strategies
+├── api/                            # FastAPI control plane (port 8001)
+├── scripts/                        # Test runner, backtests, evidence builders, soak checks
+├── tests/                          # 33 pytest test files
+├── deploy/systemd/                 # cognitrade-bot.service, cognitrade-api.service
 ├── docs/production_execution/      # Tracker, worklog, gate checklist, runbooks
+├── research/                       # Experiment registry, benchmarks
+├── data/                           # SQLite databases (trading_bot.db, observability.db)
+├── order_logs/                     # JSON trade execution logs
 ├── output/                         # Generated evidence and reports
 └── run_bot.py                      # Bot launcher
 ```
@@ -111,35 +118,37 @@ ENABLE_OBSERVABILITY=True
 
 ```bash
 python run_bot.py
-# or
-python -m bot.main
+# or via systemd (production)
+sudo systemctl start cognitrade-bot
 ```
 
 ### 4) Run the API
 
 ```bash
 cd api
-uvicorn main:app --reload
+uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+# or via systemd (production)
+sudo systemctl start cognitrade-api
 ```
 
-API docs available at `http://localhost:8000/docs`.
+API docs available at `http://localhost:8001/docs`.
 
 ## How to Use
 
 ### Start/Stop Trading via API
 
 ```bash
-curl -X POST http://localhost:8000/trading/start \
+curl -X POST http://localhost:8001/trading/start \
   -H "X-API-Key: <admin-key>"
 
-curl -X POST http://localhost:8000/trading/stop \
+curl -X POST http://localhost:8001/trading/stop \
   -H "X-API-Key: <admin-key>"
 ```
 
 ### Run a Backtest via API
 
 ```bash
-curl -X POST http://localhost:8000/backtest/run \
+curl -X POST http://localhost:8001/backtest/run \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <read-or-admin-key>" \
   -d '{
@@ -162,13 +171,13 @@ curl -X POST http://localhost:8000/backtest/run \
 
 ```bash
 # Quality gate
-curl -X POST http://localhost:8000/rollout/quality/evaluate \
+curl -X POST http://localhost:8001/rollout/quality/evaluate \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <admin-key>" \
   -d '{"validation_summary": {"walk_forward_folds": 5}}'
 
 # Stage gates
-curl -X POST http://localhost:8000/rollout/evaluate/shadow \
+curl -X POST http://localhost:8001/rollout/evaluate/shadow \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <admin-key>" \
   -d '{"rollout_id":"demo","sample_count":120,"error_rate":0.02}'
@@ -188,28 +197,32 @@ Recommended cycle:
 Useful scripts:
 
 ```bash
-venv/bin/python scripts/build_g0_evidence.py
-venv/bin/python scripts/build_gap_closure_evidence.py
-venv/bin/python scripts/check_rollout_gate.py --help
+bash scripts/run_tests_local.sh                          # safe test runner
+bash scripts/soak_daily_check.sh                         # daily health + Telegram
+venv/bin/python3 scripts/backtest_long_short.py           # multi-window backtest
+venv/bin/python3 scripts/backtest_long_short.py --sweep   # parameter sweep
+venv/bin/python3 scripts/build_g0_evidence.py
+venv/bin/python3 scripts/build_gap_closure_evidence.py
+venv/bin/python3 scripts/check_rollout_gate.py --help
 ```
 
 ## Testing
 
-Run full suite:
+Always use the safe test runner — it backs up `.env`, applies test-safe overrides (disables auth, resets trade mode), and restores on exit:
 
 ```bash
-venv/bin/pytest -q
+bash scripts/run_tests_local.sh              # full suite
+bash scripts/run_tests_local.sh -x -v        # stop on first failure, verbose
+bash scripts/run_tests_local.sh -k "strategy" # keyword filter
 ```
 
-Run key focused suites:
+Run specific suites:
 
 ```bash
-venv/bin/pytest tests/test_api.py -v
-venv/bin/pytest tests/test_main.py -v
-venv/bin/pytest tests/test_deploy_policy.py -v
-venv/bin/pytest tests/test_gap_closure.py -v
-venv/bin/pytest tests/test_validation.py -v
-venv/bin/pytest tests/test_execution_simulation.py -v
+bash scripts/run_tests_local.sh tests/test_strategy.py -v
+bash scripts/run_tests_local.sh tests/test_main.py -v
+bash scripts/run_tests_local.sh tests/test_deploy_policy.py -v
+bash scripts/run_tests_local.sh tests/test_gap_closure.py -v
 ```
 
 Coverage:
@@ -222,6 +235,11 @@ venv/bin/pytest --cov=bot --cov=api
 
 Use `.env.example` as the complete reference. High-impact sections:
 
+- Strategy selection:
+  - `ENABLE_TREND_FOLLOWING_STRATEGY=True` (production strategy)
+  - `ENABLE_SIMPLE_STRATEGY`, `ENABLE_TECHNICAL_STRATEGY` (disable for production)
+  - `MIN_STRATEGIES_FOR_DECISION=1`
+  - `ADX_PERIOD`, `ADX_TREND_THRESH`, `ADX_CHOP_THRESH`, `ADX_USE_DI_FILTER`
 - Trading mode and shorting:
   - `TRADE_MODE`
   - `ENABLE_FUTURES_SHORTS`
@@ -231,6 +249,9 @@ Use `.env.example` as the complete reference. High-impact sections:
   - `ENABLE_RISK_ENGINE`
   - `RISK_ENGINE_MAX_DRAWDOWN_PCT`
   - `RISK_ENGINE_DAILY_LOSS_LIMIT_USD`
+- Notifications:
+  - `ENABLE_TELEGRAM_NOTIFICATIONS`
+  - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 - Rollout gates:
   - `ENABLE_ROLLOUT_GATES`
   - `ROLLOUT_ENFORCE_PRODUCTION_GATE`
