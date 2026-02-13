@@ -74,6 +74,19 @@ TRADING_CONFIG = {
             "weight": float(os.getenv('CUSTOM_STRATEGY_WEIGHT', '1.0')),
             "parameters": {},  # Custom strategy parameters would be defined here
             "module_path": os.getenv('CUSTOM_STRATEGY_MODULE', '')  # Path to custom strategy module
+        },
+        "trend_following": {
+            "enabled": os.getenv('ENABLE_TREND_FOLLOWING_STRATEGY', 'False').lower() in ('true', '1', 't'),
+            "timeframe": os.getenv('TREND_FOLLOWING_STRATEGY_TIMEFRAME', '4h'),
+            "weight": float(os.getenv('TREND_FOLLOWING_STRATEGY_WEIGHT', '3.0')),
+            "parameters": {
+                "adx_period": int(os.getenv('ADX_PERIOD', '10')),
+                "adx_trend_thresh": float(os.getenv('ADX_TREND_THRESH', '25')),
+                "adx_chop_thresh": float(os.getenv('ADX_CHOP_THRESH', '15')),
+                "rsi_oversold": float(os.getenv('RSI_TF_OVERSOLD', '30')),
+                "rsi_overbought": float(os.getenv('RSI_TF_OVERBOUGHT', '70')),
+                "use_di_filter": os.getenv('ADX_USE_DI_FILTER', 'True').lower() in ('true', '1', 't'),
+            }
         }
     },
     

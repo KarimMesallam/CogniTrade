@@ -165,11 +165,11 @@ def adx_regime_strategy(data_dict: dict, symbol: str) -> str:
         -DI > +DI  -> only SELL signals allowed (bearish direction)
 
     TRENDING (ADX > 25): MACD direction  -> BUY/SELL (filtered by DI)
-    CHOPPY   (ADX < 20): RSI mean-revert -> BUY(oversold) / SELL(overbought) (filtered by DI)
-    TRANSITION (20-25):  HOLD
+    CHOPPY   (ADX < 15): RSI mean-revert -> BUY(oversold) / SELL(overbought) (filtered by DI)
+    TRANSITION (15-25):  HOLD
     """
-    return _adx_regime_logic(data_dict, adx_period=14, trend_thresh=25,
-                             chop_thresh=20, rsi_oversold=30, rsi_overbought=70,
+    return _adx_regime_logic(data_dict, adx_period=10, trend_thresh=25,
+                             chop_thresh=15, rsi_oversold=30, rsi_overbought=70,
                              use_di_filter=True)
 
 
@@ -820,7 +820,7 @@ def run_parameter_sweep():
 def main():
     """Run the default ADX regime-adaptive strategy on all windows."""
     strategy = adx_regime_strategy
-    strategy_name = "ADX(14)_T25_C20_RSI(30/70)"
+    strategy_name = "ADX(10)_T25_C15_RSI(30/70)"
 
     print()
     print("#" * 90)

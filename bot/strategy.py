@@ -262,6 +262,165 @@ def technical_analysis_signal(symbol, interval=None):
         logger.error(f"Error in technical analysis: {e}")
         return "HOLD"
 
+def _compute_adx(df, period=14):
+    """
+    Compute ADX (Average Directional Index) and +DI/-DI from OHLC data.
+
+    Uses Wilder's smoothing method. Returns a dict of Series aligned to df.index:
+        {"adx": Series, "plus_di": Series, "minus_di": Series}
+    """
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+
+    # Directional Movement
+    up_move = high - high.shift(1)
+    down_move = low.shift(1) - low
+    plus_dm = np.where((up_move > down_move) & (up_move > 0), up_move, 0.0)
+    minus_dm = np.where((down_move > up_move) & (down_move > 0), down_move, 0.0)
+
+    # True Range
+    tr1 = high - low
+    tr2 = (high - close.shift(1)).abs()
+    tr3 = (low - close.shift(1)).abs()
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+
+    n = len(df)
+    atr = np.full(n, np.nan)
+    smooth_plus = np.full(n, np.nan)
+    smooth_minus = np.full(n, np.nan)
+    adx = np.full(n, np.nan)
+
+    if n < period + 1:
+        nan_series = pd.Series(adx, index=df.index)
+        return {"adx": nan_series, "plus_di": nan_series.copy(), "minus_di": nan_series.copy()}
+
+    # Seed with simple averages over the first `period` rows
+    atr[period] = tr.iloc[1 : period + 1].mean()
+    smooth_plus[period] = plus_dm[1 : period + 1].mean()
+    smooth_minus[period] = minus_dm[1 : period + 1].mean()
+
+    # Wilder smoothing
+    for i in range(period + 1, n):
+        atr[i] = (atr[i - 1] * (period - 1) + tr.iloc[i]) / period
+        smooth_plus[i] = (smooth_plus[i - 1] * (period - 1) + plus_dm[i]) / period
+        smooth_minus[i] = (smooth_minus[i - 1] * (period - 1) + minus_dm[i]) / period
+
+    # +DI / -DI
+    with np.errstate(divide="ignore", invalid="ignore"):
+        plus_di = 100.0 * smooth_plus / atr
+        minus_di = 100.0 * smooth_minus / atr
+        dx = 100.0 * np.abs(plus_di - minus_di) / np.where(
+            (plus_di + minus_di) == 0, np.nan, plus_di + minus_di
+        )
+
+    # ADX = Wilder-smoothed DX
+    first_valid = period + period  # need `period` DX values to seed ADX
+    if n > first_valid:
+        adx[first_valid] = np.nanmean(dx[period + 1 : first_valid + 1])
+        for i in range(first_valid + 1, n):
+            if not np.isnan(dx[i]) and not np.isnan(adx[i - 1]):
+                adx[i] = (adx[i - 1] * (period - 1) + dx[i]) / period
+
+    return {
+        "adx": pd.Series(adx, index=df.index),
+        "plus_di": pd.Series(plus_di, index=df.index),
+        "minus_di": pd.Series(minus_di, index=df.index),
+    }
+
+
+def trend_following_signal(symbol, interval=None):
+    """
+    ADX regime-adaptive trend-following strategy with DI direction filter.
+
+    TRENDING  (ADX >= trend_thresh): MACD direction -> BUY/SELL
+    CHOPPY    (ADX <= chop_thresh):  RSI mean-reversion -> BUY/SELL
+    TRANSITION:                      HOLD
+
+    DI filter: +DI > -DI blocks SELL, -DI > +DI blocks BUY.
+    """
+    strategy_config = get_strategy_config("trend_following")
+    if not strategy_config.get("enabled", False):
+        logger.debug("Trend following strategy is disabled")
+        return "HOLD"
+
+    if interval is None:
+        interval = strategy_config.get("timeframe", "4h")
+
+    adx_period = get_strategy_parameter("trend_following", "adx_period", 10)
+    trend_thresh = get_strategy_parameter("trend_following", "adx_trend_thresh", 25)
+    chop_thresh = get_strategy_parameter("trend_following", "adx_chop_thresh", 15)
+    rsi_oversold = get_strategy_parameter("trend_following", "rsi_oversold", 30)
+    rsi_overbought = get_strategy_parameter("trend_following", "rsi_overbought", 70)
+    use_di_filter = get_strategy_parameter("trend_following", "use_di_filter", True)
+
+    try:
+        df = get_candles_dataframe(symbol, interval, limit=100)
+        if df is None or len(df) < adx_period * 2 + 10:
+            logger.warning(f"Not enough data for trend following on {symbol}")
+            return "HOLD"
+
+        # Compute indicators
+        df["rsi"] = calculate_rsi(df, period=14)
+        calculate_macd(df)
+        adx_data = _compute_adx(df, period=adx_period)
+
+        current = df.iloc[-1]
+        macd_val = current.get("macd_line")
+        signal_val = current.get("signal_line")
+        rsi_val = current.get("rsi")
+        adx_val = adx_data["adx"].iloc[-1]
+        plus_di = adx_data["plus_di"].iloc[-1]
+        minus_di = adx_data["minus_di"].iloc[-1]
+
+        if pd.isna(adx_val) or pd.isna(macd_val) or pd.isna(signal_val) or pd.isna(rsi_val):
+            logger.info(f"Trend following: insufficient indicator data (ADX={adx_val})")
+            return "HOLD"
+
+        # DI direction filter
+        if use_di_filter and not pd.isna(plus_di) and not pd.isna(minus_di):
+            bullish_di = plus_di > minus_di
+        else:
+            bullish_di = None
+
+        def _filter(raw_signal):
+            if bullish_di is None:
+                return raw_signal
+            if raw_signal == "BUY" and not bullish_di:
+                return "HOLD"
+            if raw_signal == "SELL" and bullish_di:
+                return "HOLD"
+            return raw_signal
+
+        # Determine regime and generate signal
+        regime = "TRANSITION"
+        signal = "HOLD"
+
+        if adx_val >= trend_thresh:
+            regime = "TRENDING"
+            if macd_val > signal_val:
+                signal = _filter("BUY")
+            elif macd_val < signal_val:
+                signal = _filter("SELL")
+        elif adx_val <= chop_thresh:
+            regime = "CHOPPY"
+            if rsi_val < rsi_oversold:
+                signal = _filter("BUY")
+            elif rsi_val > rsi_overbought:
+                signal = _filter("SELL")
+
+        logger.info(
+            f"Trend following: regime={regime} ADX={adx_val:.1f} "
+            f"+DI={plus_di:.1f} -DI={minus_di:.1f} "
+            f"MACD={macd_val:.2f} RSI={rsi_val:.1f} -> {signal}"
+        )
+        return signal
+
+    except Exception as e:
+        logger.error(f"Error in trend following strategy: {e}")
+        return "HOLD"
+
+
 def load_custom_strategy(module_path):
     """
     Load a custom strategy module dynamically.
@@ -359,7 +518,8 @@ def get_all_strategy_signals(symbol):
     strategies = {
         "simple": simple_signal,
         "technical": technical_analysis_signal,
-        "custom": custom_strategy_signal
+        "custom": custom_strategy_signal,
+        "trend_following": trend_following_signal,
     }
     
     # Execute each enabled strategy
